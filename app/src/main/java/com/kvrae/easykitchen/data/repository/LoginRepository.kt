@@ -3,7 +3,7 @@ package com.kvrae.easykitchen.data.repository
 import com.kvrae.easykitchen.data.remote.datasource.LoginRemoteDataSource
 import com.kvrae.easykitchen.data.remote.dto.LoginRequest
 import com.kvrae.easykitchen.data.remote.dto.LoginResponse
-import com.kvrae.easykitchen.domain.handlers.LoginFailureException
+import com.kvrae.easykitchen.domain.exceptions.AuthException
 import java.net.ConnectException
 import java.net.SocketTimeoutException
 
@@ -16,11 +16,11 @@ class LoginRepositoryImpl(private val remoteDataSource: LoginRemoteDataSource) :
         return try {
             Result.success(remoteDataSource.login(request))
         } catch (e: SocketTimeoutException) {
-            Result.failure(LoginFailureException("Connection timed out"))
+            Result.failure(AuthException.Login.ConnectionTimeout())
         } catch (e: ConnectException) {
-            Result.failure(LoginFailureException("Unable to connect to server"))
+            Result.failure(AuthException.Login.ServerUnreachable())
         } catch (e: Exception) {
-            Result.failure(LoginFailureException("Error logging in: ${e.message}"))
+            Result.failure(AuthException.Login.UnknownError(e.message ?: "Unknown error"))
         }
     }
 }

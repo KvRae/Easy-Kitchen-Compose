@@ -3,7 +3,7 @@ package com.kvrae.easykitchen.data.repository
 import com.kvrae.easykitchen.data.remote.datasource.RegisterRemoteDataSource
 import com.kvrae.easykitchen.data.remote.dto.RegisterRequest
 import com.kvrae.easykitchen.data.remote.dto.RegisterResponse
-import com.kvrae.easykitchen.domain.handlers.RegisterFailureException
+import com.kvrae.easykitchen.domain.exceptions.AuthException
 import io.ktor.network.sockets.SocketTimeoutException
 import java.net.ConnectException
 
@@ -16,12 +16,11 @@ class RegisterRepositoryImpl(private val remoteDataSource: RegisterRemoteDataSou
         return try{
             Result.success(remoteDataSource.register(request))
         } catch (e: SocketTimeoutException) {
-            Result.failure(RegisterFailureException("Connection timed out"))
+            Result.failure(AuthException.Register.ConnectionTimeout())
         } catch (e: ConnectException) {
-            Result.failure(RegisterFailureException("Unable to connect to server"))
+            Result.failure(AuthException.Register.ServerUnreachable())
         } catch (e: Exception) {
-            Result.failure(RegisterFailureException("There was an error registering the user"))
-
+            Result.failure(AuthException.Register.UnknownError(e.message ?: "Unknown error"))
         }
     }
 
