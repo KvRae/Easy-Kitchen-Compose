@@ -25,6 +25,7 @@ class ChatViewModel(
 
     fun sendMessage() {
         viewModelScope.launch {
+            try {
             _chatState.value = ChatState.Idle
             if (userMessage.isBlank()) {
                 _chatState.value = ChatState.Error("Message cannot be empty")
@@ -35,24 +36,31 @@ class ChatViewModel(
             
             _chatState.value = ChatState.Loading
             chatMessages.add(Message(Role.USER, currentMessage))
-            
-            val result = geminiChatUseCase(currentMessage)
-            _chatState.value = when {
-                result.isSuccess -> {
-                    val responseText = result.getOrNull() ?: "No response"
-                    chatMessages.add(Message(Role.ASSISTANT, responseText))
-                    ChatState.Success(responseText)
+
+                val result = geminiChatUseCase(currentMessage)
+                _chatState.value = when {
+                    result.isSuccess -> {
+                        val responseText = result.getOrNull() ?: "No response"
+                        chatMessages.add(Message(Role.ASSISTANT, responseText))
+                        ChatState.Success(responseText)
+                    }
+
+                    result.isFailure -> {
+                        val errorMessage =
+                            result.exceptionOrNull()?.message ?: "Failed to load data"
+                        chatMessages.add(Message(Role.ASSISTANT, errorMessage))
+                        ChatState.Error(errorMessage)
+                    }
+
+                    else -> {
+                        chatMessages.add(Message(Role.ASSISTANT, "Content is not available"))
+                        ChatState.Error("Content is not available")
+                    }
                 }
-                result.isFailure -> {
-                    val errorMessage = result.exceptionOrNull()?.message ?: "Failed to load data"
-                    chatMessages.add(Message(Role.ASSISTANT, errorMessage))
-                    ChatState.Error(errorMessage)
-                }
-                else -> {
-                    chatMessages.add(Message(Role.ASSISTANT, "Content is not available"))
-                    ChatState.Error("Content is not available")
-                }
+            } catch (e: Exception) {
+                _chatState.value = ChatState.Error(e.message ?: "Failed to load data")
             }
+
         }
     }
 }

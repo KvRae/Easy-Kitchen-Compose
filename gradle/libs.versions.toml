@@ -45,11 +45,14 @@ androidx-ui-text-google-fonts = { group = "androidx.compose.ui", name = "ui-text
 android-lottie-compose = { group = "com.airbnb.android", name = "lottie-compose", version.ref = "androidLotieCompose" }
 androidx-navigation-compose = { group = "androidx.navigation", name = "navigation-compose", version.ref = "navVersion" }
 coil-kt = { group = "io.coil-kt", name = "coil-compose", version.ref = "coil_version" }
+ktor-client-core = { group = "io.ktor", name = "ktor-client-core", version.ref = "ktor_version" }
 ktor-client-android = { group = "io.ktor", name = "ktor-client-android", version.ref = "ktor_version" }
+ktor-client-okhttp = { group = "io.ktor", name = "ktor-client-okhttp", version.ref = "ktor_version" }
 ktor-client-serialization = { group = "io.ktor", name = "ktor-client-serialization", version.ref = "ktor_version" }
 ktor-serialization-kotlinx-json = { group = "io.ktor", name = "ktor-serialization-kotlinx-json", version.ref = "ktor_version" }
 kotlinx-serialization-json = { group = "org.jetbrains.kotlinx", name = "kotlinx-serialization-json", version.ref = "serialization_version" }
 ktor-client-logging-jvm = { group = "io.ktor", name = "ktor-client-logging-jvm", version.ref = "ktor_version" }
+ktor-client-content-negotiation = { group = "io.ktor", name = "ktor-client-content-negotiation", version.ref = "ktor_version" }
 koin-android-compose = { group = "io.insert-koin", name = "koin-androidx-compose", version.ref = "koin_version" }
 androidx-room-runtime = { group = "androidx.room", name = "room-runtime", version.ref = "room_version" }
 androidx-room-compiler = { group = "androidx.room", name = "room-compiler", version.ref = "room_version" }
@@ -59,7 +62,6 @@ google-accompanist-swiperefresher = { group ="com.google.accompanist", name ="ac
 google-auth-service = {group="com.google.android.gms", name ="play-services-auth", version.ref= "google_gms_play_services_auth"}
 androidx-datastore-preferences = {module = "androidx.datastore:datastore-preferences", version.ref="datastorePreferences"}
 google-generativeai = { group = "com.google.ai.client.generativeai", name = "generativeai", version.ref = "generativeai" }
-ktor-client-content-negotiation = { group = "io.ktor", name = "ktor-client-content-negotiation", version.ref = "ktor_version"}
 [plugins]
 android-application = { id = "com.android.application", version.ref = "agp" }
 jetbrains-kotlin-android = { id = "org.jetbrains.kotlin.android", version.ref = "kotlin" }
@@ -68,7 +70,9 @@ google-ksp= { id = "com.google.devtools.ksp", version.ref = "ksp_version" }
 compose-compiler = { id = "org.jetbrains.kotlin.plugin.compose", version.ref = "kotlin" }
 [bundles]
 ktor = [
+    "ktor-client-core",
     "ktor-client-android",
+    "ktor-client-okhttp",
     "ktor-client-serialization",
     "ktor-serialization-kotlinx-json",
     "kotlinx-serialization-json",

@@ -1,6 +1,5 @@
 package com.kvrae.easykitchen.presentation.main_screen
 
-import android.content.Context
 import android.util.Log
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
@@ -27,7 +26,7 @@ import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
 import com.kvrae.easykitchen.R
@@ -83,9 +82,8 @@ fun MainScreen(
 
 @Composable
 fun MainScreenScaffold(
-    context: Context = LocalContext.current,
-    isNetworkOn: Boolean,
     modifier: Modifier = Modifier,
+    isNetworkOn: Boolean,
     navController: NavController,
     navItem: String,
     onNavItemChange: (String) -> Unit,
@@ -93,6 +91,7 @@ fun MainScreenScaffold(
 ) {
     val snackBarHostState = remember { SnackbarHostState() }
     val scope = rememberCoroutineScope()
+    val internetConnectionError = stringResource(id = R.string.no_internet_connection)
     Scaffold(
         modifier = modifier.fillMaxSize(),
         topBar = {
@@ -105,24 +104,22 @@ fun MainScreenScaffold(
             SnackbarHost(hostState = snackBarHostState)
         },
         content = { paddingValues ->
-            paddingValues
             MainScreenNavigation(
                 modifier =
                     Modifier
                         .navigationBarsPadding()
                         .statusBarsPadding()
-                        .padding(top = 56.dp, bottom = 68.dp),
+                        .padding(paddingValues),
                 navItem = navItem,
                 navController = navController,
             )
             DisposableEffect(key1 = isNetworkOn) {
+
                 if (!isNetworkOn) {
                     scope.launch {
                         snackBarHostState
                             .showSnackbar(
-                                message =
-                                    context
-                                        .getString(R.string.no_internet_connection),
+                                message = internetConnectionError,
                                 duration = SnackbarDuration.Indefinite,
                             )
                     }
