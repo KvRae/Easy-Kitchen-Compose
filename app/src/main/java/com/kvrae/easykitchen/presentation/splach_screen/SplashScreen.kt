@@ -22,11 +22,11 @@ import com.kvrae.easykitchen.utils.SPLASH_SCREEN_ROUTE
 import com.kvrae.easykitchen.utils.popThenNavigateTo
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
-import org.koin.androidx.compose.getViewModel
+import org.koin.androidx.compose.koinViewModel
 
 @Composable
 fun SplashScreen(navController: NavController) {
-    val loginViewModel = getViewModel<LoginViewModel>()
+    val loginViewModel = koinViewModel<LoginViewModel>()
     val isLoggedIn = loginViewModel.isLoggedIn.collectAsState()
 
     val coroutineScope = rememberCoroutineScope()

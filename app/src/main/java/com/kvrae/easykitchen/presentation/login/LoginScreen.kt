@@ -15,10 +15,11 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.rounded.Email
 import androidx.compose.material.icons.rounded.Lock
-import androidx.compose.material3.Divider
+import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -39,7 +40,7 @@ import com.kvrae.easykitchen.utils.FORGET_PASS_SCREEN_ROUTE
 import com.kvrae.easykitchen.utils.LOGIN_SCREEN_ROUTE
 import com.kvrae.easykitchen.utils.MAIN_SCREEN_ROUTE
 import com.kvrae.easykitchen.utils.REGISTER_SCREEN_ROUTE
-import org.koin.androidx.compose.getViewModel
+import org.koin.androidx.compose.koinViewModel
 
 
 @Composable
@@ -47,9 +48,10 @@ fun LoginScreen(
     navController: NavController,
 
 ) {
-    val loginViewModel= getViewModel<LoginViewModel>()
+    val loginViewModel= koinViewModel<LoginViewModel>()
     val loginState = loginViewModel.loginState.collectAsState().value
-    val mealsViewModel = getViewModel<MealsViewModel>()
+    val mealsViewModel = koinViewModel<MealsViewModel>()
+    val context = LocalContext.current
 
     LoginUILayout(
         navController = navController,
@@ -59,19 +61,23 @@ fun LoginScreen(
     when (loginState) {
         is LoginState.Loading -> LoadingTransparentScreen()
         is LoginState.Success -> {
-            navController.navigate(MAIN_SCREEN_ROUTE) {
+            LaunchedEffect(Unit) {
                 mealsViewModel.fetchMeals()
-                launchSingleTop = true
-                popUpTo(LOGIN_SCREEN_ROUTE) {
-                    inclusive = true
+                navController.navigate(MAIN_SCREEN_ROUTE) {
+                    launchSingleTop = true
+                    popUpTo(LOGIN_SCREEN_ROUTE) {
+                        inclusive = true
+                    }
                 }
             }
-
         }
-        is LoginState.Error ->
-            Toast.makeText(LocalContext.current, loginState.message, Toast.LENGTH_SHORT).show()
-        else -> return
-
+        is LoginState.Error -> {
+            LaunchedEffect(loginState.message) {
+                Toast.makeText(context, loginState.message, Toast.LENGTH_SHORT).show()
+                loginViewModel.resetLoginState()
+            }
+        }
+        else -> Unit
     }
 
 }
@@ -164,7 +170,7 @@ fun LoginUILayout(
 
         )
 
-        Divider(
+        HorizontalDivider(
             modifier = Modifier
                 .fillMaxWidth()
                 .padding(8.dp)

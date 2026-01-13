@@ -32,7 +32,7 @@ class Notification: BroadcastReceiver() {
 }
 @SuppressLint("ScheduleExactAlarm")
 @RequiresPermission("android.permission.SCHEDULE_EXACT_ALARM")
-inline fun scheduleNotification(
+fun scheduleNotification(
     context: Context,
     title: String,
     message : String
@@ -62,7 +62,7 @@ inline fun scheduleNotification(
         e.printStackTrace()
     }
 }
-inline fun createNotificationChannel(
+fun createNotificationChannel(
     name: String ="Notif Channel",
     description: String = "Notification Description",
     context: Context

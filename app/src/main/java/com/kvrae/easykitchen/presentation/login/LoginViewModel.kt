@@ -36,16 +36,18 @@ class LoginViewModel(
 
     fun login(username: String, password: String) {
         viewModelScope.launch {
-            _loginState.value = LoginState.Loading
+            // Validate inputs before setting Loading state
             if (username.isBlank()) {
                 _loginState.value = LoginState.Error("Username cannot be empty")
-
+                return@launch
             }
             if (password.isBlank()) {
                 _loginState.value = LoginState.Error("Password cannot be empty")
-
+                return@launch
             }
-            val result = loginUseCase(LoginRequest(username, password))
+
+            _loginState.value = LoginState.Loading
+            val result = loginUseCase(LoginRequest(username.trim(), password.trim()))
             _loginState.value = when {
                 result.isSuccess -> {
                     setLoggedInState()
@@ -59,6 +61,10 @@ class LoginViewModel(
                 }
             }
         }
+    }
+
+    fun resetLoginState() {
+        _loginState.value = LoginState.Idle
     }
 
     fun onRememberMeChanged() {

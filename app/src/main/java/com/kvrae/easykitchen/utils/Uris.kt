@@ -2,7 +2,7 @@ package com.kvrae.easykitchen.utils
 import com.kvrae.easykitchen.BuildConfig
 
 
-const val BASE_URL_TEST = BuildConfig.BASE_URL_TEST
+//const val BASE_URL_TEST = BuildConfig.BASE_URL_TEST
 const val BASE_URL =  BuildConfig.BASE_URL
 const val CHAT_BASE_URL = BuildConfig.CHAT_BASE_URL
 const val CHAT_API_KEY = BuildConfig.API_KEY

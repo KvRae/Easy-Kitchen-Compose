@@ -6,15 +6,13 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.kvrae.easykitchen.data.remote.dto.ChatRequest
-import com.kvrae.easykitchen.data.remote.dto.ChatResponse
-import com.kvrae.easykitchen.domain.usecases.ChatGptUseCase
+import com.kvrae.easykitchen.domain.usecases.GeminiChatUseCase
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
 
 class ChatViewModel(
-    private val chatApi: ChatGptUseCase
+    private val geminiChatUseCase: GeminiChatUseCase
 ) : ViewModel() {
     private val _chatState = MutableStateFlow<ChatState>(ChatState.Idle)
     val chatState: StateFlow<ChatState> = _chatState
@@ -32,26 +30,27 @@ class ChatViewModel(
                 _chatState.value = ChatState.Error("Message cannot be empty")
                 return@launch
             }
+            val currentMessage = userMessage
+            userMessage = ""
+            
             _chatState.value = ChatState.Loading
-            chatMessages.add(Message(Role.USER, userMessage))
-            val result = chatApi(ChatRequest(message = userMessage))
+            chatMessages.add(Message(Role.USER, currentMessage))
+            
+            val result = geminiChatUseCase(currentMessage)
             _chatState.value = when {
                 result.isSuccess -> {
-
-                    chatMessages.add(Message(Role.ASSISTANT,result.getOrNull()!!.choices[0].message.content))
-                    ChatState.Success(result.getOrNull()!!)
-
+                    val responseText = result.getOrNull() ?: "No response"
+                    chatMessages.add(Message(Role.ASSISTANT, responseText))
+                    ChatState.Success(responseText)
                 }
                 result.isFailure -> {
-                    chatMessages.add(
-                        Message(Role.ASSISTANT, "Failed to load data"))
-                    ChatState.Error(result.exceptionOrNull()?.message ?: "Failed to load data")
+                    val errorMessage = result.exceptionOrNull()?.message ?: "Failed to load data"
+                    chatMessages.add(Message(Role.ASSISTANT, errorMessage))
+                    ChatState.Error(errorMessage)
                 }
-
                 else -> {
-                    chatMessages.add(Message(Role.ASSISTANT,"Content is not available"))
+                    chatMessages.add(Message(Role.ASSISTANT, "Content is not available"))
                     ChatState.Error("Content is not available")
-
                 }
             }
         }
@@ -61,7 +60,7 @@ class ChatViewModel(
 sealed class ChatState {
     data object Idle : ChatState()
     data object Loading : ChatState()
-    data class Success(val response: ChatResponse) : ChatState()
+    data class Success(val response: String) : ChatState()
     data class Error(val message: String) : ChatState()
 }
 

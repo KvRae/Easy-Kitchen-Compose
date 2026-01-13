@@ -1,7 +1,17 @@
 package com.kvrae.easykitchen.utils
 
 import SearchBarLayout
+import androidx.compose.foundation.layout.*
+import androidx.compose.material3.CircularProgressIndicator
+import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.remember
+import androidx.compose.ui.Alignment
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
@@ -14,7 +24,7 @@ import com.kvrae.easykitchen.presentation.meal_detail.MealDetailsScreen
 import com.kvrae.easykitchen.presentation.meals.MealsViewModel
 import com.kvrae.easykitchen.presentation.register.RegisterScreen
 import com.kvrae.easykitchen.presentation.splach_screen.SplashScreen
-import org.koin.androidx.compose.getViewModel
+import org.koin.compose.viewmodel.koinViewModel
 
 
 // setting the navigation composable
@@ -65,7 +75,7 @@ sealed class Screen(
 // setting the navigation composable
 @Composable
 fun Navigation() {
-    val mealsViewModel = getViewModel<MealsViewModel>()
+    val mealsViewModel = koinViewModel<MealsViewModel>()
     val isNetworkOn = rememberNetworkConnectivity()
     val navController = rememberNavController()
     NavHost(navController = navController, startDestination = Screen.SplashScreen.route) {
@@ -100,12 +110,38 @@ fun Navigation() {
         }
         composable("${Screen.MealDetailsScreen.route}/{mealId}") { backStackEntry ->
             val mealId = backStackEntry.arguments?.getString("mealId")
-            val meal = mealsViewModel.findMealById(mealId)
-            if (meal != null) {
-                MealDetailsScreen(
-                    navController = navController,
-                    meal = meal.asMealDetail(),
-                )
+            val meals by mealsViewModel.meals.collectAsState()
+
+            // Ensure data is present when navigating directly
+            LaunchedEffect(mealId, meals) {
+                if (mealId != null && meals.isEmpty()) {
+                    mealsViewModel.fetchMeals()
+                }
+            }
+
+            val meal = remember(meals, mealId) { meals.firstOrNull { it.idResponse == mealId } }
+
+            when (meal) {
+                null if mealId == null -> {
+                    Text("Meal not found")
+                }
+                null -> {
+                    // Show lightweight placeholder while fetching/looking up the meal
+                    Box(
+                        modifier = Modifier
+                            .fillMaxSize()
+                            .padding(16.dp),
+                        contentAlignment = Alignment.Center
+                    ) {
+                        CircularProgressIndicator()
+                    }
+                }
+                else -> {
+                    MealDetailsScreen(
+                        navController = navController,
+                        meal = meal.asMealDetail(),
+                    )
+                }
             }
         }
         composable(Screen.SearchLayout.route) {
@@ -128,5 +164,3 @@ fun NavController.popThenNavigateTo(
         }
     }
 }
-
-

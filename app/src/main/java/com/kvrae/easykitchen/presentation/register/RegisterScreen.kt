@@ -1,5 +1,6 @@
 package com.kvrae.easykitchen.presentation.register
 
+import android.content.Context
 import android.widget.Toast
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
@@ -32,13 +33,14 @@ import com.kvrae.easykitchen.presentation.miscellaneous.screens.LoadingTranspare
 import com.kvrae.easykitchen.utils.LOGIN_SCREEN_ROUTE
 import com.kvrae.easykitchen.utils.REGISTER_SCREEN_ROUTE
 import com.kvrae.easykitchen.utils.popThenNavigateTo
-import org.koin.androidx.compose.getViewModel
+import org.koin.androidx.compose.koinViewModel
 
 @Composable
 fun RegisterScreen(
-    navController: NavController
+    navController: NavController,
+    context: Context = LocalContext.current
 ) {
-    val registerViewModel = getViewModel<RegisterViewModel>()
+    val registerViewModel = koinViewModel<RegisterViewModel>()
     val registerState by registerViewModel.registerState.collectAsState()
 
     RegisterScreenContent(
@@ -62,10 +64,10 @@ fun RegisterScreen(
                 navigateRoute = LOGIN_SCREEN_ROUTE,
                 popRoute = REGISTER_SCREEN_ROUTE
             )
-            Toast.makeText(LocalContext.current, "Registration successful", Toast.LENGTH_SHORT).show()
+            Toast.makeText(context, "Registration successful", Toast.LENGTH_SHORT).show()
         }
         is RegisterState.Error -> {
-            Toast.makeText(LocalContext.current, (registerState as RegisterState.Error).message, Toast.LENGTH_SHORT).show()
+            Toast.makeText(context, (registerState as RegisterState.Error).message, Toast.LENGTH_SHORT).show()
         }
     }
 

@@ -23,7 +23,7 @@ import com.kvrae.easykitchen.data.remote.dto.asDto
 import com.kvrae.easykitchen.presentation.miscellaneous.components.IngredientCard
 import com.kvrae.easykitchen.presentation.miscellaneous.screens.CircularLoadingScreen
 import com.kvrae.easykitchen.presentation.miscellaneous.screens.NoDataScreen
-import org.koin.androidx.compose.getViewModel
+import org.koin.androidx.compose.koinViewModel
 
 
 @Composable
@@ -32,7 +32,7 @@ fun IngredientsScreen(
     navController: NavController,
 
 ) {
-    val viewModel = getViewModel<IngredientViewModel>()
+    val viewModel = koinViewModel<IngredientViewModel>()
     val ingredientState by viewModel.ingredientsState.collectAsState()
 
     var isRefreshing by remember { mutableStateOf(false) }

@@ -13,23 +13,23 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.statusBarsPadding
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.outlined.AddCircle
-import androidx.compose.material.icons.rounded.ArrowBack
+import androidx.compose.material.icons.automirrored.rounded.ArrowBack
+import androidx.compose.material.icons.automirrored.rounded.List
 import androidx.compose.material.icons.rounded.Favorite
 import androidx.compose.material.icons.rounded.FavoriteBorder
-import androidx.compose.material.icons.rounded.Info
-import androidx.compose.material.icons.rounded.List
 import androidx.compose.material.icons.rounded.Place
-import androidx.compose.material.icons.rounded.Warning
+import androidx.compose.material.icons.rounded.Restaurant
+import androidx.compose.material.icons.rounded.Schedule
 import androidx.compose.material3.Button
 import androidx.compose.material3.CircularProgressIndicator
-import androidx.compose.material3.Divider
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
@@ -37,6 +37,7 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -47,17 +48,18 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.res.vectorResource
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
 import coil.compose.SubcomposeAsyncImage
 import com.kvrae.easykitchen.R
 import com.kvrae.easykitchen.data.remote.dto.MealDetail
 import com.kvrae.easykitchen.presentation.miscellaneous.components.CustomAlertDialogWithContent
-import com.kvrae.easykitchen.presentation.miscellaneous.components.MealInfoCard
 import com.kvrae.easykitchen.utils.openYoutube
 
 
@@ -72,10 +74,14 @@ fun MealDetailsScreen(
 
     val scrollState = rememberScrollState()
     val imageHeight = 300f
-    val imageAlpha = when {
-        scrollState.value < 0 -> 1f // Fully visible
-        scrollState.value < imageHeight -> 1f - (scrollState.value / imageHeight)
-        else -> 0f
+    val imageAlpha by remember {
+        derivedStateOf {
+            when {
+            scrollState.value <= 0 -> 1f
+            scrollState.value < imageHeight -> 1f - (scrollState.value / imageHeight)
+            else -> 0f
+        }
+        }
     }
     var isFavorite by rememberSaveable {
         mutableStateOf(false)
@@ -105,112 +111,135 @@ fun MealDetailsScreen(
             Column(
                 modifier = Modifier
                     .padding(top = 250.dp)
-                    .clip(RoundedCornerShape(topStart = 60.dp, topEnd = 60.dp))
-                    .background(MaterialTheme.colorScheme.background)
+                    .clip(RoundedCornerShape(topStart = 32.dp, topEnd = 32.dp))
+                    .background(MaterialTheme.colorScheme.surface)
                     .fillMaxWidth()
                     .fillMaxHeight()
-                    .padding(32.dp)
+                    .padding(24.dp)
             ) {
+                // Recipe Title
                 Text(
                     text = meal.name.orEmpty(),
-                    style = MaterialTheme.typography.headlineSmall,
-                    color = MaterialTheme.colorScheme.tertiary,
+                    style = MaterialTheme.typography.headlineMedium,
+                    color = MaterialTheme.colorScheme.primary,
+                    modifier = Modifier.padding(bottom = 16.dp)
+                )
 
-                    )
-                Divider(modifier = Modifier.padding(top = 16.dp))
+                // Info Pills Row
                 Row(
-                    modifier = Modifier.fillMaxWidth(),
-                    verticalAlignment = Alignment.CenterVertically,
-                    horizontalArrangement = Arrangement.Center
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(bottom = 20.dp),
+                    horizontalArrangement = Arrangement.spacedBy(8.dp),
+                    verticalAlignment = Alignment.CenterVertically
                 ) {
-                    MealInfoCard(
+                    InfoChip(
                         icon = Icons.Rounded.Place,
                         text = meal.area.orEmpty()
                     )
-
-                    MealInfoCard(
-                        icon = Icons.Rounded.Info,
+                    InfoChip(
+                        icon = Icons.Rounded.Restaurant,
                         text = meal.category.orEmpty()
                     )
-
-                    MealInfoCard(
-                        icon = Icons.Outlined.AddCircle,
+                    InfoChip(
+                        icon = Icons.Rounded.Schedule,
                         text = "N/A"
                     )
-
                 }
-                Row(
-                    modifier = Modifier.padding(top = 16.dp),
-                    verticalAlignment = Alignment.CenterVertically
+
+                // Ingredients Section Card
+                Column(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .clip(RoundedCornerShape(16.dp))
+                        .background(MaterialTheme.colorScheme.secondaryContainer)
+                        .padding(16.dp)
                 ) {
-                    Icon(
-                        imageVector = Icons.Rounded.Warning,
-                        contentDescription = "Warning Icon",
-                        tint = MaterialTheme.colorScheme.tertiary
-                    )
-                    Spacer(Modifier.padding(4.dp
-                    ))
-                    Text(
-                        text = "Ingredients",
-                        style = MaterialTheme.typography.titleLarge,
-                        color = MaterialTheme.colorScheme.tertiary
-                    )
-                }
-                Row(
-                    modifier = Modifier.padding(top = 16.dp)
-                ) {
-                    Column(
-                        modifier = Modifier.weight(1f)
-                    ) {
-                        repeat(meal.ingredients.size){
-                            Text(
-                                text = meal.ingredients[it],
-                                style = MaterialTheme.typography.bodySmall,
-                                color = MaterialTheme.colorScheme.onSurface
-                            )
-                        }
-                    }
-                    Spacer(modifier = Modifier.weight(1f))
-                    Column(
-                        modifier = Modifier.weight(1f)
-                    ) {
-                        repeat(meal.measures.size){
-                            Text(
-                                text = meal.measures[it],
-                                style = MaterialTheme.typography.bodySmall,
-                                color = MaterialTheme.colorScheme.onSurface
-
-
-                            )
-                        }
-                    }
-                }
-
-                Column {
                     Row(
-                        modifier = Modifier.padding(top = 16.dp),
-                        verticalAlignment = Alignment.CenterVertically
+                        verticalAlignment = Alignment.CenterVertically,
+                        modifier = Modifier.padding(bottom = 12.dp)
                     ) {
                         Icon(
-                            imageVector = Icons.Rounded.List,
-                            contentDescription = "Warning Icon",
-                            tint = MaterialTheme.colorScheme.tertiary
+                            imageVector = ImageVector.vectorResource(R.drawable.ingredients),
+                            contentDescription = "Ingredients",
+                            tint = MaterialTheme.colorScheme.onSecondaryContainer,
+                            modifier = Modifier.size(24.dp)
                         )
-                        Spacer(Modifier.padding(4.dp))
+                        Spacer(Modifier.width(8.dp))
                         Text(
-                            text = "Instructions",
+                            text = stringResource(R.string.ingredients),
                             style = MaterialTheme.typography.titleLarge,
-                            color = MaterialTheme.colorScheme.tertiary
+                            color = MaterialTheme.colorScheme.onSecondaryContainer
                         )
                     }
-                    Spacer(modifier = Modifier.padding(8.dp))
+
+                    Row(
+                        modifier = Modifier.fillMaxWidth(),
+                        horizontalArrangement = Arrangement.spacedBy(16.dp)
+                    ) {
+                        Column(
+                            modifier = Modifier.weight(1f),
+                            verticalArrangement = Arrangement.spacedBy(8.dp)
+                        ) {
+                            repeat(meal.ingredients.size) { index ->
+                                Text(
+                                    text = "• ${meal.ingredients[index]}",
+                                    style = MaterialTheme.typography.bodyMedium,
+                                    color = MaterialTheme.colorScheme.onSecondaryContainer
+                                )
+                            }
+                        }
+                        Column(
+                            modifier = Modifier.weight(0.8f),
+                            verticalArrangement = Arrangement.spacedBy(8.dp)
+                        ) {
+                            repeat(meal.measures.size) { index ->
+                                Text(
+                                    text = meal.measures[index],
+                                    style = MaterialTheme.typography.bodyMedium,
+                                    color = MaterialTheme.colorScheme.onSecondaryContainer
+                                )
+                            }
+                        }
+                    }
+                }
+
+                Spacer(modifier = Modifier.height(20.dp))
+
+                // Instructions Section Card
+                Column(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .clip(RoundedCornerShape(16.dp))
+                        .background(MaterialTheme.colorScheme.tertiaryContainer)
+                        .padding(16.dp)
+                ) {
+                    Row(
+                        verticalAlignment = Alignment.CenterVertically,
+                        modifier = Modifier.padding(bottom = 12.dp)
+                    ) {
+                        Icon(
+                            imageVector = Icons.AutoMirrored.Rounded.List,
+                            contentDescription = "Instructions",
+                            tint = MaterialTheme.colorScheme.onTertiaryContainer,
+                            modifier = Modifier.size(24.dp)
+                        )
+                        Spacer(Modifier.width(8.dp))
+                        Text(
+                            text = stringResource(R.string.instructions),
+                            style = MaterialTheme.typography.titleLarge,
+                            color = MaterialTheme.colorScheme.onTertiaryContainer
+                        )
+                    }
                     Text(
-                        modifier = Modifier.padding(0.dp),
                         text = meal.instructions.orEmpty(),
                         style = MaterialTheme.typography.bodyLarge,
-                        color = MaterialTheme.colorScheme.onSurface
+                        color = MaterialTheme.colorScheme.onTertiaryContainer,
+                        lineHeight = MaterialTheme.typography.bodyLarge.lineHeight
                     )
                 }
+
+                Spacer(modifier = Modifier.height(80.dp))
             }
         }
         if (!meal.youtube.isNullOrEmpty()){
@@ -232,8 +261,10 @@ fun MealDetailsScreen(
                     },
                     content = {
                         Row {
-                            Icon(painter = painterResource(
-                                id = R.drawable.ondemand_video_24),
+                            Icon(
+                                painter = painterResource(
+                                    id = R.drawable.ondemand_video_24
+                                ),
                                 contentDescription = "Youtube Icon",
                                 tint = MaterialTheme.colorScheme.background,
                             )
@@ -266,7 +297,7 @@ fun MealDetailsScreen(
                 }
             ) {
                 Icon(
-                    imageVector = Icons.Rounded.ArrowBack,
+                    imageVector = Icons.AutoMirrored.Rounded.ArrowBack,
                     contentDescription = "Arrow Back Button",
                     tint = MaterialTheme.colorScheme.tertiary
                 )
@@ -305,7 +336,7 @@ fun MealDetailsScreen(
                         }
                     ) {
                         Icon(
-                            imageVector = Icons.Rounded.ArrowBack,
+                            imageVector = Icons.AutoMirrored.Rounded.ArrowBack,
                             contentDescription = "Favorite Icon Button",
                             tint = MaterialTheme.colorScheme.tertiary
                         )
@@ -351,4 +382,31 @@ fun MealDetailsScreen(
     }
 
 
+}
+
+@Composable
+private fun InfoChip(
+    icon: ImageVector,
+    text: String
+) {
+    Row(
+        modifier = Modifier
+            .clip(RoundedCornerShape(50))
+            .background(MaterialTheme.colorScheme.primaryContainer)
+            .padding(horizontal = 12.dp, vertical = 6.dp),
+        verticalAlignment = Alignment.CenterVertically,
+        horizontalArrangement = Arrangement.spacedBy(6.dp)
+    ) {
+        Icon(
+            imageVector = icon,
+            contentDescription = null,
+            tint = MaterialTheme.colorScheme.onPrimaryContainer,
+            modifier = Modifier.size(16.dp)
+        )
+        Text(
+            text = text.ifBlank { stringResource(id = R.string.not_available) },
+            style = MaterialTheme.typography.bodySmall,
+            color = MaterialTheme.colorScheme.onPrimaryContainer
+        )
+    }
 }

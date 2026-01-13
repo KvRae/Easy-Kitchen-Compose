@@ -38,13 +38,13 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.input.TextFieldValue
 import androidx.compose.ui.unit.dp
 import com.kvrae.easykitchen.R
-import org.koin.androidx.compose.getViewModel
+import org.koin.androidx.compose.koinViewModel
 
 @Composable
 fun ChatScreen(
     modifier: Modifier = Modifier
 ) {
-    val viewModel = getViewModel<ChatViewModel>()
+    val viewModel = koinViewModel<ChatViewModel>()
     val chatState = viewModel.chatState.collectAsState()
     val listState = rememberLazyListState()
 

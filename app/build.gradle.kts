@@ -5,6 +5,7 @@ plugins {
     alias(libs.plugins.jetbrains.kotlin.android)
     alias(libs.plugins.jetbrains.kotlin.serilization)
     alias(libs.plugins.google.ksp)
+    alias(libs.plugins.compose.compiler)
 }
 
 val properties = Properties()
@@ -16,7 +17,7 @@ if (localPropertiesFile.exists()) {
 
 android {
     namespace = "com.kvrae.easykitchen"
-    compileSdk = 34
+    compileSdk = 36
 
     defaultConfig {
         buildConfigField("String", "API_KEY", "\"${properties.getProperty("API_KEY")}\"")
@@ -26,7 +27,7 @@ android {
 
         applicationId = "com.kvrae.easykitchen"
         minSdk = 26
-        targetSdk = 34
+        targetSdk = 36
         versionCode = 1
         versionName = "1.0"
 
@@ -46,11 +47,11 @@ android {
         }
     }
     compileOptions {
-        sourceCompatibility = JavaVersion.VERSION_1_8
-        targetCompatibility = JavaVersion.VERSION_1_8
+        sourceCompatibility = JavaVersion.VERSION_21
+        targetCompatibility = JavaVersion.VERSION_21
     }
     kotlinOptions {
-        jvmTarget = "1.8"
+
     }
     buildFeatures {
         buildConfig = true
@@ -84,6 +85,7 @@ dependencies {
     implementation(libs.androidx.ui.tooling.preview)
     implementation(libs.androidx.material3)
     implementation(libs.androidx.ui.text.google.fonts)
+    implementation(libs.androidx.compose.material.icons.extended)
     // Lottie
     implementation(libs.android.lottie.compose)
     // Navigation Compose
@@ -92,6 +94,7 @@ dependencies {
     implementation(libs.coil.kt)
     // Ktor
     implementation(libs.bundles.ktor)
+
     // Koin
     implementation(libs.koin.android.compose)
     // Room
@@ -107,7 +110,8 @@ dependencies {
     // Accompanist Swipe Refresh
     implementation(libs.google.accompanist.swiperefresher)
 
-
+    // Gemini
+    implementation(libs.google.generativeai)
 
     // Compose Test dependencies
     testImplementation(libs.junit)

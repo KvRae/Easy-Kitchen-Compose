@@ -4,8 +4,8 @@ import android.util.Log
 import com.kvrae.easykitchen.data.local.database.EasyKitchenDb
 import com.kvrae.easykitchen.data.remote.datasource.CategoryRemoteDataSource
 import com.kvrae.easykitchen.data.remote.datasource.CategoryRemoteDataSourceImpl
-import com.kvrae.easykitchen.data.remote.datasource.ChatGptDataSourceImpl
-import com.kvrae.easykitchen.data.remote.datasource.ChatGptRemoteDataSource
+import com.kvrae.easykitchen.data.remote.datasource.GeminiRemoteDataSource
+import com.kvrae.easykitchen.data.remote.datasource.GeminiRemoteDataSourceImpl
 import com.kvrae.easykitchen.data.remote.datasource.IngredientRemoteDataSource
 import com.kvrae.easykitchen.data.remote.datasource.IngredientRemoteDataSourceImpl
 import com.kvrae.easykitchen.data.remote.datasource.LoginRemoteDataSource
@@ -18,8 +18,8 @@ import com.kvrae.easykitchen.data.repository.AuthRepository
 import com.kvrae.easykitchen.data.repository.AuthRepositoryImpl
 import com.kvrae.easykitchen.data.repository.CategoryRepository
 import com.kvrae.easykitchen.data.repository.CategoryRepositoryImpl
-import com.kvrae.easykitchen.data.repository.ChatGptRepository
-import com.kvrae.easykitchen.data.repository.ChatGptRepositoryImpl
+import com.kvrae.easykitchen.data.repository.GeminiRepository
+import com.kvrae.easykitchen.data.repository.GeminiRepositoryImpl
 import com.kvrae.easykitchen.data.repository.IngredientRepository
 import com.kvrae.easykitchen.data.repository.IngredientRepositoryImpl
 import com.kvrae.easykitchen.data.repository.LoginRepository
@@ -28,7 +28,7 @@ import com.kvrae.easykitchen.data.repository.MealRepository
 import com.kvrae.easykitchen.data.repository.MealRepositoryImpl
 import com.kvrae.easykitchen.data.repository.RegisterRepository
 import com.kvrae.easykitchen.data.repository.RegisterRepositoryImpl
-import com.kvrae.easykitchen.domain.usecases.ChatGptUseCase
+import com.kvrae.easykitchen.domain.usecases.GeminiChatUseCase
 import com.kvrae.easykitchen.domain.usecases.GetCategoryUseCase
 import com.kvrae.easykitchen.domain.usecases.GetGoogleSignInClientUseCase
 import com.kvrae.easykitchen.domain.usecases.GetIngredientsUseCase
@@ -48,30 +48,27 @@ import com.kvrae.easykitchen.presentation.register.RegisterViewModel
 import com.kvrae.easykitchen.utils.UserPreferencesManager
 import io.ktor.client.HttpClient
 import io.ktor.client.engine.android.Android
-import io.ktor.client.features.DefaultRequest
-import io.ktor.client.features.HttpTimeout
-import io.ktor.client.features.json.JsonFeature
-import io.ktor.client.features.json.serializer.KotlinxSerializer
-import io.ktor.client.features.logging.LogLevel
-import io.ktor.client.features.logging.Logging
-import io.ktor.client.features.observer.ResponseObserver
+import io.ktor.client.plugins.DefaultRequest
+import io.ktor.client.plugins.HttpTimeout
+import io.ktor.client.plugins.logging.LogLevel
+import io.ktor.client.plugins.logging.Logging
+import io.ktor.client.plugins.observer.ResponseObserver
+import io.ktor.client.plugins.contentnegotiation.ContentNegotiation
 import io.ktor.client.request.header
+import io.ktor.serialization.kotlinx.json.json
 import kotlinx.serialization.json.Json
-import org.koin.androidx.viewmodel.dsl.viewModel
+import org.koin.core.module.dsl.viewModel
 import org.koin.dsl.module
 
 val networkModule = module {
     single {
         HttpClient(Android) {
-            install(JsonFeature) {
-                serializer =
-                    KotlinxSerializer(
-                        Json {
-                            prettyPrint = true // Prints the JSON in a human readable format
-                            isLenient = true // Makes the parser ignore unknown keys
-                            ignoreUnknownKeys = true // Ignores unknown keys
-                        },
-                    )
+            install(ContentNegotiation) {
+                json(Json {
+                    prettyPrint = true
+                    isLenient = true
+                    ignoreUnknownKeys = true
+                })
             }
             install(Logging) {
                 level = LogLevel.ALL
@@ -116,8 +113,8 @@ val dataModule = module {
 
     single<AuthRepository> { AuthRepositoryImpl(get()) }
 
-    single<ChatGptRemoteDataSource> { ChatGptDataSourceImpl(get()) }
-    single<ChatGptRepository> { ChatGptRepositoryImpl(get()) }
+    single<GeminiRemoteDataSource> { GeminiRemoteDataSourceImpl() }
+    single<GeminiRepository> { GeminiRepositoryImpl(get()) }
 
     single { UserPreferencesManager(get()) }
 }
@@ -132,7 +129,7 @@ val domainModule = module {
     factory { GetSignInIntentUseCase(get()) }
     factory { HandleSignInResultUseCase(get()) }
     factory { SendIdTokenToBackendUseCase(get()) }
-    factory { ChatGptUseCase(get()) }
+    factory { GeminiChatUseCase(get()) }
 }
 
 val presentationModule = module {
