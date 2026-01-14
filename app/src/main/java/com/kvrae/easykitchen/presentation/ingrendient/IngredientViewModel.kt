@@ -1,5 +1,6 @@
 package com.kvrae.easykitchen.presentation.ingrendient
 
+import androidx.compose.runtime.mutableStateListOf
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.kvrae.easykitchen.data.remote.dto.IngredientResponse
@@ -11,6 +12,8 @@ import kotlinx.coroutines.launch
 class IngredientViewModel(private val getIngredientsUseCase: GetIngredientsUseCase) : ViewModel() {
     private val _ingredientsState = MutableStateFlow<IngredientState>(IngredientState.Loading)
     val ingredientsState: StateFlow<IngredientState> = _ingredientsState
+
+    private val ingredientsBasket = mutableStateListOf<IngredientResponse>()
 
     init {
         getIngredients()
@@ -31,6 +34,19 @@ class IngredientViewModel(private val getIngredientsUseCase: GetIngredientsUseCa
             }
             }
         }
+    }
+
+
+    fun updateIngredientInBasket(ingredient: IngredientResponse) {
+        if (ingredientsBasket.contains(ingredient)) {
+            ingredientsBasket.remove(ingredient)
+        } else {
+            ingredientsBasket.add(ingredient)
+        }
+    }
+
+    fun isIngredientInBasket(ingredient: IngredientResponse): Boolean {
+        return ingredientsBasket.contains(ingredient)
     }
 }
 

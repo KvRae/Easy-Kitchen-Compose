@@ -1,6 +1,5 @@
 package com.kvrae.easykitchen.presentation.main_screen
 
-import android.content.Context
 import android.util.Log
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
@@ -27,16 +26,17 @@ import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
 import com.kvrae.easykitchen.R
+import com.kvrae.easykitchen.presentation.chat.ChatScreen
 import com.kvrae.easykitchen.presentation.home.HomeScreen
 import com.kvrae.easykitchen.presentation.ingrendient.IngredientsScreen
 import com.kvrae.easykitchen.presentation.meals.MealsScreen
-import com.kvrae.easykitchen.presentation.meals.MealsViewModel
 import com.kvrae.easykitchen.presentation.miscellaneous.components.BottomNavBar
 import com.kvrae.easykitchen.presentation.miscellaneous.components.TopBar
+import com.kvrae.easykitchen.utils.MAIN_CHAT_ROUTE
 import com.kvrae.easykitchen.utils.MAIN_COMPOSE_ROUTE
 import com.kvrae.easykitchen.utils.MAIN_MEALS_ROUTE
 import com.kvrae.easykitchen.utils.navItems
@@ -82,9 +82,8 @@ fun MainScreen(
 
 @Composable
 fun MainScreenScaffold(
-    context: Context = LocalContext.current,
-    isNetworkOn: Boolean,
     modifier: Modifier = Modifier,
+    isNetworkOn: Boolean,
     navController: NavController,
     navItem: String,
     onNavItemChange: (String) -> Unit,
@@ -92,13 +91,12 @@ fun MainScreenScaffold(
 ) {
     val snackBarHostState = remember { SnackbarHostState() }
     val scope = rememberCoroutineScope()
-    val ingredientBasket = mutableListOf<String>()
+    val internetConnectionError = stringResource(id = R.string.no_internet_connection)
     Scaffold(
         modifier = modifier.fillMaxSize(),
         topBar = {
             TopBar(
                 title = navItem,
-                ingredientsSize = ingredientBasket.size,
                 onActionClick = onMenuClick,
             )
         },
@@ -106,31 +104,22 @@ fun MainScreenScaffold(
             SnackbarHost(hostState = snackBarHostState)
         },
         content = { paddingValues ->
-            paddingValues
             MainScreenNavigation(
                 modifier =
                     Modifier
                         .navigationBarsPadding()
                         .statusBarsPadding()
-                        .padding(top = 56.dp, bottom = 68.dp),
+                        .padding(paddingValues),
                 navItem = navItem,
                 navController = navController,
-                onIngredientClick = { ingredient ->
-                    if (ingredientBasket.contains(ingredient)) {
-                        ingredientBasket.remove(ingredient)
-                    } else {
-                        ingredientBasket.add(ingredient)
-                    }
-                },
             )
             DisposableEffect(key1 = isNetworkOn) {
+
                 if (!isNetworkOn) {
                     scope.launch {
                         snackBarHostState
                             .showSnackbar(
-                                message =
-                                    context
-                                        .getString(R.string.no_internet_connection),
+                                message = internetConnectionError,
                                 duration = SnackbarDuration.Indefinite,
                             )
                     }
@@ -159,7 +148,6 @@ fun MainScreenNavigation(
     modifier: Modifier,
     navItem: String? = null,
     navController: NavController,
-    onIngredientClick: (String) -> Unit,
 ) {
     when (navItem) {
         MAIN_MEALS_ROUTE ->
@@ -171,8 +159,12 @@ fun MainScreenNavigation(
             IngredientsScreen(
                 modifier = modifier,
                 navController = navController,
-                onIngredientClick = onIngredientClick,
             )
+        MAIN_CHAT_ROUTE -> {
+            ChatScreen(
+                modifier = modifier
+            )
+        }
         else ->
             HomeScreen(
                 modifier = modifier,

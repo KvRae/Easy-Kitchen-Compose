@@ -4,7 +4,9 @@ import com.kvrae.easykitchen.data.remote.dto.LoginRequest
 import com.kvrae.easykitchen.data.remote.dto.LoginResponse
 import com.kvrae.easykitchen.utils.LOGIN_URL
 import io.ktor.client.HttpClient
+import io.ktor.client.call.body
 import io.ktor.client.request.post
+import io.ktor.client.request.setBody
 import io.ktor.http.ContentType
 import io.ktor.http.contentType
 
@@ -16,7 +18,7 @@ class LoginRemoteDataSourceImpl(private val client: HttpClient) : LoginRemoteDat
     override suspend fun login(request: LoginRequest): LoginResponse {
         return client.post(LOGIN_URL) {
             contentType(ContentType.Application.Json)
-            body = request
-        }
+            setBody(request)
+        }.body()
     }
 }

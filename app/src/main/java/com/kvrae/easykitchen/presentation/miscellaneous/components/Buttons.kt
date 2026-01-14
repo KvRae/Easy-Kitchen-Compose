@@ -1,9 +1,11 @@
 package com.kvrae.easykitchen.presentation.miscellaneous.components
 
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Button
+import androidx.compose.material3.Checkbox
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
@@ -80,6 +82,30 @@ fun TextFormButton(
             text = text,
             style = MaterialTheme.typography.titleMedium,
             color = MaterialTheme.colorScheme.primary,
+        )
+    }
+}
+
+@Composable
+fun TextBoxForm(
+    modifier: Modifier = Modifier,
+    onClick: (Boolean) -> Unit = {},
+    enabled: Boolean = true,
+    text: String = stringResource(R.string.empty_string),
+    ) {
+    Row(
+        modifier = modifier.padding(8.dp),
+        verticalAlignment = androidx.compose.ui.Alignment.CenterVertically,
+        horizontalArrangement = androidx.compose.foundation.layout.Arrangement.Start
+    ) {
+        Checkbox(
+            checked = enabled,
+            onCheckedChange = onClick,
+        )
+        Text(
+            text = text,
+            style = MaterialTheme.typography.titleMedium,
+            color = MaterialTheme.colorScheme.onSurface,
         )
     }
 }

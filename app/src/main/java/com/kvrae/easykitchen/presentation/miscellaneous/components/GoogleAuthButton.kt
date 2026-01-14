@@ -20,7 +20,7 @@ import com.kvrae.easykitchen.R
 import com.kvrae.easykitchen.data.remote.dto.User
 import com.kvrae.easykitchen.presentation.login.GoogleAuthState
 import com.kvrae.easykitchen.presentation.login.GoogleAuthViewModel
-import org.koin.androidx.compose.getViewModel
+import org.koin.androidx.compose.koinViewModel
 
 @Composable
 fun GoogleSignInButton(
@@ -28,7 +28,7 @@ fun GoogleSignInButton(
     onSignInError: (String) -> Unit
 ) {
     val context = LocalContext.current as Activity
-    val viewModel = getViewModel<GoogleAuthViewModel>()
+    val viewModel = koinViewModel<GoogleAuthViewModel>()
     val googleSignInClient = viewModel.getGoogleSignInClient(context)
 
     val signInLauncher = rememberLauncherForActivityResult(

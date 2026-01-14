@@ -10,6 +10,7 @@ fun getTopBarTitle(
         MAIN_HOME_ROUTE -> "Home"
         MAIN_MEALS_ROUTE -> "Meals"
         MAIN_COMPOSE_ROUTE -> "Compose"
+        MAIN_CHAT_ROUTE -> "Chat"
         else -> "EasyKitchen"
     }
 }
@@ -22,6 +23,7 @@ fun getTopBarClickAction(
         MAIN_HOME_ROUTE -> { }
         MAIN_MEALS_ROUTE -> { }
         MAIN_COMPOSE_ROUTE ->{ }
+        MAIN_CHAT_ROUTE -> { }
         else -> { }
     }
 }

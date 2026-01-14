@@ -17,6 +17,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
+import com.kvrae.easykitchen.utils.MAIN_CHAT_ROUTE
 import com.kvrae.easykitchen.utils.MAIN_COMPOSE_ROUTE
 import com.kvrae.easykitchen.utils.MAIN_HOME_ROUTE
 import com.kvrae.easykitchen.utils.MAIN_MEALS_ROUTE
@@ -90,6 +91,11 @@ fun getIcon(
             navItem.iconOutline
         }
         MAIN_COMPOSE_ROUTE -> if (navItem.name == selectedNavItem) {
+            navItem.iconFilled
+        } else {
+            navItem.iconOutline
+        }
+        MAIN_CHAT_ROUTE -> if (navItem.name == selectedNavItem) {
             navItem.iconFilled
         } else {
             navItem.iconOutline

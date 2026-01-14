@@ -19,29 +19,24 @@ import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
 import com.google.accompanist.swiperefresh.SwipeRefresh
 import com.google.accompanist.swiperefresh.rememberSwipeRefreshState
-import com.kvrae.easykitchen.data.remote.dto.IngredientResponse
 import com.kvrae.easykitchen.data.remote.dto.asDto
 import com.kvrae.easykitchen.presentation.miscellaneous.components.IngredientCard
 import com.kvrae.easykitchen.presentation.miscellaneous.screens.CircularLoadingScreen
 import com.kvrae.easykitchen.presentation.miscellaneous.screens.NoDataScreen
-import org.koin.androidx.compose.getViewModel
+import org.koin.androidx.compose.koinViewModel
 
 
 @Composable
 fun IngredientsScreen(
     modifier: Modifier = Modifier,
     navController: NavController,
-    onIngredientClick: (String) -> Unit,
 
 ) {
-    val viewModel = getViewModel<IngredientViewModel>()
+    val viewModel = koinViewModel<IngredientViewModel>()
     val ingredientState by viewModel.ingredientsState.collectAsState()
 
     var isRefreshing by remember { mutableStateOf(false) }
     val swipeRefreshState = rememberSwipeRefreshState(isRefreshing = isRefreshing)
-
-
-
 
     SwipeRefresh(
         modifier = Modifier
@@ -59,7 +54,7 @@ fun IngredientsScreen(
             is IngredientState.Loading -> CircularLoadingScreen()
             is IngredientState.Success -> IngredientScreenContent(
                 modifier = modifier,
-                ingredientResponses = (ingredientState as IngredientState.Success).ingredients
+                viewModel = viewModel
             )
             is IngredientState.Error -> NoDataScreen(
                 message = (ingredientState as IngredientState.Error).message
@@ -72,8 +67,11 @@ fun IngredientsScreen(
 
 @Composable
 fun IngredientScreenContent(
-    ingredientResponses: List<IngredientResponse> = emptyList(),
-    modifier: Modifier = Modifier) {
+    viewModel: IngredientViewModel,
+    modifier: Modifier = Modifier
+) {
+    val ingredientState = viewModel.ingredientsState.collectAsState().value as IngredientState.Success
+    val ingredientResponses = ingredientState.ingredients
     Box(
         modifier =
         modifier
@@ -91,7 +89,14 @@ fun IngredientScreenContent(
             ) { index ->
                 IngredientCard(
                     ingredient = ingredientResponses[index].asDto(),
-                    onIngredientClick = {},
+                    onIngredientClick = {
+                        viewModel.updateIngredientInBasket(
+                            ingredient = ingredientResponses[index]
+                        )
+                    },
+                    isChecked = viewModel.isIngredientInBasket(
+                        ingredient = ingredientResponses[index]
+                    )
                 )
             }
         }

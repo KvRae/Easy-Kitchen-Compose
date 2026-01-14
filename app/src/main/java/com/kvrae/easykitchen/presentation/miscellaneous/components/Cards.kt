@@ -1,5 +1,6 @@
 package com.kvrae.easykitchen.presentation.miscellaneous.components
 
+import android.util.Log
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
@@ -28,10 +29,6 @@ import androidx.compose.material3.IconToggleButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -48,6 +45,8 @@ import com.kvrae.easykitchen.R
 import com.kvrae.easykitchen.data.remote.dto.Category
 import com.kvrae.easykitchen.data.remote.dto.Ingredient
 import com.kvrae.easykitchen.data.remote.dto.Meal
+import com.kvrae.easykitchen.data.remote.dto.MealDetail
+import com.kvrae.easykitchen.utils.INGREDIENT_IMAGE_URL
 import com.valentinilk.shimmer.shimmer
 
 @Composable
@@ -234,15 +233,14 @@ fun MealByAreaAnsCategoryCard(
 fun IngredientCard(
     modifier: Modifier = Modifier,
     onIngredientClick: (String) -> Unit,
-    ingredient: Ingredient
+    ingredient: Ingredient,
+    isChecked: Boolean = false
 ) {
     Card(
         modifier = modifier
             .padding(8.dp)
             .clip(RoundedCornerShape(8.dp))
     ) {
-        var checked by remember { mutableStateOf(false) }
-
         Row(
             modifier = Modifier
                 .fillMaxSize()
@@ -250,20 +248,33 @@ fun IngredientCard(
             verticalAlignment = Alignment.CenterVertically,
             horizontalArrangement = Arrangement.SpaceBetween
         ) {
+            SubcomposeAsyncImage(
+                model = ingredient.image,
+                loading = {
+                    CircularProgressIndicator()
+                },
+                contentDescription = stringResource(R.string.meal_image),
+                contentScale = ContentScale.Fit,
+                modifier = Modifier
+                    .clip(RoundedCornerShape(50))
+                    .height(48.dp)
+                    .background(MaterialTheme.colorScheme.background)
+                    .padding(4.dp),
+
+            )
             Text(
                 text = ingredient.name.orEmpty(),
                 style = MaterialTheme.typography.titleSmall,
             )
 
             IconToggleButton(
-                checked = checked,
+                checked = isChecked,
                 onCheckedChange = {
-                    checked = it
                     onIngredientClick("Name")
                 }
             ) {
                 Icon(
-                    imageVector = if (!checked) Icons.Rounded.Add else Icons.Rounded.Clear,
+                    imageVector = if (!isChecked) Icons.Rounded.Add else Icons.Rounded.Clear,
                     contentDescription = "Add/Remove Icon"
                 )
             }
@@ -276,11 +287,13 @@ fun IngredientCard(
 @Composable
 fun MealImageCoveredCard(
     modifier: Modifier = Modifier,
-    meal: Meal = Meal(),
+    meal: MealDetail = MealDetail(),
     onMealClick: (String) -> Unit,
     isFavorite: Boolean = false,
     onFavoriteClick: (String) -> Unit
 ) {
+    val ingredinets = meal.ingredients
+    Log.d("Ingredients List", ingredinets.size.toString())
     Box(
         modifier = modifier
             .padding(8.dp)
@@ -360,6 +373,33 @@ fun MealImageCoveredCard(
                     color = MaterialTheme.colorScheme.tertiary
                 )
             }
+            if(ingredinets.size > 3)
+                Box(
+                    modifier = Modifier
+                        .fillMaxWidth(0.3f)
+                        .align(Alignment.BottomEnd)
+                        .padding(bottom = 8.dp)
+                        .clip(RoundedCornerShape(topStart = 32.dp, bottomStart = 32.dp))
+                        .background(MaterialTheme.colorScheme.background)
+                )
+                {
+                    Row {
+                        repeat(3) {
+                            Log.d("Ingredients List", ingredinets[it])
+                            val name = ingredinets[it]
+                            SubcomposeAsyncImage(
+                                model = "$INGREDIENT_IMAGE_URL$name.png",
+                                contentDescription = stringResource(R.string.meal_image),
+                                contentScale = ContentScale.Fit,
+                                modifier = Modifier
+                                    .clip(RoundedCornerShape(50))
+                                    .height(32.dp)
+                                    .padding(4.dp),
+                            )
+
+                        }
+                    }
+                }
         }
     }
 }

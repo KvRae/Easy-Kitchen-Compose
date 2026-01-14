@@ -2,42 +2,40 @@ package com.kvrae.easykitchen.presentation.meals
 
 import androidx.compose.foundation.layout.statusBarsPadding
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.material3.pulltorefresh.PullToRefreshBox
+import androidx.compose.material3.pulltorefresh.rememberPullToRefreshState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.navigation.NavController
-import com.google.accompanist.swiperefresh.SwipeRefresh
-import com.google.accompanist.swiperefresh.rememberSwipeRefreshState
 import com.kvrae.easykitchen.data.remote.dto.MealResponse
-import com.kvrae.easykitchen.data.remote.dto.asDto
+import com.kvrae.easykitchen.data.remote.dto.asMealDetail
 import com.kvrae.easykitchen.presentation.miscellaneous.components.MealImageCoveredCard
 import com.kvrae.easykitchen.presentation.miscellaneous.screens.MealsImageCoveredListLoad
 import com.kvrae.easykitchen.presentation.miscellaneous.screens.NoDataScreen
 import com.kvrae.easykitchen.utils.MEAL_DETAILS_SCREEN_ROUTE
-import org.koin.androidx.compose.getViewModel
+import org.koin.androidx.compose.koinViewModel
 
 @Composable
 fun MealsScreen(
     modifier: Modifier = Modifier,
     navController: NavController,
 ) {
-    val mealsViewModel = getViewModel<MealsViewModel>()
+    val mealsViewModel = koinViewModel<MealsViewModel>()
     val mealState by mealsViewModel.mealState.collectAsState()
 
-    var refreshing by remember { mutableStateOf(false) }
-    val refreshingState = rememberSwipeRefreshState(isRefreshing = refreshing)
+    var isRefreshing = mealState is MealState.Loading
+    val refreshingState = rememberPullToRefreshState()
 
-    SwipeRefresh(
+
+
+    PullToRefreshBox(
         modifier = Modifier.statusBarsPadding(),
+        isRefreshing =  isRefreshing,
         state = refreshingState,
         onRefresh = {
-            refreshing = true
             mealsViewModel.fetchMeals()
-            refreshing = false
         }
     ) {
         when (mealState) {
@@ -72,9 +70,9 @@ fun MealScreenContent(
             key = { index -> mealList[index].idResponse ?: index },
         ) { index ->
             MealImageCoveredCard(
-                meal = mealList[index].asDto(),
+                meal = mealList[index].asMealDetail(),
                 onMealClick = {
-                    onMealClick(mealList[index].idResponse ?: "")
+                    onMealClick(mealList[index].asMealDetail().id ?: "")
                 },
                 onFavoriteClick = {
                     onFavoriteClick(mealList[index].idResponse ?: "")
