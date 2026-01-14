@@ -2,22 +2,19 @@ package com.kvrae.easykitchen.ui.theme
 import androidx.compose.ui.graphics.Color
 
 // Light Theme - Modern Red-Orange & Blue Color Scheme
-// Primary: #ED6E62 (Red-Orange) with variants
-val primaryLight = Color(0xFFED6E62) // Vibrant Red-Orange
+val primaryLight = Color(0xFFED6E62)
 val onPrimaryLight = Color(0xFFFFFFFF)
-val primaryContainerLight = Color(0xFFFFDCD6) // Very light red-orange
+val primaryContainerLight = Color(0xFFFFDCD6)
 val onPrimaryContainerLight = Color(0xFF3B0D06)
 
-// Secondary: #D3E1F0 (Soft Blue) with variants
-val secondaryLight = Color(0xFF5B7D97) // Deep blue-gray (derived from secondary)
+val secondaryLight = Color(0xFF5B7D97)
 val onSecondaryLight = Color(0xFFFFFFFF)
-val secondaryContainerLight = Color(0xFFD3E1F0) // Light blue (the secondary color)
+val secondaryContainerLight = Color(0xFFD3E1F0)
 val onSecondaryContainerLight = Color(0xFF1B2E3F)
 
-// Tertiary: Accent between primary and secondary
-val tertiaryLight = Color(0xFFF4A88B) // Soft coral (between red-orange and blue)
+val tertiaryLight = Color(0xFFF4A88B)
 val onTertiaryLight = Color(0xFFFFFFFF)
-val tertiaryContainerLight = Color(0xFFFFE8E1) // Very light coral
+val tertiaryContainerLight = Color(0xFFFFE8E1)
 val onTertiaryContainerLight = Color(0xFF4A1A0E)
 
 val errorLight = Color(0xFFBA1A1A)
@@ -25,13 +22,13 @@ val onErrorLight = Color(0xFFFFFFFF)
 val errorContainerLight = Color(0xFFFFDAD6)
 val onErrorContainerLight = Color(0xFF410002)
 
-val backgroundLight = Color(0xFFFFFBF9) // Very light warm background
+val backgroundLight = Color(0xFFFFFBF9)
 val onBackgroundLight = Color(0xFF1F1B16)
 
-val surfaceLight = Color(0xFFFFFFFF) // Pure white surface
+val surfaceLight = Color(0xFFFFFFFF)
 val onSurfaceLight = Color(0xFF1F1B16)
 
-val surfaceVariantLight = Color(0xFFF5E6E3) // Soft warm gray
+val surfaceVariantLight = Color(0xFFF5E6E3)
 val onSurfaceVariantLight = Color(0xFF504540)
 
 val outlineLight = Color(0xFF84746B)
@@ -42,47 +39,41 @@ val inverseSurfaceLight = Color(0xFF35302A)
 val inverseOnSurfaceLight = Color(0xFFF9F0E8)
 val inversePrimaryLight = Color(0xFFFFB4A8)
 
-// Dark Theme - Modern Red-Orange & Blue Color Scheme
-// Primary: #ED6E62 adapted for dark mode
-val primaryDark = Color(0xFFFFB4A8) // Lighter red-orange for dark mode
-val onPrimaryDark = Color(0xFF5B1409)
+// --- REFINED DARK THEME ---
+// Deep Charcoal & Vibrant Accents for a "Gourmet" feel
+val primaryDark = Color(0xFFFF897D) // Vibrant pastel coral-red
+val onPrimaryDark = Color(0xFF650B00)
+val primaryContainerDark = Color(0xFF8E1D10)
+val onPrimaryContainerDark = Color(0xFFFFDAD4)
 
-val primaryContainerDark = Color(0xFF7D2C23) // Darker red-orange for containers
-val onPrimaryContainerDark = Color(0xFFFFDCD6)
+val secondaryDark = Color(0xFFB0C9E8) // Clear slate blue
+val onSecondaryDark = Color(0xFF19324B)
+val secondaryContainerDark = Color(0xFF324962)
+val onSecondaryContainerDark = Color(0xFFD1E4FF)
 
-// Secondary: #D3E1F0 adapted for dark mode
-val secondaryDark = Color(0xFFB7C9DB) // Lighter blue for dark mode
-val onSecondaryDark = Color(0xFF273140)
-
-val secondaryContainerDark = Color(0xFF3D4E62) // Darker blue for containers
-val onSecondaryContainerDark = Color(0xFFD3E1F0)
-
-// Tertiary: Accent variant
-val tertiaryDark = Color(0xFFFFB8A1) // Light coral for dark mode
-val onTertiaryDark = Color(0xFF62290B)
-
-val tertiaryContainerDark = Color(0xFF844320) // Darker coral for containers
-val onTertiaryContainerDark = Color(0xFFFFE8E1)
+val tertiaryDark = Color(0xFFFFB4A8) // Peach accent
+val onTertiaryDark = Color(0xFF561E0F)
+val tertiaryContainerDark = Color(0xFF723323)
+val onTertiaryContainerDark = Color(0xFFFFDBCA)
 
 val errorDark = Color(0xFFFFB4AB)
 val onErrorDark = Color(0xFF690005)
 val errorContainerDark = Color(0xFF93000A)
 val onErrorContainerDark = Color(0xFFFFDAD6)
 
-val backgroundDark = Color(0xFF1F1B16) // Dark warm brown
-val onBackgroundDark = Color(0xFFEAE1D9)
+val backgroundDark = Color(0xFF0F0D0C) // Deep, rich dark base
+val onBackgroundDark = Color(0xFFEBE0DE)
 
-val surfaceDark = Color(0xFF1F1B16) // Dark surface
-val onSurfaceDark = Color(0xFFEAE1D9)
+val surfaceDark = Color(0xFF141211)    // Elevated surface
+val onSurfaceDark = Color(0xFFEBE0DE)
 
-val surfaceVariantDark = Color(0xFF504540) // Dark warm gray
-val onSurfaceVariantDark = Color(0xFFD8C8C3)
+val surfaceVariantDark = Color(0xFF26211F) // For cards and fields
+val onSurfaceVariantDark = Color(0xFFD8C2BE)
 
-val outlineDark = Color(0xFFA09593)
-val outlineVariantDark = Color(0xFF504540)
+val outlineDark = Color(0xFFA08C8A)
+val outlineVariantDark = Color(0xFF534341)
 val scrimDark = Color(0xFF000000)
 
-val inverseSurfaceDark = Color(0xFFEAE1D9)
-val inverseOnSurfaceDark = Color(0xFF35302A)
+val inverseSurfaceDark = Color(0xFFEBE0DE)
+val inverseOnSurfaceDark = Color(0xFF362E2D)
 val inversePrimaryDark = Color(0xFFED6E62)
-
