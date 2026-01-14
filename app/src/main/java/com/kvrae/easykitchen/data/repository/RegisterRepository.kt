@@ -4,7 +4,7 @@ import com.kvrae.easykitchen.data.remote.datasource.RegisterRemoteDataSource
 import com.kvrae.easykitchen.data.remote.dto.RegisterRequest
 import com.kvrae.easykitchen.data.remote.dto.RegisterResponse
 import com.kvrae.easykitchen.domain.exceptions.AuthException
-import io.ktor.network.sockets.SocketTimeoutException
+import io.ktor.client.network.sockets.SocketTimeoutException
 import java.net.ConnectException
 
 interface RegisterRepository {

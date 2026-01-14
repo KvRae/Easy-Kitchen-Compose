@@ -7,6 +7,9 @@ import androidx.compose.material3.pulltorefresh.rememberPullToRefreshState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.navigation.NavController
 import com.kvrae.easykitchen.data.remote.dto.MealResponse
@@ -24,8 +27,7 @@ fun MealsScreen(
 ) {
     val mealsViewModel = koinViewModel<MealsViewModel>()
     val mealState by mealsViewModel.mealState.collectAsState()
-
-    var isRefreshing = mealState is MealState.Loading
+    var isRefreshing by remember { mutableStateOf(false) }
     val refreshingState = rememberPullToRefreshState()
 
 

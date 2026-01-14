@@ -4,7 +4,9 @@ import android.content.Context
 import android.widget.Toast
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
+import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
@@ -12,6 +14,9 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.rounded.Email
 import androidx.compose.material.icons.rounded.Lock
@@ -26,6 +31,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
 import com.kvrae.easykitchen.R
@@ -46,40 +52,49 @@ import org.koin.androidx.compose.koinViewModel
 @Composable
 fun LoginScreen(
     navController: NavController,
-
 ) {
-    val loginViewModel= koinViewModel<LoginViewModel>()
+    val loginViewModel = koinViewModel<LoginViewModel>()
     val loginState = loginViewModel.loginState.collectAsState().value
     val mealsViewModel = koinViewModel<MealsViewModel>()
     val context = LocalContext.current
 
-    LoginUILayout(
-        navController = navController,
-        loginViewModel = loginViewModel
-    )
+    LaunchedEffect(Unit) {
+        loginViewModel.resetLoginState()
+    }
 
-    when (loginState) {
-        is LoginState.Loading -> LoadingTransparentScreen()
-        is LoginState.Success -> {
-            LaunchedEffect(Unit) {
-                mealsViewModel.fetchMeals()
-                navController.navigate(MAIN_SCREEN_ROUTE) {
-                    launchSingleTop = true
-                    popUpTo(LOGIN_SCREEN_ROUTE) {
-                        inclusive = true
+    Box(modifier = Modifier.fillMaxSize()) {
+        LoginUILayout(
+            navController = navController,
+            loginViewModel = loginViewModel
+        )
+
+        when (loginState) {
+            is LoginState.Loading -> {
+                LoadingTransparentScreen()
+            }
+
+            is LoginState.Success -> {
+                LaunchedEffect(loginState) {
+                    mealsViewModel.fetchMeals()
+                    navController.navigate(MAIN_SCREEN_ROUTE) {
+                        launchSingleTop = true
+                        popUpTo(LOGIN_SCREEN_ROUTE) {
+                            inclusive = true
+                        }
                     }
                 }
             }
-        }
-        is LoginState.Error -> {
-            LaunchedEffect(loginState.message) {
-                Toast.makeText(context, loginState.message, Toast.LENGTH_SHORT).show()
-                loginViewModel.resetLoginState()
-            }
-        }
-        else -> Unit
-    }
 
+            is LoginState.Error -> {
+                LaunchedEffect(loginState.message) {
+                    Toast.makeText(context, loginState.message, Toast.LENGTH_SHORT).show()
+                    loginViewModel.resetLoginState()
+                }
+            }
+
+            else -> {}
+        }
+    }
 }
 
 @Composable
@@ -90,33 +105,56 @@ fun LoginUILayout(
 ) {
     val username = loginViewModel.userName.value
     val password = loginViewModel.password.value
+    val logo = if (!isSystemInDarkTheme()) R.drawable.logo_dark else R.drawable.logo_light
+    val scrollState = rememberScrollState()
 
     Column(
         modifier = Modifier
             .fillMaxSize()
-            .background(MaterialTheme.colorScheme.surface),
+            .background(MaterialTheme.colorScheme.surface)
+            .verticalScroll(scrollState)
+            .padding(24.dp),
         horizontalAlignment = Alignment.CenterHorizontally,
-        verticalArrangement = Arrangement.Center
+        verticalArrangement = Arrangement.Top
     ) {
+        Spacer(modifier = Modifier.height(48.dp))
+        
         Image(
-            painter = painterResource(R.drawable.ic_launcher_foreground),
-            contentDescription = "Logo"
+            painter = painterResource(logo),
+            contentDescription = "Logo",
+            modifier = Modifier
+                .size(160.dp)
+                .padding(bottom = 16.dp)
         )
+
+        Text(
+            text = "Welcome Back",
+            style = MaterialTheme.typography.headlineMedium,
+            fontWeight = FontWeight.Bold,
+            color = MaterialTheme.colorScheme.onSurface
+        )
+
+        Text(
+            text = "Login to your account to continue",
+            style = MaterialTheme.typography.bodyMedium,
+            color = MaterialTheme.colorScheme.onSurfaceVariant,
+            modifier = Modifier.padding(bottom = 32.dp)
+        )
+
         TextInput(
             value = username,
-            onValueChange = {
-                loginViewModel.userName.value = it
-            },
-            placeholder = "Enter a username / email",
+            onValueChange = { loginViewModel.userName.value = it },
+            placeholder = "Username or Email",
             label = "Username or Email",
             leadingIcon = Icons.Rounded.Email,
         )
+
+        Spacer(modifier = Modifier.height(8.dp))
+
         TextInput(
             value = password,
-            onValueChange = {
-                loginViewModel.password.value = it
-            },
-            placeholder = "Enter your password",
+            onValueChange = { loginViewModel.password.value = it },
+            placeholder = "Password",
             label = "Password",
             leadingIcon = Icons.Rounded.Lock,
         )
@@ -128,53 +166,63 @@ fun LoginUILayout(
         ) {
             TextBoxForm(
                 text = stringResource(R.string.remember_me),
-                onClick = {
-                    loginViewModel.onRememberMeChanged()
-                },
+                onClick = { loginViewModel.onRememberMeChanged() },
                 enabled = loginViewModel.rememberMe.value
-
             )
             TextFormButton(
                 text = stringResource(R.string.forget_password),
-                onClick = {
-                    navController.navigate(FORGET_PASS_SCREEN_ROUTE)
-                }
+                onClick = { navController.navigate(FORGET_PASS_SCREEN_ROUTE) }
             )
         }
 
+        Spacer(modifier = Modifier.height(24.dp))
+
         FormButton(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(16.dp),
             text = stringResource(R.string.login),
             onClick = {
-                loginViewModel.login(
-                    username = username,
-                    password = password
-                )
+                loginViewModel.login(username = username, password = password)
             }
         )
-        Spacer(modifier = Modifier.height(16.dp))
+
+        Spacer(modifier = Modifier.height(24.dp))
+
+        Row(
+            modifier = Modifier.fillMaxWidth(),
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            HorizontalDivider(
+                modifier = Modifier.weight(1f),
+                color = MaterialTheme.colorScheme.outlineVariant
+            )
+            Text(
+                text = " OR ",
+                style = MaterialTheme.typography.labelMedium,
+                color = MaterialTheme.colorScheme.outline,
+                modifier = Modifier.padding(horizontal = 16.dp)
+            )
+            HorizontalDivider(
+                modifier = Modifier.weight(1f),
+                color = MaterialTheme.colorScheme.outlineVariant
+            )
+        }
+
+        Spacer(modifier = Modifier.height(24.dp))
+
         GoogleSignInButton(
             onSignInSuccess = {
                 navController.navigate(MAIN_SCREEN_ROUTE) {
                     launchSingleTop = true
-                    popUpTo(LOGIN_SCREEN_ROUTE) {
-                        inclusive = true
-                    }
+                    popUpTo(LOGIN_SCREEN_ROUTE) { inclusive = true }
                 }
             },
             onSignInError = {
                 Toast.makeText(context, it, Toast.LENGTH_SHORT).show()
             }
-
         )
 
-        HorizontalDivider(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(8.dp)
-        )
+        Spacer(modifier = Modifier.weight(1f))
+        Spacer(modifier = Modifier.height(32.dp))
+
         Row(
             modifier = Modifier.fillMaxWidth(),
             horizontalArrangement = Arrangement.Center,
@@ -182,17 +230,15 @@ fun LoginUILayout(
         ) {
             Text(
                 text = stringResource(R.string.don_t_have_an_account),
-                style = MaterialTheme.typography.titleMedium,
-                color = MaterialTheme.colorScheme.onSurface
+                style = MaterialTheme.typography.bodyMedium,
+                color = MaterialTheme.colorScheme.onSurfaceVariant
             )
             TextFormButton(
                 text = stringResource(R.string.sign_up),
-                onClick = {
-                    navController.navigate(REGISTER_SCREEN_ROUTE)
-                }
+                onClick = { navController.navigate(REGISTER_SCREEN_ROUTE) }
             )
         }
 
+        Spacer(modifier = Modifier.height(16.dp))
     }
-
 }

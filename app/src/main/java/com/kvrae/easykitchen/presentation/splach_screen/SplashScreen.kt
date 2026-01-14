@@ -1,19 +1,30 @@
 package com.kvrae.easykitchen.presentation.splach_screen
 
+import androidx.compose.animation.core.FastOutSlowInEasing
+import androidx.compose.animation.core.animateFloatAsState
+import androidx.compose.animation.core.tween
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.size
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.setValue
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.alpha
+import androidx.compose.ui.draw.scale
+import androidx.compose.ui.graphics.Brush
+import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
-import com.airbnb.lottie.compose.LottieAnimation
-import com.airbnb.lottie.compose.LottieCompositionSpec
-import com.airbnb.lottie.compose.animateLottieCompositionAsState
-import com.airbnb.lottie.compose.rememberLottieComposition
 import com.kvrae.easykitchen.R
 import com.kvrae.easykitchen.presentation.login.LoginViewModel
 import com.kvrae.easykitchen.utils.LOGIN_SCREEN_ROUTE
@@ -46,18 +57,62 @@ fun SplashScreen(navController: NavController) {
             )
         }
     }
-    LottieSplashScreen()
+    GradientSplashScreen()
 }
 
 @Composable
-fun LottieSplashScreen() {
-    val composition by rememberLottieComposition(LottieCompositionSpec.RawRes(R.raw.lottie_animation))
-    val progress by animateLottieCompositionAsState(composition)
-    LottieAnimation(
-        modifier = Modifier
-            .background(MaterialTheme.colorScheme.surface)
-            .fillMaxSize(),
-        composition = composition,
-        progress = progress,
+fun GradientSplashScreen() {
+    var startAnimation by remember { mutableStateOf(false) }
+
+    // Animate logo scale
+    val scale by animateFloatAsState(
+        targetValue = if (startAnimation) 1f else 0.3f,
+        animationSpec = tween(
+            durationMillis = 1000,
+            easing = FastOutSlowInEasing
+        ),
+        label = "logo_scale"
     )
+
+    // Animate logo alpha
+    val alpha by animateFloatAsState(
+        targetValue = if (startAnimation) 1f else 0f,
+        animationSpec = tween(
+            durationMillis = 1000,
+            easing = FastOutSlowInEasing
+        ),
+        label = "logo_alpha"
+    )
+
+    LaunchedEffect(key1 = true) {
+        startAnimation = true
+    }
+
+    val primaryColor = MaterialTheme.colorScheme.primary
+    val tertiaryColor = MaterialTheme.colorScheme.tertiary
+
+    Box(
+        modifier = Modifier
+            .fillMaxSize()
+            .background(
+                brush = Brush.verticalGradient(
+                    colors = listOf(
+                        primaryColor,
+                        tertiaryColor
+                    ),
+                    startY = 0f,
+                    endY = Float.POSITIVE_INFINITY
+                )
+            ),
+        contentAlignment = Alignment.Center
+    ) {
+        Image(
+            painter = painterResource(id = R.drawable.logo_light),
+            contentDescription = "App Logo",
+            modifier = Modifier
+                .size(200.dp)
+                .scale(scale)
+                .alpha(alpha)
+        )
+    }
 }

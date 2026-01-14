@@ -46,20 +46,35 @@ class LoginViewModel(
                 return@launch
             }
 
+            android.util.Log.d("LoginViewModel", "Starting login for user: $username")
             _loginState.value = LoginState.Loading
+            android.util.Log.d("LoginViewModel", "State set to Loading")
+
             val result = loginUseCase(LoginRequest(username.trim(), password.trim()))
+            android.util.Log.d("LoginViewModel", "Login result received: ${result.isSuccess}")
+
             _loginState.value = when {
                 result.isSuccess -> {
+                    android.util.Log.d(
+                        "LoginViewModel",
+                        "Login successful, setting logged in state"
+                    )
                     setLoggedInState()
                     LoginState.Success(result.getOrNull()!!)
                 }
                 result.isFailure -> {
+                    android.util.Log.d(
+                        "LoginViewModel",
+                        "Login failed: ${result.exceptionOrNull()?.message}"
+                    )
                     LoginState.Error(result.exceptionOrNull()?.message ?: "Failed to load data")
                 }
                 else -> {
+                    android.util.Log.d("LoginViewModel", "Login returned unexpected result")
                     LoginState.Error("Content is not available")
                 }
             }
+            android.util.Log.d("LoginViewModel", "Final state: ${_loginState.value}")
         }
     }
 

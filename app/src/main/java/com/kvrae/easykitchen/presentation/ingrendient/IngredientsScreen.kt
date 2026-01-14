@@ -1,24 +1,26 @@
 package com.kvrae.easykitchen.presentation.ingrendient
 
-import androidx.compose.foundation.layout.Box
+import SearchField
+import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.statusBarsPadding
 import androidx.compose.foundation.lazy.staggeredgrid.LazyVerticalStaggeredGrid
 import androidx.compose.foundation.lazy.staggeredgrid.StaggeredGridCells
+import androidx.compose.material3.pulltorefresh.PullToRefreshBox
+import androidx.compose.material3.pulltorefresh.rememberPullToRefreshState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
-import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import androidx.navigation.NavController
-import com.google.accompanist.swiperefresh.SwipeRefresh
-import com.google.accompanist.swiperefresh.rememberSwipeRefreshState
+import com.kvrae.easykitchen.data.remote.dto.IngredientResponse
 import com.kvrae.easykitchen.data.remote.dto.asDto
 import com.kvrae.easykitchen.presentation.miscellaneous.components.IngredientCard
 import com.kvrae.easykitchen.presentation.miscellaneous.screens.CircularLoadingScreen
@@ -29,76 +31,108 @@ import org.koin.androidx.compose.koinViewModel
 @Composable
 fun IngredientsScreen(
     modifier: Modifier = Modifier,
-    navController: NavController,
 
-) {
+    ) {
     val viewModel = koinViewModel<IngredientViewModel>()
-    val ingredientState by viewModel.ingredientsState.collectAsState()
+    val filteredIngredientState by viewModel.filteredIngredientsState.collectAsState()
 
+    val searchQuery by viewModel.searchQuery.collectAsState()
     var isRefreshing by remember { mutableStateOf(false) }
-    val swipeRefreshState = rememberSwipeRefreshState(isRefreshing = isRefreshing)
+    val swipeRefreshState = rememberPullToRefreshState()
 
-    SwipeRefresh(
+    Column(
         modifier = Modifier
             .fillMaxSize()
             .statusBarsPadding()
-            .navigationBarsPadding(),
-        state =  swipeRefreshState,
-        onRefresh = {
-            isRefreshing = true
-            viewModel.getIngredients()
-            isRefreshing = false
-        }
+            .navigationBarsPadding()
     ) {
-        when (ingredientState) {
-            is IngredientState.Loading -> CircularLoadingScreen()
-            is IngredientState.Success -> IngredientScreenContent(
-                modifier = modifier,
-                viewModel = viewModel
-            )
-            is IngredientState.Error -> NoDataScreen(
-                message = (ingredientState as IngredientState.Error).message
-            )
+        PullToRefreshBox(
+            modifier = Modifier.fillMaxSize(),
+            state = swipeRefreshState,
+            isRefreshing = isRefreshing,
+            onRefresh = {
+                isRefreshing = true
+                viewModel.getIngredients()
+                isRefreshing = false
+            }
+        ) {
+
+            when (filteredIngredientState) {
+                is IngredientState.Loading -> CircularLoadingScreen()
+                is IngredientState.Success -> {
+                    val filteredIngredients =
+                        (filteredIngredientState as IngredientState.Success).ingredients
+                    if (filteredIngredients.isEmpty() && searchQuery.isNotEmpty()) {
+                        NoDataScreen(message = "No ingredients found matching \"$searchQuery\"")
+                    } else {
+                        IngredientScreenContent(
+                            modifier = modifier,
+                            viewModel = viewModel,
+                            ingredients = filteredIngredients,
+                            searchQuery = searchQuery
+                        )
+                    }
+                }
+
+                is IngredientState.Error -> NoDataScreen(
+                    message = (filteredIngredientState as IngredientState.Error).message
+                )
+            }
         }
     }
-
-
 }
+
+
 
 @Composable
 fun IngredientScreenContent(
     viewModel: IngredientViewModel,
-    modifier: Modifier = Modifier
+    ingredients: List<IngredientResponse>,
+    modifier: Modifier = Modifier,
+    searchQuery: String = ""
 ) {
-    val ingredientState = viewModel.ingredientsState.collectAsState().value as IngredientState.Success
-    val ingredientResponses = ingredientState.ingredients
-    Box(
+    Column(
         modifier =
         modifier
             .fillMaxSize()
             .padding(8.dp),
+        verticalArrangement = androidx.compose.foundation.layout.Arrangement.Top,
+
     ) {
-        LazyVerticalStaggeredGrid(
+        SearchField(
+            query = searchQuery,
+            onQueryChange = { viewModel.updateSearchQuery(it) },
+            onClearClick = { viewModel.clearSearch() },
             modifier = Modifier
-                .fillMaxSize()
-                .align(Alignment.TopCenter),
-            columns = StaggeredGridCells.Adaptive(200.dp)
+                .fillMaxWidth()
+                .padding(bottom = 16.dp, start = 8.dp, end = 8.dp)
+        )
+        LazyVerticalStaggeredGrid(
+            modifier = Modifier.fillMaxSize(),
+            columns = StaggeredGridCells.Adaptive(150.dp)
         ) {
-            items(count = ingredientResponses.size,
-                key = { index -> index }
+            items(
+                count = ingredients.size,
+                key = { index -> ingredients[index].idResponse ?: index }
             ) { index ->
                 IngredientCard(
-                    ingredient = ingredientResponses[index].asDto(),
+                    ingredient = ingredients[index].asDto(),
                     onIngredientClick = {
                         viewModel.updateIngredientInBasket(
-                            ingredient = ingredientResponses[index]
+                            ingredient = ingredients[index]
                         )
                     },
                     isChecked = viewModel.isIngredientInBasket(
-                        ingredient = ingredientResponses[index]
+                        ingredient = ingredients[index]
                     )
                 )
             }
         }
     }
+}
+
+@Preview
+@Composable
+private fun IngredientScreenPreview() {
+    IngredientsScreen()
 }

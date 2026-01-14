@@ -104,12 +104,13 @@ fun MainScreenScaffold(
             SnackbarHost(hostState = snackBarHostState)
         },
         content = { paddingValues ->
+            paddingValues
             MainScreenNavigation(
                 modifier =
                     Modifier
                         .navigationBarsPadding()
                         .statusBarsPadding()
-                        .padding(paddingValues),
+                        .padding(vertical = 64.dp),
                 navItem = navItem,
                 navController = navController,
             )
@@ -158,7 +159,6 @@ fun MainScreenNavigation(
         MAIN_COMPOSE_ROUTE ->
             IngredientsScreen(
                 modifier = modifier,
-                navController = navController,
             )
         MAIN_CHAT_ROUTE -> {
             ChatScreen(

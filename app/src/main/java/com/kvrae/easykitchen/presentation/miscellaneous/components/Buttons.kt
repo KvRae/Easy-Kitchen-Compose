@@ -1,45 +1,26 @@
 package com.kvrae.easykitchen.presentation.miscellaneous.components
 
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Button
+import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Checkbox
+import androidx.compose.material3.CheckboxDefaults
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import com.kvrae.easykitchen.R
-import com.valentinilk.shimmer.shimmer
-
-@Composable
-fun GlowButton(
-    modifier: Modifier = Modifier,
-    onClick: () -> Unit = {},
-    content: @Composable () -> Unit = {},
-    enabled: Boolean = true,
-    text: String = stringResource(R.string.empty_string),
-) {
-    Button(
-        modifier = Modifier
-            .shimmer()
-            .fillMaxSize(),
-        onClick = {onClick},
-        content = {content},
-    )
-    Text(
-        text = text,
-        style = MaterialTheme.typography.titleMedium,
-        color = MaterialTheme.colorScheme.background,
-        fontWeight = FontWeight.Bold,
-    )
-}
 
 @Composable
 fun FormButton(
@@ -50,20 +31,29 @@ fun FormButton(
 ) {
     Button(
         modifier = modifier
-            .clip(RoundedCornerShape(32.dp))
-        ,
+            .fillMaxWidth()
+            .height(56.dp),
         onClick = onClick,
         enabled = enabled,
-    ){
+        shape = RoundedCornerShape(16.dp),
+        colors = ButtonDefaults.buttonColors(
+            containerColor = MaterialTheme.colorScheme.primary,
+            contentColor = MaterialTheme.colorScheme.onPrimary,
+            disabledContainerColor = MaterialTheme.colorScheme.primary.copy(alpha = 0.5f),
+            disabledContentColor = MaterialTheme.colorScheme.onPrimary.copy(alpha = 0.5f)
+        ),
+        elevation = ButtonDefaults.buttonElevation(
+            defaultElevation = 2.dp,
+            pressedElevation = 4.dp
+        )
+    ) {
         Text(
-            modifier = Modifier.padding(horizontal = 16.dp, vertical = 8.dp),
             text = text,
             style = MaterialTheme.typography.titleMedium,
-            color = MaterialTheme.colorScheme.background,
             fontWeight = FontWeight.Bold,
-            )
+            letterSpacing = 1.sp
+        )
     }
-
 }
 
 @Composable
@@ -72,6 +62,7 @@ fun TextFormButton(
     onClick: () -> Unit = {},
     enabled: Boolean = true,
     text: String = stringResource(R.string.empty_string),
+    color: Color = MaterialTheme.colorScheme.primary
 ) {
     TextButton(
         modifier = modifier,
@@ -80,8 +71,9 @@ fun TextFormButton(
     ) {
         Text(
             text = text,
-            style = MaterialTheme.typography.titleMedium,
-            color = MaterialTheme.colorScheme.primary,
+            style = MaterialTheme.typography.labelLarge,
+            color = color,
+            fontWeight = FontWeight.SemiBold
         )
     }
 }
@@ -92,20 +84,24 @@ fun TextBoxForm(
     onClick: (Boolean) -> Unit = {},
     enabled: Boolean = true,
     text: String = stringResource(R.string.empty_string),
-    ) {
+) {
     Row(
-        modifier = modifier.padding(8.dp),
-        verticalAlignment = androidx.compose.ui.Alignment.CenterVertically,
-        horizontalArrangement = androidx.compose.foundation.layout.Arrangement.Start
+        modifier = modifier,
+        verticalAlignment = Alignment.CenterVertically,
+        horizontalArrangement = Arrangement.Start
     ) {
         Checkbox(
             checked = enabled,
             onCheckedChange = onClick,
+            colors = CheckboxDefaults.colors(
+                checkedColor = MaterialTheme.colorScheme.primary,
+                uncheckedColor = MaterialTheme.colorScheme.outline
+            )
         )
         Text(
             text = text,
-            style = MaterialTheme.typography.titleMedium,
-            color = MaterialTheme.colorScheme.onSurface,
+            style = MaterialTheme.typography.bodyMedium,
+            color = MaterialTheme.colorScheme.onSurfaceVariant,
         )
     }
 }

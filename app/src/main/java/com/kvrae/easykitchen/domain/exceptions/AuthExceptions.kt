@@ -9,7 +9,8 @@ sealed class AuthException(message: String) : Exception(message) {
 
     // Login-specific exceptions
     sealed class Login(message: String) : AuthException(message) {
-        class InvalidCredentials : Login("Invalid username or password")
+        class InvalidCredentials(errorMessage: String = "Invalid username or password") :
+            Login(errorMessage)
         class ConnectionTimeout : Login("Connection timed out")
         class ServerUnreachable : Login("Unable to connect to server")
         class UnknownError(errorMessage: String) : Login("Error logging in: $errorMessage")

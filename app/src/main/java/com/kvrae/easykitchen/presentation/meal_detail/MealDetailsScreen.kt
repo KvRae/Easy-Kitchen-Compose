@@ -82,6 +82,7 @@ fun MealDetailsScreen(
             else -> 0f
         }
         }
+
     }
     var isFavorite by rememberSaveable {
         mutableStateOf(false)
