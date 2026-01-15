@@ -2,8 +2,6 @@ package com.kvrae.easykitchen.presentation.miscellaneous.components
 
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
@@ -30,15 +28,13 @@ fun FormButton(
     text: String = stringResource(R.string.empty_string),
 ) {
     Button(
-        modifier = modifier
-            .fillMaxWidth()
-            .height(56.dp),
+        modifier = modifier,
         onClick = onClick,
         enabled = enabled,
         shape = RoundedCornerShape(16.dp),
         colors = ButtonDefaults.buttonColors(
             containerColor = MaterialTheme.colorScheme.primary,
-            contentColor = MaterialTheme.colorScheme.onPrimary,
+            contentColor = MaterialTheme.colorScheme.onBackground,
             disabledContainerColor = MaterialTheme.colorScheme.primary.copy(alpha = 0.5f),
             disabledContentColor = MaterialTheme.colorScheme.onPrimary.copy(alpha = 0.5f)
         ),

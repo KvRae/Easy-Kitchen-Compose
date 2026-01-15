@@ -1,7 +1,9 @@
 package com.kvrae.easykitchen.utils
 
 import SearchBarLayout
-import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -9,6 +11,7 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
@@ -24,6 +27,8 @@ import com.kvrae.easykitchen.presentation.meal_detail.MealDetailsScreen
 import com.kvrae.easykitchen.presentation.meals.MealsViewModel
 import com.kvrae.easykitchen.presentation.register.RegisterScreen
 import com.kvrae.easykitchen.presentation.splach_screen.SplashScreen
+import kotlinx.coroutines.launch
+import org.koin.compose.koinInject
 import org.koin.compose.viewmodel.koinViewModel
 
 
@@ -76,8 +81,11 @@ sealed class Screen(
 @Composable
 fun Navigation() {
     val mealsViewModel = koinViewModel<MealsViewModel>()
+    val userPreferencesManager: UserPreferencesManager = koinInject()
     val isNetworkOn = rememberNetworkConnectivity()
     val navController = rememberNavController()
+    val scope = rememberCoroutineScope()
+
     NavHost(navController = navController, startDestination = Screen.SplashScreen.route) {
         composable(Screen.SplashScreen.route) {
             SplashScreen(
@@ -106,6 +114,17 @@ fun Navigation() {
             MainScreen(
                 navController = navController,
                 isNetworkOn = isNetworkOn,
+                onLogout = {
+                    scope.launch {
+                        userPreferencesManager.clearUserData()
+                        navController.navigate(Screen.LoginScreen.route) {
+                            popUpTo(Screen.MainScreen.route) {
+                                inclusive = true
+                            }
+                            launchSingleTop = true
+                        }
+                    }
+                }
             )
         }
         composable("${Screen.MealDetailsScreen.route}/{mealId}") { backStackEntry ->

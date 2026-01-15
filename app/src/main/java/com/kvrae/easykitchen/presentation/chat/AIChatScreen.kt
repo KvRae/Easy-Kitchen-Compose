@@ -9,13 +9,11 @@ import androidx.compose.foundation.layout.ColumnScope
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.layout.statusBarsPadding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.lazy.LazyColumn
@@ -48,6 +46,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.TextFieldValue
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
+import com.kvrae.easykitchen.utils.stripMarkdown
 import org.koin.androidx.compose.koinViewModel
 
 @Composable
@@ -84,31 +83,8 @@ fun ChatScreen(
     val focusManager = LocalFocusManager.current
 
     Column(
-        modifier = modifier
-            .fillMaxSize()
-            .background(MaterialTheme.colorScheme.surface)
-
+        modifier = modifier.background(MaterialTheme.colorScheme.surface)
     ) {
-        // Header
-        Column(
-            modifier = Modifier
-                .fillMaxWidth()
-                .statusBarsPadding()
-                .padding(16.dp)
-        ) {
-            Text(
-                text = "AI Chef Assistant",
-                style = MaterialTheme.typography.headlineSmall,
-                fontWeight = FontWeight.Bold,
-                color = MaterialTheme.colorScheme.primary
-            )
-            Text(
-                text = "Ask me anything about cooking!",
-                style = MaterialTheme.typography.labelMedium,
-                color = MaterialTheme.colorScheme.onSurfaceVariant
-            )
-        }
-
         // Chat Messages
         if (viewModel.chatMessages.isEmpty() && chatState !is ChatState.Loading) {
             // Empty State
@@ -136,8 +112,7 @@ fun ChatScreen(
 
         // Input Area
         Surface(
-            modifier = Modifier
-                .fillMaxWidth(),
+            modifier = Modifier.fillMaxWidth(),
             tonalElevation = 2.dp,
             shadowElevation = 12.dp,
             color = MaterialTheme.colorScheme.surface,
@@ -367,9 +342,4 @@ fun ChefTypingIndicator() {
     }
 }
 
-private fun String.stripMarkdown(): String {
-    return this.replace(Regex("""(\*\*|__|\*|_|`)"""), "")
-        .replace(Regex("""#+\s+"""), "")
-        .replace(Regex("""^[-*+]\s+""", RegexOption.MULTILINE), "• ")
-        .trim()
-}
+

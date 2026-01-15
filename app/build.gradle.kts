@@ -6,6 +6,7 @@ plugins {
     alias(libs.plugins.jetbrains.kotlin.serilization)
     alias(libs.plugins.google.ksp)
     alias(libs.plugins.compose.compiler)
+    id("androidx.room")
 }
 
 val properties = Properties()
@@ -72,6 +73,9 @@ android {
             }
         }
     }
+    room {
+        schemaDirectory("$projectDir/schemas")
+    }
 }
 
 dependencies {
@@ -102,6 +106,8 @@ dependencies {
     annotationProcessor(libs.androidx.room.compiler)
     // google auth
     implementation(libs.google.auth.service)
+    // google location
+    implementation(libs.google.location.service)
     // datastore
     implementation(libs.androidx.datastore.preferences)
 
@@ -109,6 +115,8 @@ dependencies {
     implementation(libs.valentinilk.shimmer)
     // Accompanist Swipe Refresh
     implementation(libs.google.accompanist.swiperefresher)
+    // Accompanist Permissions
+    implementation(libs.google.accompanist.permissions)
 
     // Gemini
     implementation(libs.google.generativeai)

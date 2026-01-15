@@ -42,6 +42,7 @@ import org.koin.androidx.compose.koinViewModel
 
 @Composable
 fun GoogleSignInButton(
+    modifier: Modifier = Modifier,
     onSignInSuccess: (User) -> Unit,
     onSignInError: (String) -> Unit
 ) {
@@ -87,7 +88,7 @@ fun GoogleSignInButton(
     }
 
     Box(
-        modifier = Modifier
+        modifier = modifier
             .fillMaxWidth()
             .height(56.dp)
             .clip(RoundedCornerShape(12.dp))

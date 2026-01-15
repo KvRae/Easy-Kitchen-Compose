@@ -1,7 +1,6 @@
 package com.kvrae.easykitchen.di
 
 import android.util.Log
-import com.kvrae.easykitchen.data.local.database.EasyKitchenDb
 import com.kvrae.easykitchen.data.remote.datasource.CategoryRemoteDataSource
 import com.kvrae.easykitchen.data.remote.datasource.CategoryRemoteDataSourceImpl
 import com.kvrae.easykitchen.data.remote.datasource.GeminiRemoteDataSource
@@ -22,18 +21,22 @@ import com.kvrae.easykitchen.data.repository.GeminiRepository
 import com.kvrae.easykitchen.data.repository.GeminiRepositoryImpl
 import com.kvrae.easykitchen.data.repository.IngredientRepository
 import com.kvrae.easykitchen.data.repository.IngredientRepositoryImpl
+import com.kvrae.easykitchen.data.repository.LocationRepository
+import com.kvrae.easykitchen.data.repository.LocationRepositoryImpl
 import com.kvrae.easykitchen.data.repository.LoginRepository
 import com.kvrae.easykitchen.data.repository.LoginRepositoryImpl
 import com.kvrae.easykitchen.data.repository.MealRepository
 import com.kvrae.easykitchen.data.repository.MealRepositoryImpl
 import com.kvrae.easykitchen.data.repository.RegisterRepository
 import com.kvrae.easykitchen.data.repository.RegisterRepositoryImpl
+import com.kvrae.easykitchen.domain.usecases.FilterMealsByAreaUseCase
 import com.kvrae.easykitchen.domain.usecases.GeminiChatUseCase
 import com.kvrae.easykitchen.domain.usecases.GetCategoryUseCase
 import com.kvrae.easykitchen.domain.usecases.GetGoogleSignInClientUseCase
 import com.kvrae.easykitchen.domain.usecases.GetIngredientsUseCase
 import com.kvrae.easykitchen.domain.usecases.GetMealsUseCase
 import com.kvrae.easykitchen.domain.usecases.GetSignInIntentUseCase
+import com.kvrae.easykitchen.domain.usecases.GetUserLocationUseCase
 import com.kvrae.easykitchen.domain.usecases.HandleSignInResultUseCase
 import com.kvrae.easykitchen.domain.usecases.LoginUseCase
 import com.kvrae.easykitchen.domain.usecases.RegisterUseCase
@@ -109,12 +112,21 @@ val dataModule = module {
     single<CategoryRepository> { CategoryRepositoryImpl(get())  }
 
     single<MealRemoteDataSource> {MealsRemoteDataSourceImpl(get())}
-    single<MealRepository>{MealRepositoryImpl(get())}
+
+    single<MealRepository> {
+        MealRepositoryImpl(
+            get<MealRemoteDataSource>(),
+            // get<MealDao>(), // COMMENTED TO PREVENT CRASH
+        )
+    }
+
 
     single<AuthRepository> { AuthRepositoryImpl(get()) }
 
     single<GeminiRemoteDataSource> { GeminiRemoteDataSourceImpl() }
     single<GeminiRepository> { GeminiRepositoryImpl(get()) }
+
+    single<LocationRepository> { LocationRepositoryImpl(get()) }
 
     single { UserPreferencesManager(get()) }
 }
@@ -125,6 +137,8 @@ val domainModule = module {
     factory { GetIngredientsUseCase(get()) }
     factory { GetCategoryUseCase(get()) }
     factory { GetMealsUseCase(get()) }
+    factory { GetUserLocationUseCase(get()) }
+    factory { FilterMealsByAreaUseCase() }
     factory { GetGoogleSignInClientUseCase(get()) }
     factory { GetSignInIntentUseCase(get()) }
     factory { HandleSignInResultUseCase(get()) }
@@ -140,7 +154,14 @@ val presentationModule = module {
         get<UserPreferencesManager>()
     ) }
     viewModel { RegisterViewModel(get()) }
-    viewModel { HomeViewModel(get<GetMealsUseCase>(), get<GetCategoryUseCase>()) }
+    viewModel {
+        HomeViewModel(
+            get<GetMealsUseCase>(),
+            get<GetCategoryUseCase>(),
+            get<GetUserLocationUseCase>(),
+            get<FilterMealsByAreaUseCase>()
+        )
+    }
     viewModel {
         GoogleAuthViewModel(
             get<GetGoogleSignInClientUseCase>(),
@@ -153,5 +174,10 @@ val presentationModule = module {
 }
 
 val databaseModule = module {
+    // COMMENTED TO PREVENT CRASH
+    /*
     single { EasyKitchenDb.getInstance(get()) }
+    single { get<EasyKitchenDb>().mealDao }
+    single { get<EasyKitchenDb>().savedMealDao }
+    */
 }

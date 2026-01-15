@@ -27,4 +27,11 @@ class UserPreferencesManager(context: Context) {
     val isLoggedIn: Flow<Boolean> = dataStore.data.map { preferences ->
         preferences[IS_LOGGED_IN] ?: false
     }
+
+    // Clear all user data (logout)
+    suspend fun clearUserData() {
+        dataStore.edit { preferences ->
+            preferences.clear()
+        }
+    }
 }

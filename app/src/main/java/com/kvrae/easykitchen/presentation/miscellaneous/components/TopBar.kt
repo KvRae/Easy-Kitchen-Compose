@@ -2,9 +2,10 @@ package com.kvrae.easykitchen.presentation.miscellaneous.components
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.layout.statusBarsPadding
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material3.BadgedBox
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -20,36 +21,56 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
-import com.kvrae.easykitchen.ui.theme.AppTypography
-import com.kvrae.easykitchen.utils.MAIN_HOME_ROUTE
-import com.kvrae.easykitchen.utils.MAIN_MEALS_ROUTE
+import com.kvrae.easykitchen.utils.MAIN_COMPOSE_ROUTE
 import com.kvrae.easykitchen.utils.getTapBarIcon
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun TopBar(
     modifier: Modifier = Modifier,
-    title : String = "EasyKitchen",
+    name: String = "EasyKitchen",
+    title: String? = null,
+    description: String? = null,
     onActionClick: () -> Unit,
-    actionIcon : Int = getTapBarIcon(title),
+    actionIcon: Int = getTapBarIcon(name),
     ingredientsSize : Int = 0
 ) {
     TopAppBar(
-        modifier = modifier
-            .statusBarsPadding()
-        ,
+        colors = TopAppBarDefaults.topAppBarColors(
+            containerColor = MaterialTheme.colorScheme.surface,
+            titleContentColor = MaterialTheme.colorScheme.primary
+        ),
         title = {
-            Text(
-                text = title,
-                style = AppTypography.headlineSmall,
-                fontWeight = FontWeight.Bold,
-                modifier = Modifier.padding(8.dp)
-            )
+            // Header
+            Column(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(16.dp)
+            ) {
+                if (title != null)
+                    Text(
+                        text = title,
+                        style = MaterialTheme.typography.headlineSmall,
+                        fontWeight = FontWeight.Bold,
+                        color = MaterialTheme.colorScheme.primary
+                    )
+                if (description != null)
+                    Text(
+                        text = description,
+                        style = MaterialTheme.typography.labelMedium,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant
+                    )
+            }
         },
         actions = {
-            if (title == MAIN_HOME_ROUTE || title == MAIN_MEALS_ROUTE) {
-                IconButton(onClick = { onActionClick }) {
-                    Icon(painter = painterResource(id = actionIcon), contentDescription = "actionIcon")
+            if (title != MAIN_COMPOSE_ROUTE) {
+                IconButton(onClick = onActionClick) {
+                    Icon(
+                        painter =
+                            painterResource(id = actionIcon),
+                        contentDescription = "actionIcon",
+                        tint = MaterialTheme.colorScheme.primary
+                    )
                 }
             } else {
                 BadgedBox(

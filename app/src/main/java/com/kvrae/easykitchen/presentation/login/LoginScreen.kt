@@ -2,6 +2,8 @@ package com.kvrae.easykitchen.presentation.login
 
 import android.content.Context
 import android.widget.Toast
+import androidx.compose.animation.core.animateFloatAsState
+import androidx.compose.animation.core.tween
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.isSystemInDarkTheme
@@ -26,8 +28,13 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
@@ -38,6 +45,7 @@ import com.kvrae.easykitchen.R
 import com.kvrae.easykitchen.presentation.meals.MealsViewModel
 import com.kvrae.easykitchen.presentation.miscellaneous.components.FormButton
 import com.kvrae.easykitchen.presentation.miscellaneous.components.GoogleSignInButton
+import com.kvrae.easykitchen.presentation.miscellaneous.components.PasswordInput
 import com.kvrae.easykitchen.presentation.miscellaneous.components.TextBoxForm
 import com.kvrae.easykitchen.presentation.miscellaneous.components.TextFormButton
 import com.kvrae.easykitchen.presentation.miscellaneous.components.TextInput
@@ -107,6 +115,16 @@ fun LoginUILayout(
     val password = loginViewModel.password.value
     val logo = if (!isSystemInDarkTheme()) R.drawable.logo_dark else R.drawable.logo_light
     val scrollState = rememberScrollState()
+    var isVisible by remember { mutableStateOf(false) }
+
+    LaunchedEffect(Unit) {
+        isVisible = true
+    }
+    val contentAlpha by animateFloatAsState(
+        targetValue = if (isVisible) 1f else 0f,
+        animationSpec = tween(600, delayMillis = 100),
+        label = "Content alpha"
+    )
 
     Column(
         modifier = Modifier
@@ -131,14 +149,17 @@ fun LoginUILayout(
             text = "Welcome Back",
             style = MaterialTheme.typography.headlineMedium,
             fontWeight = FontWeight.Bold,
-            color = MaterialTheme.colorScheme.onSurface
+            color = MaterialTheme.colorScheme.onSurface,
+            modifier = Modifier.alpha(contentAlpha)
         )
 
         Text(
             text = "Login to your account to continue",
             style = MaterialTheme.typography.bodyMedium,
             color = MaterialTheme.colorScheme.onSurfaceVariant,
-            modifier = Modifier.padding(bottom = 32.dp)
+            modifier = Modifier
+                .padding(bottom = 32.dp)
+                .alpha(contentAlpha)
         )
 
         TextInput(
@@ -147,20 +168,24 @@ fun LoginUILayout(
             placeholder = "Username or Email",
             label = "Username or Email",
             leadingIcon = Icons.Rounded.Email,
+            modifier = Modifier.alpha(contentAlpha)
         )
 
         Spacer(modifier = Modifier.height(8.dp))
 
-        TextInput(
+        PasswordInput(
             value = password,
             onValueChange = { loginViewModel.password.value = it },
-            placeholder = "Password",
+            placeholder = "Enter your password",
             label = "Password",
             leadingIcon = Icons.Rounded.Lock,
+            modifier = Modifier.alpha(contentAlpha)
         )
 
         Row(
-            modifier = Modifier.fillMaxWidth(),
+            modifier = Modifier
+                .fillMaxWidth()
+                .alpha(contentAlpha),
             horizontalArrangement = Arrangement.SpaceBetween,
             verticalAlignment = Alignment.CenterVertically
         ) {
@@ -178,6 +203,10 @@ fun LoginUILayout(
         Spacer(modifier = Modifier.height(24.dp))
 
         FormButton(
+            modifier = Modifier
+                .fillMaxWidth()
+                .height(56.dp)
+                .alpha(contentAlpha),
             text = stringResource(R.string.login),
             onClick = {
                 loginViewModel.login(username = username, password = password)
@@ -187,7 +216,9 @@ fun LoginUILayout(
         Spacer(modifier = Modifier.height(24.dp))
 
         Row(
-            modifier = Modifier.fillMaxWidth(),
+            modifier = Modifier
+                .fillMaxWidth()
+                .alpha(contentAlpha),
             verticalAlignment = Alignment.CenterVertically
         ) {
             HorizontalDivider(
@@ -209,6 +240,7 @@ fun LoginUILayout(
         Spacer(modifier = Modifier.height(24.dp))
 
         GoogleSignInButton(
+            modifier = Modifier.alpha(contentAlpha),
             onSignInSuccess = {
                 navController.navigate(MAIN_SCREEN_ROUTE) {
                     launchSingleTop = true
@@ -219,12 +251,13 @@ fun LoginUILayout(
                 Toast.makeText(context, it, Toast.LENGTH_SHORT).show()
             }
         )
-
+        Spacer(modifier = Modifier.height(16.dp)) // Minimum Spacing
         Spacer(modifier = Modifier.weight(1f))
-        Spacer(modifier = Modifier.height(32.dp))
 
         Row(
-            modifier = Modifier.fillMaxWidth(),
+            modifier = Modifier
+                .fillMaxWidth()
+                .alpha(contentAlpha),
             horizontalArrangement = Arrangement.Center,
             verticalAlignment = Alignment.CenterVertically
         ) {

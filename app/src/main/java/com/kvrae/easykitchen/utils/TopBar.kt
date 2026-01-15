@@ -34,6 +34,7 @@ fun getTapBarIcon(
     return when (navItem) {
         MAIN_MEALS_ROUTE -> R.drawable.round_bookmark
         MAIN_COMPOSE_ROUTE -> R.drawable.round_shopping_bag
+        MAIN_CHAT_ROUTE -> R.drawable.outline_refresh_24
         else -> R.drawable.outline_event_list
     }
 }

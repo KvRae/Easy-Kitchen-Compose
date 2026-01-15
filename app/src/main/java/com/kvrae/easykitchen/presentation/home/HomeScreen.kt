@@ -2,11 +2,11 @@ package com.kvrae.easykitchen.presentation.home
 
 
 import SearchBarField
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.statusBarsPadding
@@ -14,6 +14,8 @@ import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.rounded.SearchOff
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.material3.pulltorefresh.PullToRefreshBox
@@ -23,7 +25,6 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
@@ -41,7 +42,6 @@ import com.kvrae.easykitchen.presentation.miscellaneous.components.MealCard
 import com.kvrae.easykitchen.presentation.miscellaneous.screens.LottieAnimation
 import com.kvrae.easykitchen.presentation.miscellaneous.screens.NoDataScreen
 import com.kvrae.easykitchen.utils.Screen
-import com.kvrae.easykitchen.utils.getMealTime
 import org.koin.androidx.compose.koinViewModel
 
 @Composable
@@ -52,7 +52,9 @@ fun HomeScreen(
 ) {
     val viewModel = koinViewModel<HomeViewModel>()
     val homeState by viewModel.homeState.collectAsState()
-    var isRefreshing by remember { mutableStateOf(false) }
+    val isRefreshing by remember {
+        mutableStateOf(false)
+    }
     val refreshingState = rememberPullToRefreshState()
 
     PullToRefreshBox(
@@ -60,7 +62,7 @@ fun HomeScreen(
         isRefreshing = isRefreshing,
         state = refreshingState,
         onRefresh = {
-            viewModel.getData()
+            viewModel.getData(forceRefresh = true)
         }
     ) {
         when(homeState){
@@ -71,10 +73,12 @@ fun HomeScreen(
                 modifier = modifier,
                 navController = navController,
                 meals = (homeState as HomeState.Success).meals,
-                categories = (homeState as HomeState.Success).categories
+                categories = (homeState as HomeState.Success).categories,
+                viewModel = viewModel
             )
             is HomeState.Error -> NoDataScreen(
-                message = (homeState as HomeState.Error).message
+                message = (homeState as HomeState.Error).message,
+                icon = Icons.Rounded.SearchOff,
             )
         }
     }
@@ -85,12 +89,13 @@ fun HomeScreenContent(
     modifier: Modifier = Modifier,
     navController: NavController,
     categories : List<CategoryResponse>,
-    meals : List<MealResponse>
+    meals: List<MealResponse>,
+    viewModel: HomeViewModel
 ) {
     Column(
         modifier = modifier
-            .fillMaxSize()
-            .verticalScroll(rememberScrollState()),
+            .verticalScroll(rememberScrollState())
+            .background(MaterialTheme.colorScheme.surface),
         verticalArrangement = Arrangement.Top,
         horizontalAlignment = Alignment.Start,
     ) {
@@ -117,14 +122,15 @@ fun HomeScreenContent(
 
         Spacer(modifier = Modifier.height(16.dp))
 
+        val (timeTitle, timeMeals) = remember {
+            viewModel.getMealsByTimeOfDay(meals)
+        }
         HorizontalList(
-            title = "Ideas for ${getMealTime()}",
+            title = timeTitle,
             content = {
                 LazyRow(
                     contentPadding = PaddingValues(horizontal = 8.dp)
                 ) {
-                    val timeMeals =
-                        meals.filter { it.asDto().category == "Dessert" } // Replace logic if needed
                     items(timeMeals) { meal ->
                         MealCard(
                             meal = meal.asDto(),
@@ -139,16 +145,16 @@ fun HomeScreenContent(
 
         Spacer(modifier = Modifier.height(16.dp))
 
+        val (locationTitle, locationMeals) = viewModel.getLocationSection(meals)
         HorizontalList(
-            title = "Some Dessert Ideas",
+            title = locationTitle,
             content = {
                 LazyRow(
                     contentPadding = PaddingValues(horizontal = 8.dp)
                 ) {
-                    val desserts = meals.filter { it.asDto().category == "Dessert" }
-                    items(desserts) { dessert ->
+                    items(locationMeals) { meal ->
                         MealByAreaAnsCategoryCard(
-                            meal = dessert.asDto(),
+                            meal = meal.asDto(),
                             onMealClick = {
                                 navController.navigate("${Screen.MealDetailsScreen.route}/$it")
                             }

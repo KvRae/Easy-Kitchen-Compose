@@ -1,14 +1,14 @@
 package com.kvrae.easykitchen.presentation.ingrendient
 
 import SearchField
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.statusBarsPadding
 import androidx.compose.foundation.lazy.staggeredgrid.LazyVerticalStaggeredGrid
 import androidx.compose.foundation.lazy.staggeredgrid.StaggeredGridCells
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.pulltorefresh.PullToRefreshBox
 import androidx.compose.material3.pulltorefresh.rememberPullToRefreshState
 import androidx.compose.runtime.Composable
@@ -41,11 +41,20 @@ fun IngredientsScreen(
     val swipeRefreshState = rememberPullToRefreshState()
 
     Column(
-        modifier = Modifier
+        modifier = modifier
             .fillMaxSize()
-            .statusBarsPadding()
-            .navigationBarsPadding()
+            .background(MaterialTheme.colorScheme.surface)
+            .padding(8.dp),
+        verticalArrangement = androidx.compose.foundation.layout.Arrangement.Top,
     ) {
+        SearchField(
+            query = searchQuery,
+            onQueryChange = { viewModel.updateSearchQuery(it) },
+            onClearClick = { viewModel.clearSearch() },
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(bottom = 16.dp, start = 8.dp, end = 8.dp)
+        )
         PullToRefreshBox(
             modifier = Modifier.fillMaxSize(),
             state = swipeRefreshState,
@@ -91,22 +100,6 @@ fun IngredientScreenContent(
     modifier: Modifier = Modifier,
     searchQuery: String = ""
 ) {
-    Column(
-        modifier =
-        modifier
-            .fillMaxSize()
-            .padding(8.dp),
-        verticalArrangement = androidx.compose.foundation.layout.Arrangement.Top,
-
-    ) {
-        SearchField(
-            query = searchQuery,
-            onQueryChange = { viewModel.updateSearchQuery(it) },
-            onClearClick = { viewModel.clearSearch() },
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(bottom = 16.dp, start = 8.dp, end = 8.dp)
-        )
         LazyVerticalStaggeredGrid(
             modifier = Modifier.fillMaxSize(),
             columns = StaggeredGridCells.Adaptive(150.dp)
@@ -128,7 +121,6 @@ fun IngredientScreenContent(
                 )
             }
         }
-    }
 }
 
 @Preview

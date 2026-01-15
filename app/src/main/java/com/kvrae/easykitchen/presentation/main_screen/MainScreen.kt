@@ -1,21 +1,19 @@
 package com.kvrae.easykitchen.presentation.main_screen
 
 import android.util.Log
-import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.statusBarsPadding
+import androidx.compose.foundation.layout.systemBarsPadding
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.DrawerValue
-import androidx.compose.material3.ListItem
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.ModalDrawerSheet
 import androidx.compose.material3.ModalNavigationDrawer
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.SnackbarDuration
 import androidx.compose.material3.SnackbarHost
 import androidx.compose.material3.SnackbarHostState
-import androidx.compose.material3.Text
 import androidx.compose.material3.rememberDrawerState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
@@ -35,10 +33,12 @@ import com.kvrae.easykitchen.presentation.home.HomeScreen
 import com.kvrae.easykitchen.presentation.ingrendient.IngredientsScreen
 import com.kvrae.easykitchen.presentation.meals.MealsScreen
 import com.kvrae.easykitchen.presentation.miscellaneous.components.BottomNavBar
+import com.kvrae.easykitchen.presentation.miscellaneous.components.ModalDrawerSheetContent
 import com.kvrae.easykitchen.presentation.miscellaneous.components.TopBar
 import com.kvrae.easykitchen.utils.MAIN_CHAT_ROUTE
 import com.kvrae.easykitchen.utils.MAIN_COMPOSE_ROUTE
 import com.kvrae.easykitchen.utils.MAIN_MEALS_ROUTE
+import com.kvrae.easykitchen.utils.getNavItemByName
 import com.kvrae.easykitchen.utils.navItems
 import kotlinx.coroutines.launch
 
@@ -46,6 +46,7 @@ import kotlinx.coroutines.launch
 fun MainScreen(
     navController: NavController,
     isNetworkOn: Boolean,
+    onLogout: () -> Unit
 ) {
     var navItem by rememberSaveable {
         mutableStateOf(navItems.first().name)
@@ -54,17 +55,33 @@ fun MainScreen(
     val scope = rememberCoroutineScope()
 
     ModalNavigationDrawer(
+        modifier = Modifier
+            .fillMaxSize()
+            .background(MaterialTheme.colorScheme.surface),
         drawerState = drawerState,
         drawerContent = {
-            ModalDrawerSheet {
-                ModalDrawerSheetContent()
+            ModalDrawerSheet(
+                drawerContainerColor = MaterialTheme.colorScheme.surface,
+                drawerShape = RoundedCornerShape(topEnd = 24.dp, bottomEnd = 24.dp)
+            ) {
+                ModalDrawerSheetContent(
+                    onItemClick = { route ->
+                        navItem = route
+                        scope.launch { drawerState.close() }
+                    },
+                    selectedRoute = navItem,
+                    onLogout = {
+                        scope.launch { drawerState.close() }
+                        onLogout()
+                    }
+                )
             }
         },
     ) {
         MainScreenScaffold(
             isNetworkOn = isNetworkOn,
             navController = navController,
-            navItem = navItem,
+            selectedRoute = navItem,
             onNavItemChange = {
                 navItem = it
             },
@@ -85,7 +102,7 @@ fun MainScreenScaffold(
     modifier: Modifier = Modifier,
     isNetworkOn: Boolean,
     navController: NavController,
-    navItem: String,
+    selectedRoute: String,
     onNavItemChange: (String) -> Unit,
     onMenuClick: () -> Unit,
 ) {
@@ -93,25 +110,16 @@ fun MainScreenScaffold(
     val scope = rememberCoroutineScope()
     val internetConnectionError = stringResource(id = R.string.no_internet_connection)
     Scaffold(
-        modifier = modifier.fillMaxSize(),
-        topBar = {
-            TopBar(
-                title = navItem,
-                onActionClick = onMenuClick,
-            )
-        },
+        modifier = modifier
+            .fillMaxSize()
+            .systemBarsPadding(),
         snackbarHost = {
             SnackbarHost(hostState = snackBarHostState)
         },
         content = { paddingValues ->
-            paddingValues
             MainScreenNavigation(
-                modifier =
-                    Modifier
-                        .navigationBarsPadding()
-                        .statusBarsPadding()
-                        .padding(vertical = 64.dp),
-                navItem = navItem,
+                modifier = Modifier.padding(paddingValues),
+                navItem = selectedRoute,
                 navController = navController,
             )
             DisposableEffect(key1 = isNetworkOn) {
@@ -132,10 +140,18 @@ fun MainScreenScaffold(
                 }
             }
         },
+        topBar = {
+            TopBar(
+                onActionClick = onMenuClick,
+                title = getNavItemByName(selectedRoute)?.title,
+                description = getNavItemByName(selectedRoute)?.description,
+                name = selectedRoute,
+            )
+        },
         bottomBar = {
             BottomNavBar(
                 navItems = navItems,
-                navItem = navItem,
+                navItem = selectedRoute,
                 onNavItemSelect = {
                     onNavItemChange(it)
                 },
@@ -170,21 +186,5 @@ fun MainScreenNavigation(
                 modifier = modifier,
                 navController = navController,
             )
-    }
-}
-
-@Composable
-fun ModalDrawerSheetContent(modifier: Modifier = Modifier) {
-    Column(
-        modifier =
-            modifier
-                .padding(16.dp)
-                .fillMaxWidth(.6f),
-    ) {
-        Text(text = "Welcome to EasyKitchen")
-        ListItem(
-            headlineContent = { /*TODO*/ },
-            trailingContent = { /*TODO*/ },
-        )
     }
 }

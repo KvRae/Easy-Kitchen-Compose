@@ -321,7 +321,10 @@ fun IngredientCard(
             .clickable { onIngredientClick(ingredient.name.orEmpty()) },
         shape = RoundedCornerShape(20.dp),
         colors = CardDefaults.cardColors(
-            containerColor = if (isChecked) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.secondaryContainer
+            containerColor = if (isChecked)
+                MaterialTheme.colorScheme.primary
+            else
+                MaterialTheme.colorScheme.secondaryContainer.copy(alpha = 0.3f)
         )
     ) {
         Column(
@@ -338,12 +341,10 @@ fun IngredientCard(
                     .aspectRatio(1f)
                     .clip(RoundedCornerShape(16.dp))
                     .background(
-                        brush = Brush.linearGradient(
-                            colors = listOf(
-                                MaterialTheme.colorScheme.primaryContainer.copy(alpha = 0.8f),
-                                MaterialTheme.colorScheme.secondaryContainer.copy(alpha = 0.8f)
-                            )
-                        )
+                        if (isChecked)
+                            MaterialTheme.colorScheme.onPrimary.copy(alpha = 0.2f)
+                        else
+                            MaterialTheme.colorScheme.secondaryContainer,
                     ),
                 contentAlignment = Alignment.Center
             ) {
@@ -389,7 +390,7 @@ fun IngredientCard(
                         if (isChecked)
                             MaterialTheme.colorScheme.onPrimary.copy(alpha = 0.2f)
                         else
-                            MaterialTheme.colorScheme.surfaceVariant,
+                            MaterialTheme.colorScheme.secondaryContainer,
                         shape = RoundedCornerShape(14.dp)
                     ),
                 contentAlignment = Alignment.Center

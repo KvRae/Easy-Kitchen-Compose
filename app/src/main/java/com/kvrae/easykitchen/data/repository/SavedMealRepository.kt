@@ -7,19 +7,19 @@ class SavedMealRepository(
     private val savedMealDao: SavedMealDao
 ) {
     suspend fun saveMeal(savedMeal: SavedMeal) {
-        savedMealDao.saveMeal(savedMeal)
+        // savedMealDao.saveMeal(savedMeal)
     }
 
     suspend fun getAllSavedMeals(): List<SavedMeal> {
-        return savedMealDao.getAllSavedMeals()
+        return emptyList() // savedMealDao.getAllSavedMeals()
     }
 
     suspend fun getSavedMealById(id: String): SavedMeal? {
-        return savedMealDao.getSavedMealById(id)
+        return null // savedMealDao.getSavedMealById(id)
     }
 
     suspend fun deleteSavedMealById(id: String) {
-        savedMealDao.deleteSavedMealById(id)
+        // savedMealDao.deleteSavedMealById(id)
     }
 
 }

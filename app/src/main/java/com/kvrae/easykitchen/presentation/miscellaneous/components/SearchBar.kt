@@ -20,6 +20,7 @@ import androidx.compose.material3.IconButton
 import androidx.compose.material3.ListItem
 import androidx.compose.material3.ListItemDefaults
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextField
 import androidx.compose.material3.TextFieldDefaults
@@ -115,19 +116,15 @@ fun SearchBarField(
 ) {
 
     Box {
-        TextField(
+        OutlinedTextField(
+            shape = RoundedCornerShape(16.dp),
             modifier = Modifier
-                .padding(8.dp)
-                .clip(RoundedCornerShape(56.dp))
+                .padding(16.dp)
                 .height(56.dp)
                 .fillMaxWidth(),
             value = "",
             placeholder = { Text(text = placeholder.orEmpty())},
             onValueChange = {},
-            colors = TextFieldDefaults.colors(
-                unfocusedIndicatorColor = Color.Transparent,
-                focusedIndicatorColor = Color.Transparent
-            ),
             leadingIcon = {
                 Icon(imageVector = Icons.Rounded.Search, contentDescription = "Search Icon")
             }
@@ -152,19 +149,13 @@ fun SearchField(
     onClearClick: () -> Unit,
     modifier: Modifier = Modifier
 ) {
-    TextField(
+    OutlinedTextField(
+        shape = RoundedCornerShape(16.dp),
         modifier = modifier
-            .clip(RoundedCornerShape(16.dp))
             .height(56.dp),
         value = query,
         onValueChange = onQueryChange,
         placeholder = { Text(text = "Search ingredients...") },
-        colors = TextFieldDefaults.colors(
-            unfocusedIndicatorColor = Color.Transparent,
-            focusedIndicatorColor = Color.Transparent,
-            unfocusedContainerColor = MaterialTheme.colorScheme.surfaceVariant,
-            focusedContainerColor = MaterialTheme.colorScheme.surfaceVariant
-        ),
         leadingIcon = {
             Icon(
                 imageVector = Icons.Rounded.Search,
