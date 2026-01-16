@@ -1,5 +1,6 @@
 package com.kvrae.easykitchen.presentation.meals
 
+import androidx.compose.runtime.mutableStateOf
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.kvrae.easykitchen.data.remote.dto.MealResponse
@@ -34,6 +35,11 @@ class MealsViewModel(
 
     private val _mealsByTime = MutableStateFlow<List<MealResponse>>(emptyList())
     val mealsByTime: StateFlow<List<MealResponse>> = _mealsByTime
+
+    var searchQuery = mutableStateOf("")
+
+    private val _searchResults = MutableStateFlow<List<MealResponse>>(emptyList())
+    val searchResults: StateFlow<List<MealResponse>> = _searchResults
 
     init {
         fetchMeals()
@@ -148,6 +154,21 @@ class MealsViewModel(
                 filter.categories.isNotEmpty() ||
                 filter.areas.isNotEmpty() ||
                 filter.sortBy != SortOption.NAME_ASC
+    }
+
+    fun searchMeals(query: String) {
+        searchQuery.value = query
+        viewModelScope.launch {
+            _searchResults.value = if (query.isBlank()) {
+                meals.value
+            } else {
+                meals.value.filter { meal ->
+                    meal.strMeal?.contains(query, ignoreCase = true) == true ||
+                            meal.strArea?.contains(query, ignoreCase = true) == true ||
+                            meal.strCategory?.contains(query, ignoreCase = true) == true
+                }
+            }
+        }
     }
 }
 

@@ -55,7 +55,7 @@ fun QuickTipItem(emoji: String, text: String) {
         modifier = Modifier
             .fillMaxWidth()
             .clip(RoundedCornerShape(12.dp))
-            .background(MaterialTheme.colorScheme.surface.copy(alpha = 0.7f))
+            .background(MaterialTheme.colorScheme.surface.copy(alpha = 0.8f))
             .padding(12.dp),
         verticalAlignment = Alignment.CenterVertically,
         horizontalArrangement = Arrangement.spacedBy(12.dp)
@@ -113,8 +113,8 @@ fun ChatScreen(
         // Input Area
         Surface(
             modifier = Modifier.fillMaxWidth(),
-            tonalElevation = 2.dp,
-            shadowElevation = 12.dp,
+            tonalElevation = 8.dp,
+            shadowElevation = 16.dp,
             color = MaterialTheme.colorScheme.surface,
             shape = RoundedCornerShape(topStart = 24.dp, topEnd = 24.dp)
         ) {
@@ -144,9 +144,11 @@ fun ChatScreen(
                         .weight(1f)
                         .clip(RoundedCornerShape(28.dp)),
                     colors = TextFieldDefaults.colors(
-                        focusedContainerColor = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.4f),
-                        unfocusedContainerColor = MaterialTheme.colorScheme.surfaceVariant.copy(
-                            alpha = 0.4f
+                        focusedContainerColor = MaterialTheme.colorScheme.primaryContainer.copy(
+                            alpha = 0.15f
+                        ),
+                        unfocusedContainerColor = MaterialTheme.colorScheme.primaryContainer.copy(
+                            alpha = 0.1f
                         ),
                         focusedIndicatorColor = Color.Transparent,
                         unfocusedIndicatorColor = Color.Transparent,
@@ -165,7 +167,7 @@ fun ChatScreen(
                         .clip(CircleShape)
                         .background(
                             if (isNotEmpty) MaterialTheme.colorScheme.primary
-                            else MaterialTheme.colorScheme.surfaceVariant
+                            else MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.5f)
                         )
                         .clickable(enabled = isNotEmpty) {
                             viewModel.sendMessage()
@@ -206,15 +208,15 @@ private fun ColumnScope.EmptyChatPlaceHolder() {
         // Placeholder Icon
         Box(
             modifier = Modifier
-                .size(48.dp)
+                .size(64.dp)
                 .clip(RoundedCornerShape(24.dp))
-                .background(MaterialTheme.colorScheme.primaryContainer.copy(alpha = 0.3f)),
+                .background(MaterialTheme.colorScheme.primary.copy(alpha = 0.15f)),
             contentAlignment = Alignment.Center
         ) {
             Icon(
                 imageVector = Icons.Rounded.RestaurantMenu,
                 contentDescription = "Chef",
-                modifier = Modifier.size(24.dp),
+                modifier = Modifier.size(32.dp),
                 tint = MaterialTheme.colorScheme.primary
             )
         }
@@ -249,7 +251,7 @@ private fun ColumnScope.EmptyChatPlaceHolder() {
             modifier = Modifier
                 .fillMaxWidth(0.9f)
                 .clip(RoundedCornerShape(16.dp))
-                .background(MaterialTheme.colorScheme.secondaryContainer.copy(alpha = 0.3f))
+                .background(MaterialTheme.colorScheme.secondaryContainer.copy(alpha = 0.4f))
                 .padding(16.dp),
             verticalArrangement = Arrangement.spacedBy(12.dp)
         ) {
@@ -287,15 +289,15 @@ fun MessageItem(message: Message) {
                     )
                 )
                 .background(
-                    if (isUser) MaterialTheme.colorScheme.primaryContainer
-                    else MaterialTheme.colorScheme.secondaryContainer
+                    if (isUser) MaterialTheme.colorScheme.primary.copy(alpha = 0.9f)
+                    else MaterialTheme.colorScheme.secondaryContainer.copy(alpha = 0.6f)
                 )
                 .padding(12.dp)
         ) {
             Text(
                 text = if (isUser) message.content else message.content.stripMarkdown(),
                 style = MaterialTheme.typography.bodyMedium,
-                color = if (isUser) MaterialTheme.colorScheme.onPrimaryContainer
+                color = if (isUser) MaterialTheme.colorScheme.onPrimary
                 else MaterialTheme.colorScheme.onSecondaryContainer
             )
         }

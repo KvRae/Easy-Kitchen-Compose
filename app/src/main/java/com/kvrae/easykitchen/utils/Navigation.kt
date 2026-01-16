@@ -1,6 +1,5 @@
 package com.kvrae.easykitchen.utils
 
-import SearchBarLayout
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
@@ -20,12 +19,15 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import com.kvrae.easykitchen.data.remote.dto.asMealDetail
+import com.kvrae.easykitchen.presentation.basket.BasketScreen
+import com.kvrae.easykitchen.presentation.filtered_meals.FilteredMealsScreen
 import com.kvrae.easykitchen.presentation.forget_password.ForgetPasswordScreen
 import com.kvrae.easykitchen.presentation.login.LoginScreen
 import com.kvrae.easykitchen.presentation.main_screen.MainScreen
 import com.kvrae.easykitchen.presentation.meal_detail.MealDetailsScreen
 import com.kvrae.easykitchen.presentation.meals.MealsViewModel
 import com.kvrae.easykitchen.presentation.register.RegisterScreen
+import com.kvrae.easykitchen.presentation.search.SearchScreen
 import com.kvrae.easykitchen.presentation.splach_screen.SplashScreen
 import kotlinx.coroutines.launch
 import org.koin.compose.koinInject
@@ -45,11 +47,13 @@ const val REGISTER_SCREEN_ROUTE = "register"
 const val FORGET_PASS_SCREEN_ROUTE = "forget"
 const val MAIN_SCREEN_ROUTE = "main"
 const val MEAL_DETAILS_SCREEN_ROUTE = "details"
+const val FILTERED_MEALS_ROUTE = "filtered_meals"
+const val BASKET_ROUTE = "basket"
 // Main screen routes
 const val MAIN_HOME_ROUTE = "Home"
 const val MAIN_MEALS_ROUTE = "Meals"
-const val MAIN_COMPOSE_ROUTE = "Compose"
-const val MAIN_CHAT_ROUTE = "Chat"
+const val MAIN_COMPOSE_ROUTE = "Planner"
+const val MAIN_CHAT_ROUTE = "Chief"
 
 
 const val SEARCH_BAR_LAYOUT_ROUTE = "search"
@@ -75,6 +79,10 @@ sealed class Screen(
     data object SearchLayout : Screen(SEARCH_BAR_LAYOUT_ROUTE)
 
     data object MealDetailsScreen : Screen(MEAL_DETAILS_SCREEN_ROUTE)
+
+    data object FilteredMealsScreen : Screen(FILTERED_MEALS_ROUTE)
+
+    data object BasketScreen : Screen(BASKET_ROUTE)
 }
 
 // setting the navigation composable
@@ -164,10 +172,21 @@ fun Navigation() {
             }
         }
         composable(Screen.SearchLayout.route) {
-            SearchBarLayout(
-                navController = navController,
-                items = emptyList(),
+            SearchScreen(
+                navController = navController
             )
+        }
+        composable("${Screen.FilteredMealsScreen.route}/{ingredients}") { backStackEntry ->
+            val ingredientsString = backStackEntry.arguments?.getString("ingredients") ?: ""
+            val ingredientsList = ingredientsString.split(",").filter { it.isNotBlank() }
+
+            FilteredMealsScreen(
+                navController = navController,
+                selectedIngredientNames = ingredientsList
+            )
+        }
+        composable(Screen.BasketScreen.route) {
+            BasketScreen(navController = navController)
         }
     }
 }

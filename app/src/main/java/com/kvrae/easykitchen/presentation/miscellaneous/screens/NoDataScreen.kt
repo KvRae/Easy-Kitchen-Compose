@@ -32,6 +32,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.kvrae.easykitchen.R
 
 @Composable
 fun NoDataScreen(
@@ -66,17 +67,15 @@ fun NoDataScreen(
                 .size(160.dp)
                 .padding(bottom = 32.dp)
                 .background(
-                    color = MaterialTheme.colorScheme.primaryContainer.copy(alpha = 0.6f),
+                    color = MaterialTheme.colorScheme.secondaryContainer.copy(alpha = 0.6f),
                     shape = CircleShape
                 )
                 .scale(scale),
             contentAlignment = Alignment.Center
         ) {
-            Icon(
-                imageVector = icon,
-                contentDescription = "No Data found Icon",
-                modifier = Modifier.size(80.dp),
-                tint = MaterialTheme.colorScheme.primary
+            LottieAnimation(
+                modifier = Modifier.size(100.dp),
+                rawRes = R.raw.not_found,
             )
         }
 

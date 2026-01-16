@@ -5,6 +5,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.kvrae.easykitchen.data.remote.dto.IngredientResponse
 import com.kvrae.easykitchen.domain.usecases.GetIngredientsUseCase
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
@@ -22,6 +23,12 @@ class IngredientViewModel(private val getIngredientsUseCase: GetIngredientsUseCa
 
     private val ingredientsBasket = mutableStateListOf<IngredientResponse>()
 
+    private val _basketCount = MutableStateFlow(0)
+    val basketCount: StateFlow<Int> = _basketCount
+
+    private val _basketItems = MutableStateFlow<List<IngredientResponse>>(emptyList())
+    val basketItems: StateFlow<List<IngredientResponse>> = _basketItems
+
     init {
         getIngredients()
     }
@@ -29,6 +36,7 @@ class IngredientViewModel(private val getIngredientsUseCase: GetIngredientsUseCa
     fun getIngredients() {
         _ingredientsState.value = IngredientState.Loading
         viewModelScope.launch {
+            delay(1000)
             val result = getIngredientsUseCase()
             _ingredientsState.value = when {
                 result.isSuccess -> {
@@ -89,10 +97,20 @@ class IngredientViewModel(private val getIngredientsUseCase: GetIngredientsUseCa
         } else {
             ingredientsBasket.add(ingredient)
         }
+        _basketCount.value = ingredientsBasket.size
+        _basketItems.value = ingredientsBasket.toList()
     }
 
     fun isIngredientInBasket(ingredient: IngredientResponse): Boolean {
         return ingredientsBasket.contains(ingredient)
+    }
+
+    fun getSelectedIngredientNames(): List<String> {
+        return ingredientsBasket.mapNotNull { it.strIngredient }
+    }
+
+    fun getBasketIngredients(): List<IngredientResponse> {
+        return ingredientsBasket.toList()
     }
 }
 

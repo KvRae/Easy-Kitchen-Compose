@@ -90,6 +90,7 @@ class LoginViewModel(
         if (rememberMe.value) {
             viewModelScope.launch {
                 userPreferencesManager.saveLoginState(true)
+                userPreferencesManager.saveUsername(userName.value.trim())
             }
         }
     }

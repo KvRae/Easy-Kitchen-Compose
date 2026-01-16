@@ -13,29 +13,29 @@ data class NavItem(
 val navItems = listOf(
     NavItem(
         MAIN_HOME_ROUTE,
-        R.drawable.baseline_home_filled,
-        R.drawable.rounded_home_outlined,
+        R.drawable.restaurant_filled,
+        R.drawable.restaurant_outline,
         "Hello there!",
         "Welcome to EasyKitchen"
     ),
     NavItem(
         MAIN_MEALS_ROUTE,
-        R.drawable.round_fastfood__filled,
-        R.drawable.outline_fastfood_round,
+        R.drawable.book_filled,
+        R.drawable.book_outlined,
         "Meals",
         "Discover new recipes!"
     ),
     NavItem(
         MAIN_COMPOSE_ROUTE,
-        R.drawable.rice_bowl_filled,
-        R.drawable.outline_rice_bowl,
-        "Meal Planner",
-        "Pick ingredients and look for recipes!"
+        R.drawable.bowl_filled,
+        R.drawable.bowl_outline,
+        "Pantry Match",
+        "Pick ingredients and see what you can cook"
     ),
     NavItem(
         MAIN_CHAT_ROUTE,
-        R.drawable.baseline_chat_bubble_24,
-        R.drawable.round_chat_bubble_outline_24,
+        R.drawable.chef_hat_filled,
+        R.drawable.chef_hat_outlined,
         "AI Chef Assistant",
         "Ask me anything about cooking!"
     )

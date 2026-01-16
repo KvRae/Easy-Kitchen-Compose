@@ -17,6 +17,7 @@ import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.rememberDrawerState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -24,12 +25,15 @@ import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
 import com.kvrae.easykitchen.R
 import com.kvrae.easykitchen.presentation.chat.ChatScreen
+import com.kvrae.easykitchen.presentation.chat.ChatViewModel
 import com.kvrae.easykitchen.presentation.home.HomeScreen
+import com.kvrae.easykitchen.presentation.ingrendient.IngredientViewModel
 import com.kvrae.easykitchen.presentation.ingrendient.IngredientsScreen
 import com.kvrae.easykitchen.presentation.meals.MealsScreen
 import com.kvrae.easykitchen.presentation.miscellaneous.components.BottomNavBar
@@ -38,9 +42,11 @@ import com.kvrae.easykitchen.presentation.miscellaneous.components.TopBar
 import com.kvrae.easykitchen.utils.MAIN_CHAT_ROUTE
 import com.kvrae.easykitchen.utils.MAIN_COMPOSE_ROUTE
 import com.kvrae.easykitchen.utils.MAIN_MEALS_ROUTE
+import com.kvrae.easykitchen.utils.UserPreferencesManager
 import com.kvrae.easykitchen.utils.getNavItemByName
 import com.kvrae.easykitchen.utils.navItems
 import kotlinx.coroutines.launch
+import org.koin.androidx.compose.koinViewModel
 
 @Composable
 fun MainScreen(
@@ -48,6 +54,17 @@ fun MainScreen(
     isNetworkOn: Boolean,
     onLogout: () -> Unit
 ) {
+    val context = LocalContext.current
+    val userPreferencesManager = remember { UserPreferencesManager(context) }
+    val username by userPreferencesManager.username.collectAsState(initial = "")
+
+    // Get the IngredientViewModel to observe basket count
+    val ingredientViewModel = koinViewModel<IngredientViewModel>()
+    val basketCount by ingredientViewModel.basketCount.collectAsState()
+
+    // Get the ChatViewModel for reset chat functionality
+    val chatViewModel = koinViewModel<ChatViewModel>()
+
     var navItem by rememberSaveable {
         mutableStateOf(navItems.first().name)
     }
@@ -82,6 +99,9 @@ fun MainScreen(
             isNetworkOn = isNetworkOn,
             navController = navController,
             selectedRoute = navItem,
+            username = username,
+            ingredientsCount = basketCount,
+            onResetChat = { chatViewModel.clearMessages() },
             onNavItemChange = {
                 navItem = it
             },
@@ -103,6 +123,9 @@ fun MainScreenScaffold(
     isNetworkOn: Boolean,
     navController: NavController,
     selectedRoute: String,
+    username: String = "",
+    ingredientsCount: Int = 0,
+    onResetChat: (() -> Unit)? = null,
     onNavItemChange: (String) -> Unit,
     onMenuClick: () -> Unit,
 ) {
@@ -112,13 +135,20 @@ fun MainScreenScaffold(
     Scaffold(
         modifier = modifier
             .fillMaxSize()
-            .systemBarsPadding(),
+            .systemBarsPadding()
+            .background(MaterialTheme.colorScheme.surface),
+        containerColor = MaterialTheme.colorScheme.surface,
         snackbarHost = {
             SnackbarHost(hostState = snackBarHostState)
         },
         content = { paddingValues ->
             MainScreenNavigation(
-                modifier = Modifier.padding(paddingValues),
+                modifier = Modifier
+                    .padding(
+                        bottom = paddingValues.calculateBottomPadding(),
+                        top = paddingValues.calculateTopPadding()
+                    )
+                    .fillMaxSize(),
                 navItem = selectedRoute,
                 navController = navController,
             )
@@ -142,10 +172,20 @@ fun MainScreenScaffold(
         },
         topBar = {
             TopBar(
-                onActionClick = onMenuClick,
+                onActionClick = {
+                    // If on ingredients screen, navigate to basket
+                    if (selectedRoute == MAIN_COMPOSE_ROUTE) {
+                        navController.navigate("basket")
+                    } else {
+                        onMenuClick()
+                    }
+                },
+                onResetChat = onResetChat,
                 title = getNavItemByName(selectedRoute)?.title,
                 description = getNavItemByName(selectedRoute)?.description,
                 name = selectedRoute,
+                username = username,
+                ingredientsSize = ingredientsCount
             )
         },
         bottomBar = {
@@ -175,6 +215,7 @@ fun MainScreenNavigation(
         MAIN_COMPOSE_ROUTE ->
             IngredientsScreen(
                 modifier = modifier,
+                navController = navController,
             )
         MAIN_CHAT_ROUTE -> {
             ChatScreen(

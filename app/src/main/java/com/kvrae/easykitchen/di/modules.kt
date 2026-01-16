@@ -30,6 +30,7 @@ import com.kvrae.easykitchen.data.repository.MealRepositoryImpl
 import com.kvrae.easykitchen.data.repository.RegisterRepository
 import com.kvrae.easykitchen.data.repository.RegisterRepositoryImpl
 import com.kvrae.easykitchen.domain.usecases.FilterMealsByAreaUseCase
+import com.kvrae.easykitchen.domain.usecases.FilterMealsByIngredientsUseCase
 import com.kvrae.easykitchen.domain.usecases.GeminiChatUseCase
 import com.kvrae.easykitchen.domain.usecases.GetCategoryUseCase
 import com.kvrae.easykitchen.domain.usecases.GetGoogleSignInClientUseCase
@@ -42,6 +43,7 @@ import com.kvrae.easykitchen.domain.usecases.LoginUseCase
 import com.kvrae.easykitchen.domain.usecases.RegisterUseCase
 import com.kvrae.easykitchen.domain.usecases.SendIdTokenToBackendUseCase
 import com.kvrae.easykitchen.presentation.chat.ChatViewModel
+import com.kvrae.easykitchen.presentation.filtered_meals.FilteredMealsViewModel
 import com.kvrae.easykitchen.presentation.home.HomeViewModel
 import com.kvrae.easykitchen.presentation.ingrendient.IngredientViewModel
 import com.kvrae.easykitchen.presentation.login.GoogleAuthViewModel
@@ -139,6 +141,7 @@ val domainModule = module {
     factory { GetMealsUseCase(get()) }
     factory { GetUserLocationUseCase(get()) }
     factory { FilterMealsByAreaUseCase() }
+    factory { FilterMealsByIngredientsUseCase() }
     factory { GetGoogleSignInClientUseCase(get()) }
     factory { GetSignInIntentUseCase(get()) }
     factory { HandleSignInResultUseCase(get()) }
@@ -148,7 +151,8 @@ val domainModule = module {
 
 val presentationModule = module {
     viewModel { MealsViewModel(get()) }
-    viewModel { IngredientViewModel(get()) }
+    single { IngredientViewModel(get()) }
+    viewModel { FilteredMealsViewModel(get(), get()) }
     viewModel { LoginViewModel(
         get<LoginUseCase>(),
         get<UserPreferencesManager>()
