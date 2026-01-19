@@ -70,6 +70,47 @@ class FilteredMealsViewModel(
             }
         }
     }
+
+    fun filterMealsByCategory(categoryName: String) {
+        if (categoryName.isBlank()) {
+            _filteredMealsState.value = FilteredMealsState.Error("Category not provided")
+            return
+        }
+        viewModelScope.launch {
+            _filteredMealsState.value = FilteredMealsState.Loading
+            try {
+                val result = getMealsUseCase()
+                result.fold(
+                    onSuccess = { meals ->
+                        val matches = meals.filter {
+                            it.strCategory.equals(categoryName, ignoreCase = true)
+                        }
+                        _exactMatches.value = matches
+                        _partialMatches.value = emptyList()
+                        if (matches.isEmpty()) {
+                            _filteredMealsState.value = FilteredMealsState.Error(
+                                "No meals found in $categoryName"
+                            )
+                        } else {
+                            _filteredMealsState.value = FilteredMealsState.Success(
+                                exactMatches = matches,
+                                partialMatches = emptyList()
+                            )
+                        }
+                    },
+                    onFailure = { error ->
+                        _filteredMealsState.value = FilteredMealsState.Error(
+                            error.message ?: "Failed to load meals"
+                        )
+                    }
+                )
+            } catch (e: Exception) {
+                _filteredMealsState.value = FilteredMealsState.Error(
+                    e.message ?: "An unexpected error occurred"
+                )
+            }
+        }
+    }
 }
 
 sealed class FilteredMealsState {

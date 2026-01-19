@@ -1,4 +1,4 @@
-package com.kvrae.easykitchen.presentation.splach_screen
+package com.kvrae.easykitchen.presentation.splash
 
 import androidx.compose.animation.core.FastOutSlowInEasing
 import androidx.compose.animation.core.animateFloatAsState

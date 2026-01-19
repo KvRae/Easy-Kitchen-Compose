@@ -28,6 +28,9 @@ class HomeViewModel(
     private val _userLocation = MutableStateFlow<UserLocation?>(null)
     val userLocation: StateFlow<UserLocation?> = _userLocation
 
+    private val _lastViewedMealId = MutableStateFlow<String?>(null)
+    val lastViewedMealId: StateFlow<String?> = _lastViewedMealId
+
     private var isDataLoaded = false
 
     init {
@@ -41,7 +44,10 @@ class HomeViewModel(
         }
 
         viewModelScope.launch {
-            _homeState.value = HomeState.Loading
+            // Only set to Loading if we don't have data already
+            if (!isDataLoaded) {
+                _homeState.value = HomeState.Loading
+            }
 
             val categoryResult = async { categoryUseCase() }.await()
             val mealResult = async { mealsUseCase() }.await()
@@ -60,9 +66,13 @@ class HomeViewModel(
                     HomeState.Success(meals, categories)
                 }
                 categoryResult.isFailure || mealResult.isFailure -> {
-                    HomeState.Error( "Failed to load Data")
+                    // Only show error if we don't already have data to show
+                    if (isDataLoaded) _homeState.value else HomeState.Error("Failed to load Data")
                 }
-                else -> {HomeState.Error("Contents Not Available!")}
+
+                else -> {
+                    if (isDataLoaded) _homeState.value else HomeState.Error("Contents Not Available!")
+                }
             }
         }
     }
@@ -71,10 +81,20 @@ class HomeViewModel(
         val location = _userLocation.value ?: return emptyList()
         val area = location.cuisineArea
         if (area.isBlank() || area.equals("Unknown", ignoreCase = true)) {
-            // When we can't resolve a cuisine area, do not filter
             return emptyList()
         }
         return filterMealsByAreaUseCase(meals, area)
+    }
+
+    fun onMealViewed(mealId: String?) {
+        if (!mealId.isNullOrBlank()) {
+            _lastViewedMealId.value = mealId
+        }
+    }
+
+    fun getFeaturedMeal(meals: List<MealResponse>): MealResponse? {
+        val lastId = _lastViewedMealId.value ?: return null
+        return meals.firstOrNull { it.idResponse == lastId }
     }
 
     fun getLocationSection(meals: List<MealResponse>): Pair<String, List<MealResponse>> {
@@ -131,7 +151,6 @@ class HomeViewModel(
 
     private fun getPopularOrSeasonalMeals(meals: List<MealResponse>): List<MealResponse> {
         if (meals.isEmpty()) return emptyList()
-        // Simple popularity heuristic: take up to 10 meals from the most frequent categories
         val mealsByCategory = meals.groupBy { it.strCategory.orEmpty() }
         val sortedCategories = mealsByCategory.entries
             .sortedByDescending { it.value.size }

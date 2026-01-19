@@ -2,6 +2,7 @@ package com.kvrae.easykitchen.presentation.home
 
 
 import SearchBarField
+import android.net.Uri
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
@@ -19,8 +20,8 @@ import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.rounded.Restaurant
-import androidx.compose.material.icons.rounded.SearchOff
 import androidx.compose.material.icons.rounded.Schedule
+import androidx.compose.material.icons.rounded.SearchOff
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
@@ -35,6 +36,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.res.vectorResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
@@ -113,17 +115,22 @@ fun HomeScreenContent(
         Spacer(modifier = Modifier.height(8.dp))
 
         // Featured Meal Section (Hero)
-        if (meals.isNotEmpty()) {
-            val featuredMeal = meals.first()
+        val featuredMeal = viewModel.getFeaturedMeal(meals)
+        if (featuredMeal != null) {
+            SectionHeader(
+                title = "Continue where you left off",
+                icon = ImageVector.vectorResource(id = R.drawable.backup_restore)
+            )
+            Spacer(modifier = Modifier.height(8.dp))
             MealCard(
                 meal = featuredMeal.asDto(),
-                onMealClick = {
-                    navController.navigate("${Screen.MealDetailsScreen.route}/$it")
+                onMealClick = { mealId ->
+                    viewModel.onMealViewed(mealId)
+                    navController.navigate("${Screen.MealDetailsScreen.route}/$mealId")
                 },
                 modifier = Modifier
                     .fillMaxWidth()
                     .padding(horizontal = 16.dp)
-                    .height(220.dp)
             )
             Spacer(modifier = Modifier.height(24.dp))
         }
@@ -140,7 +147,13 @@ fun HomeScreenContent(
             horizontalArrangement = Arrangement.spacedBy(12.dp)
         ) {
             items(categories) { category ->
-                CategoryCard(category = category.asDto())
+                CategoryCard(
+                    category = category.asDto(),
+                    onCategoryClick = { name ->
+                        val encoded = Uri.encode(name)
+                        navController.navigate("${Screen.FilteredMealsScreen.route}/category/$encoded")
+                    }
+                )
             }
         }
 
@@ -164,8 +177,9 @@ fun HomeScreenContent(
             items(timeMeals) { meal ->
                 MealCard(
                     meal = meal.asDto(),
-                    onMealClick = {
-                        navController.navigate("${Screen.MealDetailsScreen.route}/$it")
+                    onMealClick = { mealId ->
+                        viewModel.onMealViewed(mealId)
+                        navController.navigate("${Screen.MealDetailsScreen.route}/$mealId")
                     }
                 )
             }
@@ -189,8 +203,9 @@ fun HomeScreenContent(
             items(locationMeals) { meal ->
                 MealByAreaAnsCategoryCard(
                     meal = meal.asDto(),
-                    onMealClick = {
-                        navController.navigate("${Screen.MealDetailsScreen.route}/$it")
+                    onMealClick = { mealId ->
+                        viewModel.onMealViewed(mealId)
+                        navController.navigate("${Screen.MealDetailsScreen.route}/$mealId")
                     }
                 )
             }

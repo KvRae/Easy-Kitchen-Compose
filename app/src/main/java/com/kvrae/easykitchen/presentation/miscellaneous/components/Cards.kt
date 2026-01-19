@@ -146,7 +146,8 @@ fun MealShimmerCard(modifier: Modifier = Modifier) {
 
 @Composable
 fun CategoryCard(
-    category: Category
+    category: Category,
+    onCategoryClick: (String) -> Unit
 ) {
     val shadowAlpha = if (isSystemInDarkTheme()) 0.2f else 0.1f
     Card(
@@ -156,9 +157,14 @@ fun CategoryCard(
                 elevation = 4.dp,
                 shape = RoundedCornerShape(50),
                 spotColor = MaterialTheme.colorScheme.primary.copy(alpha = shadowAlpha)
-            ),
+            )
+            .clickable { onCategoryClick(category.name.orEmpty()) },
         shape = RoundedCornerShape(50),
-        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface)
+        colors = CardDefaults.cardColors(
+            containerColor = MaterialTheme.colorScheme.surfaceVariant.copy(
+                alpha = 0.45f
+            )
+        )
     ) {
         Row(
             modifier = Modifier

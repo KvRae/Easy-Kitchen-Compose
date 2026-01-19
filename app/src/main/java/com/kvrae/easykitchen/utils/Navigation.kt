@@ -23,12 +23,12 @@ import com.kvrae.easykitchen.presentation.basket.BasketScreen
 import com.kvrae.easykitchen.presentation.filtered_meals.FilteredMealsScreen
 import com.kvrae.easykitchen.presentation.forget_password.ForgetPasswordScreen
 import com.kvrae.easykitchen.presentation.login.LoginScreen
-import com.kvrae.easykitchen.presentation.main_screen.MainScreen
+import com.kvrae.easykitchen.presentation.main.MainScreen
 import com.kvrae.easykitchen.presentation.meal_detail.MealDetailsScreen
 import com.kvrae.easykitchen.presentation.meals.MealsViewModel
 import com.kvrae.easykitchen.presentation.register.RegisterScreen
 import com.kvrae.easykitchen.presentation.search.SearchScreen
-import com.kvrae.easykitchen.presentation.splach_screen.SplashScreen
+import com.kvrae.easykitchen.presentation.splash.SplashScreen
 import kotlinx.coroutines.launch
 import org.koin.compose.koinInject
 import org.koin.compose.viewmodel.koinViewModel
@@ -183,6 +183,14 @@ fun Navigation() {
             FilteredMealsScreen(
                 navController = navController,
                 selectedIngredientNames = ingredientsList
+            )
+        }
+        composable("${Screen.FilteredMealsScreen.route}/category/{category}") { backStackEntry ->
+            val categoryName = backStackEntry.arguments?.getString("category") ?: ""
+            FilteredMealsScreen(
+                navController = navController,
+                selectedIngredientNames = emptyList(),
+                categoryName = categoryName
             )
         }
         composable(Screen.BasketScreen.route) {

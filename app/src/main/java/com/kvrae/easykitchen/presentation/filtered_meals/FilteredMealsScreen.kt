@@ -10,7 +10,6 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.statusBarsPadding
 import androidx.compose.foundation.layout.systemBarsPadding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -47,6 +46,7 @@ import org.koin.androidx.compose.koinViewModel
 fun FilteredMealsScreen(
     navController: NavController,
     selectedIngredientNames: List<String>,
+    categoryName: String? = null,
     modifier: Modifier = Modifier
 ) {
     val viewModel = koinViewModel<FilteredMealsViewModel>()
@@ -55,8 +55,15 @@ fun FilteredMealsScreen(
     val partialMatches by viewModel.partialMatches.collectAsState()
 
     // Trigger filtering when screen loads
-    LaunchedEffect(selectedIngredientNames) {
-        viewModel.filterMealsByIngredients(selectedIngredientNames)
+    LaunchedEffect(selectedIngredientNames, categoryName) {
+        when {
+            !categoryName.isNullOrBlank() -> viewModel.filterMealsByCategory(categoryName)
+            selectedIngredientNames.isNotEmpty() -> viewModel.filterMealsByIngredients(
+                selectedIngredientNames
+            )
+
+            else -> viewModel.filterMealsByCategory("")
+        }
     }
 
     Scaffold(
@@ -68,7 +75,7 @@ fun FilteredMealsScreen(
             TopAppBar(
                 title = {
                     Text(
-                        text = "Recipes Found",
+                        text = categoryName?.let { "Meals in $it" } ?: "Recipes Found",
                         style = MaterialTheme.typography.titleLarge,
                         fontWeight = FontWeight.Bold
                     )
@@ -114,13 +121,19 @@ fun FilteredMealsScreen(
             }
 
             is FilteredMealsState.Success -> {
+                val primaryTitle =
+                    if (!categoryName.isNullOrBlank()) "Meals in $categoryName" else "Perfect Matches"
+                val primarySubtitle =
+                    if (!categoryName.isNullOrBlank()) "Fresh picks from $categoryName" else "Recipes with all your ingredients"
                 FilteredMealsContent(
                     modifier = Modifier.padding(paddingValues),
                     exactMatches = exactMatches,
                     partialMatches = partialMatches,
                     onMealClick = { mealId ->
                         navController.navigate("$MEAL_DETAILS_SCREEN_ROUTE/$mealId")
-                    }
+                    },
+                    primaryTitle = primaryTitle,
+                    primarySubtitle = primarySubtitle
                 )
             }
         }
@@ -132,7 +145,9 @@ fun FilteredMealsContent(
     exactMatches: List<MealResponse>,
     partialMatches: List<MealResponse>,
     onMealClick: (String) -> Unit,
-    modifier: Modifier = Modifier
+    modifier: Modifier = Modifier,
+    primaryTitle: String = "Perfect Matches",
+    primarySubtitle: String = "Recipes with all your ingredients"
 ) {
     LazyColumn(
         modifier = modifier
@@ -150,13 +165,13 @@ fun FilteredMealsContent(
                         .padding(horizontal = 16.dp, vertical = 12.dp)
                 ) {
                     Text(
-                        text = "Perfect Matches",
+                        text = primaryTitle,
                         style = MaterialTheme.typography.titleMedium,
                         fontWeight = FontWeight.Bold,
                         color = MaterialTheme.colorScheme.primary
                     )
                     Text(
-                        text = "Recipes with all your ingredients (${exactMatches.size})",
+                        text = "$primarySubtitle (${exactMatches.size})",
                         style = MaterialTheme.typography.bodySmall,
                         color = MaterialTheme.colorScheme.onSurfaceVariant
                     )

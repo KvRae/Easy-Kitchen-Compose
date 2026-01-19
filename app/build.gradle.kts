@@ -51,16 +51,18 @@ android {
         sourceCompatibility = JavaVersion.VERSION_21
         targetCompatibility = JavaVersion.VERSION_21
     }
-    kotlinOptions {
-
-    }
     buildFeatures {
         buildConfig = true
         compose = true
     }
-    composeOptions {
-        kotlinCompilerExtensionVersion = "1.5.1"
+    compileOptions {
+        sourceCompatibility = JavaVersion.VERSION_21
+        targetCompatibility = JavaVersion.VERSION_21
     }
+    kotlinOptions {
+        freeCompilerArgs = listOf("-XXLanguage:+WhenGuards")
+    }
+
     packaging {
         resources {
             excludes += "/META-INF/{AL2.0,LGPL2.1}"
@@ -103,7 +105,8 @@ dependencies {
     implementation(libs.koin.android.compose)
     // Room
     implementation(libs.bundles.room)
-    annotationProcessor(libs.androidx.room.compiler)
+    implementation(libs.androidx.compose.material3)
+    ksp(libs.androidx.room.compiler)
     // google auth
     implementation(libs.google.auth.service)
     // google location

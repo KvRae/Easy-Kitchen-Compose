@@ -1,6 +1,8 @@
 package com.kvrae.easykitchen.di
 
 import android.util.Log
+import com.kvrae.easykitchen.data.local.dao.MealDao
+import com.kvrae.easykitchen.data.local.database.EasyKitchenDb
 import com.kvrae.easykitchen.data.remote.datasource.CategoryRemoteDataSource
 import com.kvrae.easykitchen.data.remote.datasource.CategoryRemoteDataSourceImpl
 import com.kvrae.easykitchen.data.remote.datasource.GeminiRemoteDataSource
@@ -118,7 +120,7 @@ val dataModule = module {
     single<MealRepository> {
         MealRepositoryImpl(
             get<MealRemoteDataSource>(),
-            // get<MealDao>(), // COMMENTED TO PREVENT CRASH
+            get<MealDao>()
         )
     }
 
@@ -178,10 +180,7 @@ val presentationModule = module {
 }
 
 val databaseModule = module {
-    // COMMENTED TO PREVENT CRASH
-    /*
     single { EasyKitchenDb.getInstance(get()) }
     single { get<EasyKitchenDb>().mealDao }
     single { get<EasyKitchenDb>().savedMealDao }
-    */
 }

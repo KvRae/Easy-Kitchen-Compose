@@ -1,4 +1,5 @@
-# EasyKitchenCompose
+# Easy-Kitchen-Compose
+
 ![Android SDK](https://img.shields.io/badge/Android%20SDK-21%2B-brightgreen)
 ![Kotlin](https://img.shields.io/badge/Kotlin-1.5.21-blue)
 ![Compose](https://img.shields.io/badge/Compose-1.0.0-9cf)
@@ -9,13 +10,60 @@
 ![Coil](https://img.shields.io/badge/Coil-1.3.2-yellowgreen)
 ![Compose Navigation](https://img.shields.io/badge/Compose%20Navigation-2.4.0-ff69b4)
 
+EasyKitchenCompose is a Jetpack Compose recipe app that makes discovering, saving, and cooking meals
+delightful. It pairs a modern UI with clean architecture, remote data via Ktor, local persistence
+via Room, and DI via Koin.
 
+## What you can do
 
-Easy Kitchen but reimagined with Jetpack Compose.
-This project is a simple recipe app that allows users to search for recipes, view recipe details, and save recipes to a favorites list.
-The app is built using Jetpack Compose, Ktor, Room, and Koin.
+- Browse and search meals by name, category, or area.
+- Open rich meal details with ingredients, steps, and media.
+- Save favorites locally for quick access.
+- Filter content (by area/category/ingredients) and navigate to tailored lists.
+- Chat assistant screen to help with cooking ideas.
 
-## Features
-- Search for recipes
-- View recipe details
-- Save recipes to favorites
+## Architecture & tech
+
+- Clean Architecture: presentation (Compose + ViewModel), domain (use cases, models, sealed
+  exceptions), data (repositories, remote Ktor client, Room cache).
+- Dependency Injection: Koin modules for data, domain, and presentation layers.
+- Networking: Ktor client + serialization; image loading via Coil.
+- Concurrency: Kotlin Coroutines/Flows.
+- Navigation: Jetpack Compose Navigation; single-activity, multi-screen flow.
+- Design system: Material 3-inspired theming with an orange-first palette and soft secondary
+  accents.
+
+## Project layout
+
+```
+app/
+  src/main/java/com/kvrae/easykitchen/
+    data/          # Remote data sources, DTOs, repositories
+    domain/        # Use cases, models, sealed exceptions
+    presentation/  # Compose UI, ViewModels, navigation
+  src/main/res/    # Theming, drawables, strings
+```
+
+## Getting started
+
+1) Prerequisites: Android Studio with Android SDK 21+, JDK matching your IDE toolchain, and an
+   emulator/device.
+2) Clone and set `local.properties` with your `sdk.dir`.
+3) Sync the project in Android Studio.
+
+Build and run from the IDE, or via CLI:
+
+```bash
+./gradlew clean assembleDebug
+```
+
+Run unit tests:
+
+```bash
+./gradlew test
+```
+
+## Notes
+
+- If you hit dependency cache issues, retry with `./gradlew --refresh-dependencies`.
+- Ktor and Room components rely on proper Gradle sync; ensure network access on first setup.

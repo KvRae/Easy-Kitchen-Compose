@@ -1,4 +1,4 @@
-package com.kvrae.easykitchen.presentation.main_screen
+package com.kvrae.easykitchen.presentation.main
 
 import android.util.Log
 import androidx.compose.foundation.background
@@ -37,6 +37,7 @@ import com.kvrae.easykitchen.presentation.ingrendient.IngredientViewModel
 import com.kvrae.easykitchen.presentation.ingrendient.IngredientsScreen
 import com.kvrae.easykitchen.presentation.meals.MealsScreen
 import com.kvrae.easykitchen.presentation.miscellaneous.components.BottomNavBar
+import com.kvrae.easykitchen.presentation.miscellaneous.components.ConnectivitySnackbar
 import com.kvrae.easykitchen.presentation.miscellaneous.components.ModalDrawerSheetContent
 import com.kvrae.easykitchen.presentation.miscellaneous.components.TopBar
 import com.kvrae.easykitchen.utils.MAIN_CHAT_ROUTE
@@ -139,7 +140,9 @@ fun MainScreenScaffold(
             .background(MaterialTheme.colorScheme.surface),
         containerColor = MaterialTheme.colorScheme.surface,
         snackbarHost = {
-            SnackbarHost(hostState = snackBarHostState)
+            SnackbarHost(hostState = snackBarHostState) { data ->
+                ConnectivitySnackbar(data)
+            }
         },
         content = { paddingValues ->
             MainScreenNavigation(
@@ -229,3 +232,5 @@ fun MainScreenNavigation(
             )
     }
 }
+
+
