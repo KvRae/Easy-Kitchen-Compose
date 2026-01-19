@@ -71,7 +71,8 @@ fun MealsScreen(
                 onMealClick = { mealId ->
                     navController.navigate("${MEAL_DETAILS_SCREEN_ROUTE}/$mealId")
                 },
-                onFavoriteClick = { _ ->
+                onFavoriteClick = { meal ->
+                    mealsViewModel.toggleFavorite(meal)
                 },
                 mealsViewModel = mealsViewModel,
                 currentFilter = currentFilter,
@@ -98,11 +99,12 @@ fun MealScreenContent(
     modifier: Modifier = Modifier,
     mealList: List<MealResponse>,
     onMealClick: (String) -> Unit,
-    onFavoriteClick: (String) -> Unit = {},
-    mealsViewModel: MealsViewModel = koinViewModel(),
+    onFavoriteClick: (MealResponse) -> Unit = {},
+    mealsViewModel: MealsViewModel,
     currentFilter: MealFilter = mealsViewModel.currentFilter.collectAsState().value,
     filterOptions: FilterOptions = mealsViewModel.filterOptions.collectAsState().value,
 ) {
+    val savedMealIds by mealsViewModel.savedMealIds.collectAsState()
 
     LazyColumn(
         modifier = Modifier.background(MaterialTheme.colorScheme.surface)
@@ -118,10 +120,10 @@ fun MealScreenContent(
                     onMealClick(mealList[index].asMealDetail().id ?: "")
                 },
                 onFavoriteClick = {
-                    onFavoriteClick(mealList[index].idResponse ?: "")
-                }
+                    onFavoriteClick(mealList[index])
+                },
+                isFavorite = savedMealIds.contains(mealList[index].idResponse)
             )
         }
         }
 }
-

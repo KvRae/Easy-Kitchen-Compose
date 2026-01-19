@@ -49,6 +49,7 @@ const val MAIN_SCREEN_ROUTE = "main"
 const val MEAL_DETAILS_SCREEN_ROUTE = "details"
 const val FILTERED_MEALS_ROUTE = "filtered_meals"
 const val BASKET_ROUTE = "basket"
+const val SAVED_MEALS_ROUTE = "saved_meals"
 // Main screen routes
 const val MAIN_HOME_ROUTE = "Home"
 const val MAIN_MEALS_ROUTE = "Meals"
@@ -83,6 +84,8 @@ sealed class Screen(
     data object FilteredMealsScreen : Screen(FILTERED_MEALS_ROUTE)
 
     data object BasketScreen : Screen(BASKET_ROUTE)
+
+    data object SavedMealsScreen : Screen(SAVED_MEALS_ROUTE)
 }
 
 // setting the navigation composable
@@ -195,6 +198,9 @@ fun Navigation() {
         }
         composable(Screen.BasketScreen.route) {
             BasketScreen(navController = navController)
+        }
+        composable(Screen.SavedMealsScreen.route) {
+            com.kvrae.easykitchen.presentation.meals.SavedMealsScreen(navController = navController)
         }
     }
 }

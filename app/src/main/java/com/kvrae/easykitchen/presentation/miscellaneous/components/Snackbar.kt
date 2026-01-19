@@ -3,6 +3,7 @@ package com.kvrae.easykitchen.presentation.miscellaneous.components
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -29,9 +30,11 @@ fun ConnectivitySnackbar(data: SnackbarData) {
         color = MaterialTheme.colorScheme.errorContainer.copy(alpha = 0.96f),
         modifier = Modifier
             .padding(horizontal = 16.dp, vertical = 8.dp)
+            .fillMaxWidth()
     ) {
         Row(
             modifier = Modifier
+                .fillMaxWidth()
                 .padding(horizontal = 14.dp, vertical = 10.dp),
             horizontalArrangement = Arrangement.spacedBy(10.dp),
             verticalAlignment = Alignment.CenterVertically
@@ -47,11 +50,6 @@ fun ConnectivitySnackbar(data: SnackbarData) {
                     text = stringResource(id = R.string.no_internet_connection),
                     style = MaterialTheme.typography.titleSmall,
                     color = MaterialTheme.colorScheme.onErrorContainer
-                )
-                Text(
-                    text = data.visuals.message,
-                    style = MaterialTheme.typography.labelMedium,
-                    color = MaterialTheme.colorScheme.onErrorContainer.copy(alpha = 0.85f)
                 )
             }
         }

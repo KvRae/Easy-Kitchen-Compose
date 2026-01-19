@@ -5,7 +5,6 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.kvrae.easykitchen.data.remote.dto.IngredientResponse
 import com.kvrae.easykitchen.domain.usecases.GetIngredientsUseCase
-import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
@@ -36,7 +35,6 @@ class IngredientViewModel(private val getIngredientsUseCase: GetIngredientsUseCa
     fun getIngredients() {
         _ingredientsState.value = IngredientState.Loading
         viewModelScope.launch {
-            delay(1000)
             val result = getIngredientsUseCase()
             _ingredientsState.value = when {
                 result.isSuccess -> {

@@ -43,6 +43,7 @@ import com.kvrae.easykitchen.presentation.miscellaneous.components.TopBar
 import com.kvrae.easykitchen.utils.MAIN_CHAT_ROUTE
 import com.kvrae.easykitchen.utils.MAIN_COMPOSE_ROUTE
 import com.kvrae.easykitchen.utils.MAIN_MEALS_ROUTE
+import com.kvrae.easykitchen.utils.Screen
 import com.kvrae.easykitchen.utils.UserPreferencesManager
 import com.kvrae.easykitchen.utils.getNavItemByName
 import com.kvrae.easykitchen.utils.navItems
@@ -179,6 +180,8 @@ fun MainScreenScaffold(
                     // If on ingredients screen, navigate to basket
                     if (selectedRoute == MAIN_COMPOSE_ROUTE) {
                         navController.navigate("basket")
+                    } else if (selectedRoute == MAIN_MEALS_ROUTE) {
+                        navController.navigate(Screen.SavedMealsScreen.route)
                     } else {
                         onMenuClick()
                     }
@@ -232,5 +235,3 @@ fun MainScreenNavigation(
             )
     }
 }
-
-

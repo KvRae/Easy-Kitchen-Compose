@@ -3,12 +3,16 @@ package com.kvrae.easykitchen.presentation.meals
 import androidx.compose.runtime.mutableStateOf
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.kvrae.easykitchen.data.local.entity.toSavedMeal
 import com.kvrae.easykitchen.data.remote.dto.MealResponse
 import com.kvrae.easykitchen.data.remote.dto.asDto
 import com.kvrae.easykitchen.domain.model.FilterOptions
 import com.kvrae.easykitchen.domain.model.MealFilter
 import com.kvrae.easykitchen.domain.model.SortOption
+import com.kvrae.easykitchen.domain.usecases.DeleteSavedMealUseCase
 import com.kvrae.easykitchen.domain.usecases.GetMealsUseCase
+import com.kvrae.easykitchen.domain.usecases.GetSavedMealsUseCase
+import com.kvrae.easykitchen.domain.usecases.SaveMealUseCase
 import com.kvrae.easykitchen.utils.getMealCategoryByTime
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -16,6 +20,9 @@ import kotlinx.coroutines.launch
 
 class MealsViewModel(
     private val getMealsUseCase: GetMealsUseCase,
+    private val saveMealUseCase: SaveMealUseCase,
+    private val deleteSavedMealUseCase: DeleteSavedMealUseCase,
+    private val getSavedMealsUseCase: GetSavedMealsUseCase,
 ) : ViewModel() {
 
     private val _mealState = MutableStateFlow<MealState>(MealState.Loading)
@@ -41,8 +48,19 @@ class MealsViewModel(
     private val _searchResults = MutableStateFlow<List<MealResponse>>(emptyList())
     val searchResults: StateFlow<List<MealResponse>> = _searchResults
 
+    private val _savedMealIds = MutableStateFlow<Set<String>>(emptySet())
+    val savedMealIds: StateFlow<Set<String>> = _savedMealIds
+
     init {
         fetchMeals()
+        refreshSavedMeals()
+    }
+
+    private fun refreshSavedMeals() {
+        viewModelScope.launch {
+            val saved = getSavedMealsUseCase()
+            _savedMealIds.value = saved.mapNotNull { it.id }.toSet()
+        }
     }
 
     fun fetchMeals() {
@@ -168,6 +186,22 @@ class MealsViewModel(
                             meal.strCategory?.contains(query, ignoreCase = true) == true
                 }
             }
+        }
+    }
+
+    fun isSaved(mealId: String?): Boolean {
+        return mealId != null && _savedMealIds.value.contains(mealId)
+    }
+
+    fun toggleFavorite(meal: MealResponse) {
+        val id = meal.idResponse ?: return
+        viewModelScope.launch {
+            if (isSaved(id)) {
+                deleteSavedMealUseCase(id)
+            } else {
+                saveMealUseCase(meal.toSavedMeal())
+            }
+            refreshSavedMeals()
         }
     }
 }

@@ -31,6 +31,9 @@ import com.kvrae.easykitchen.data.repository.MealRepository
 import com.kvrae.easykitchen.data.repository.MealRepositoryImpl
 import com.kvrae.easykitchen.data.repository.RegisterRepository
 import com.kvrae.easykitchen.data.repository.RegisterRepositoryImpl
+import com.kvrae.easykitchen.data.repository.SavedMealRepository
+import com.kvrae.easykitchen.domain.usecases.ClearSavedMealsUseCase
+import com.kvrae.easykitchen.domain.usecases.DeleteSavedMealUseCase
 import com.kvrae.easykitchen.domain.usecases.FilterMealsByAreaUseCase
 import com.kvrae.easykitchen.domain.usecases.FilterMealsByIngredientsUseCase
 import com.kvrae.easykitchen.domain.usecases.GeminiChatUseCase
@@ -38,11 +41,13 @@ import com.kvrae.easykitchen.domain.usecases.GetCategoryUseCase
 import com.kvrae.easykitchen.domain.usecases.GetGoogleSignInClientUseCase
 import com.kvrae.easykitchen.domain.usecases.GetIngredientsUseCase
 import com.kvrae.easykitchen.domain.usecases.GetMealsUseCase
+import com.kvrae.easykitchen.domain.usecases.GetSavedMealsUseCase
 import com.kvrae.easykitchen.domain.usecases.GetSignInIntentUseCase
 import com.kvrae.easykitchen.domain.usecases.GetUserLocationUseCase
 import com.kvrae.easykitchen.domain.usecases.HandleSignInResultUseCase
 import com.kvrae.easykitchen.domain.usecases.LoginUseCase
 import com.kvrae.easykitchen.domain.usecases.RegisterUseCase
+import com.kvrae.easykitchen.domain.usecases.SaveMealUseCase
 import com.kvrae.easykitchen.domain.usecases.SendIdTokenToBackendUseCase
 import com.kvrae.easykitchen.presentation.chat.ChatViewModel
 import com.kvrae.easykitchen.presentation.filtered_meals.FilteredMealsViewModel
@@ -51,6 +56,7 @@ import com.kvrae.easykitchen.presentation.ingrendient.IngredientViewModel
 import com.kvrae.easykitchen.presentation.login.GoogleAuthViewModel
 import com.kvrae.easykitchen.presentation.login.LoginViewModel
 import com.kvrae.easykitchen.presentation.meals.MealsViewModel
+import com.kvrae.easykitchen.presentation.meals.SavedMealsViewModel
 import com.kvrae.easykitchen.presentation.register.RegisterViewModel
 import com.kvrae.easykitchen.utils.UserPreferencesManager
 import io.ktor.client.HttpClient
@@ -110,10 +116,10 @@ val dataModule = module {
     single<RegisterRepository> { RegisterRepositoryImpl(get()) }
 
     single<IngredientRemoteDataSource> { IngredientRemoteDataSourceImpl(get()) }
-    single<IngredientRepository> { IngredientRepositoryImpl(get()) }
+    single<IngredientRepository> { IngredientRepositoryImpl(get(), get()) }
 
     single<CategoryRemoteDataSource> {CategoryRemoteDataSourceImpl(get())}
-    single<CategoryRepository> { CategoryRepositoryImpl(get())  }
+    single<CategoryRepository> { CategoryRepositoryImpl(get(), get()) }
 
     single<MealRemoteDataSource> {MealsRemoteDataSourceImpl(get())}
 
@@ -124,6 +130,7 @@ val dataModule = module {
         )
     }
 
+    single { SavedMealRepository(get()) }
 
     single<AuthRepository> { AuthRepositoryImpl(get()) }
 
@@ -149,10 +156,14 @@ val domainModule = module {
     factory { HandleSignInResultUseCase(get()) }
     factory { SendIdTokenToBackendUseCase(get()) }
     factory { GeminiChatUseCase(get()) }
+    factory { SaveMealUseCase(get()) }
+    factory { DeleteSavedMealUseCase(get()) }
+    factory { GetSavedMealsUseCase(get()) }
+    factory { ClearSavedMealsUseCase(get()) }
 }
 
 val presentationModule = module {
-    viewModel { MealsViewModel(get()) }
+    viewModel { MealsViewModel(get(), get(), get(), get()) }
     single { IngredientViewModel(get()) }
     viewModel { FilteredMealsViewModel(get(), get()) }
     viewModel { LoginViewModel(
@@ -177,10 +188,13 @@ val presentationModule = module {
         )
     }
     viewModel { ChatViewModel(get<GeminiChatUseCase>()) }
+    viewModel { SavedMealsViewModel(get(), get(), get()) }
 }
 
 val databaseModule = module {
     single { EasyKitchenDb.getInstance(get()) }
     single { get<EasyKitchenDb>().mealDao }
     single { get<EasyKitchenDb>().savedMealDao }
+    single { get<EasyKitchenDb>().ingredientDao }
+    single { get<EasyKitchenDb>().categoryDao }
 }

@@ -38,11 +38,11 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
-import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -60,8 +60,10 @@ import androidx.navigation.NavController
 import coil.compose.SubcomposeAsyncImage
 import com.kvrae.easykitchen.R
 import com.kvrae.easykitchen.data.remote.dto.MealDetail
+import com.kvrae.easykitchen.presentation.meals.MealsViewModel
 import com.kvrae.easykitchen.presentation.miscellaneous.components.CustomAlertDialogWithContent
 import com.kvrae.easykitchen.utils.openYoutube
+import org.koin.androidx.compose.koinViewModel
 
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -71,6 +73,10 @@ fun MealDetailsScreen(
     meal : MealDetail,
     context: Context = LocalContext.current
 ) {
+    val mealsViewModel = koinViewModel<MealsViewModel>()
+    val savedMealIds by mealsViewModel.savedMealIds.collectAsState()
+    val isFavorite = savedMealIds.contains(meal.id)
+
     var isButtonExtended by remember { mutableStateOf(false) }
     var selectedTab by remember { mutableStateOf(0) }
 
@@ -85,9 +91,6 @@ fun MealDetailsScreen(
         }
         }
 
-    }
-    var isFavorite by rememberSaveable {
-        mutableStateOf(false)
     }
     val favoriteIcon = if (!isFavorite) Icons.Rounded.FavoriteBorder else Icons.Rounded.Favorite
 
@@ -414,7 +417,9 @@ fun MealDetailsScreen(
                     .clip(CircleShape)
                     .background(MaterialTheme.colorScheme.background),
                 onClick = {
-                    isFavorite = !isFavorite
+                    // Find the meal in the meals list to get the MealResponse
+                    val mealResponse = mealsViewModel.findMealById(meal.id)
+                    mealResponse?.let { mealsViewModel.toggleFavorite(it) }
                 }
             ) {
                 Icon(
@@ -453,7 +458,9 @@ fun MealDetailsScreen(
                             .clip(CircleShape)
                             .background(MaterialTheme.colorScheme.background),
                         onClick = {
-                            isFavorite = !isFavorite
+                            // Find the meal in the meals list to get the MealResponse
+                            val mealResponse = mealsViewModel.findMealById(meal.id)
+                            mealResponse?.let { mealsViewModel.toggleFavorite(it) }
                         }
                     ) {
                         Icon(

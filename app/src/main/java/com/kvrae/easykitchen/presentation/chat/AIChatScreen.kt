@@ -23,6 +23,7 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.rounded.Send
 import androidx.compose.material.icons.rounded.RestaurantMenu
+import androidx.compose.material.icons.rounded.SignalWifiConnectedNoInternet4
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
@@ -46,6 +47,8 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.TextFieldValue
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
+import com.kvrae.easykitchen.presentation.miscellaneous.screens.NoDataScreen
+import com.kvrae.easykitchen.utils.rememberNetworkConnectivity
 import com.kvrae.easykitchen.utils.stripMarkdown
 import org.koin.androidx.compose.koinViewModel
 
@@ -81,6 +84,16 @@ fun ChatScreen(
     val chatState by viewModel.chatState.collectAsState()
     val listState = rememberLazyListState()
     val focusManager = LocalFocusManager.current
+    val isNetworkOn = rememberNetworkConnectivity()
+
+    if (!isNetworkOn) {
+        NoDataScreen(
+            message = "No internet connection",
+            subtitle = "Connect to the internet to chat with your AI Chef",
+            icon = Icons.Rounded.SignalWifiConnectedNoInternet4
+        )
+        return
+    }
 
     Column(
         modifier = modifier.background(MaterialTheme.colorScheme.surface)
@@ -343,5 +356,3 @@ fun ChefTypingIndicator() {
         )
     }
 }
-
-
