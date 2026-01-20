@@ -6,6 +6,11 @@ class GeminiChatUseCase(
     private val repository: GeminiRepository
 ) {
     suspend operator fun invoke(prompt: String): Result<String> {
-        return repository.sendMessage(prompt)
+
+        return try {
+            repository.sendMessage(prompt)
+        } catch (e: Exception) {
+            Result.failure(e)
+        }
     }
 }

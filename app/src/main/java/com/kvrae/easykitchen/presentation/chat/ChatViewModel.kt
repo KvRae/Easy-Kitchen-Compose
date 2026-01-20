@@ -63,6 +63,12 @@ class ChatViewModel(
 
         }
     }
+
+    fun clearMessages() {
+        chatMessages.clear()
+        _chatState.value = ChatState.Idle
+        userMessage = ""
+    }
 }
 
 sealed class ChatState {

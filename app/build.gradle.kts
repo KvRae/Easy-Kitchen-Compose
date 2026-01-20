@@ -6,6 +6,7 @@ plugins {
     alias(libs.plugins.jetbrains.kotlin.serilization)
     alias(libs.plugins.google.ksp)
     alias(libs.plugins.compose.compiler)
+    id("androidx.room")
 }
 
 val properties = Properties()
@@ -50,16 +51,18 @@ android {
         sourceCompatibility = JavaVersion.VERSION_21
         targetCompatibility = JavaVersion.VERSION_21
     }
-    kotlinOptions {
-
-    }
     buildFeatures {
         buildConfig = true
         compose = true
     }
-    composeOptions {
-        kotlinCompilerExtensionVersion = "1.5.1"
+    compileOptions {
+        sourceCompatibility = JavaVersion.VERSION_21
+        targetCompatibility = JavaVersion.VERSION_21
     }
+    kotlinOptions {
+        freeCompilerArgs = listOf("-XXLanguage:+WhenGuards")
+    }
+
     packaging {
         resources {
             excludes += "/META-INF/{AL2.0,LGPL2.1}"
@@ -71,6 +74,9 @@ android {
                 srcDirs("src\\main\\assets", "src\\main\\assets")
             }
         }
+    }
+    room {
+        schemaDirectory("$projectDir/schemas")
     }
 }
 
@@ -99,9 +105,12 @@ dependencies {
     implementation(libs.koin.android.compose)
     // Room
     implementation(libs.bundles.room)
-    annotationProcessor(libs.androidx.room.compiler)
+    implementation(libs.androidx.compose.material3)
+    ksp(libs.androidx.room.compiler)
     // google auth
     implementation(libs.google.auth.service)
+    // google location
+    implementation(libs.google.location.service)
     // datastore
     implementation(libs.androidx.datastore.preferences)
 
@@ -109,6 +118,8 @@ dependencies {
     implementation(libs.valentinilk.shimmer)
     // Accompanist Swipe Refresh
     implementation(libs.google.accompanist.swiperefresher)
+    // Accompanist Permissions
+    implementation(libs.google.accompanist.permissions)
 
     // Gemini
     implementation(libs.google.generativeai)

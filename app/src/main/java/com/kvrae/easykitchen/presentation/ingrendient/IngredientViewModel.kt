@@ -13,26 +13,78 @@ class IngredientViewModel(private val getIngredientsUseCase: GetIngredientsUseCa
     private val _ingredientsState = MutableStateFlow<IngredientState>(IngredientState.Loading)
     val ingredientsState: StateFlow<IngredientState> = _ingredientsState
 
+    private val _searchQuery = MutableStateFlow("")
+    val searchQuery: StateFlow<String> = _searchQuery
+
+    private val _filteredIngredientsState =
+        MutableStateFlow<IngredientState>(IngredientState.Loading)
+    val filteredIngredientsState: StateFlow<IngredientState> = _filteredIngredientsState
+
     private val ingredientsBasket = mutableStateListOf<IngredientResponse>()
+
+    private val _basketCount = MutableStateFlow(0)
+    val basketCount: StateFlow<Int> = _basketCount
+
+    private val _basketItems = MutableStateFlow<List<IngredientResponse>>(emptyList())
+    val basketItems: StateFlow<List<IngredientResponse>> = _basketItems
 
     init {
         getIngredients()
     }
 
     fun getIngredients() {
+        _ingredientsState.value = IngredientState.Loading
         viewModelScope.launch {
             val result = getIngredientsUseCase()
             _ingredientsState.value = when {
                 result.isSuccess -> {
-                    IngredientState.Success(result.getOrNull()!!)
+                    val ingredients = result.getOrNull()!!
+                    _filteredIngredientsState.value = IngredientState.Success(ingredients)
+                    IngredientState.Success(ingredients)
                 }
                 result.isFailure -> {
-                    IngredientState.Error(result.exceptionOrNull()?.message ?: "Failed to load data")
-                    }
+                    val error = IngredientState.Error(
+                        result.exceptionOrNull()?.message ?: "Failed to load data"
+                    )
+                    _filteredIngredientsState.value = error
+                    error
+                }
                 else -> {
-                    IngredientState.Error("Unknown error")
+                    val error = IngredientState.Error("Unknown error")
+                    _filteredIngredientsState.value = error
+                    error
+                }
             }
+        }
+    }
+
+    fun updateSearchQuery(query: String) {
+        _searchQuery.value = query
+        filterIngredients(query)
+    }
+
+    private fun filterIngredients(query: String) {
+        val currentState = _ingredientsState.value
+        if (currentState is IngredientState.Success) {
+            val allIngredients = currentState.ingredients
+
+            if (query.isBlank()) {
+                _filteredIngredientsState.value = IngredientState.Success(allIngredients)
+            } else {
+                val filtered = allIngredients.filter { ingredient ->
+                    ingredient.strIngredient?.contains(query, ignoreCase = true) == true ||
+                            ingredient.strDescription?.contains(query, ignoreCase = true) == true
+                }
+                _filteredIngredientsState.value = IngredientState.Success(filtered)
             }
+        }
+    }
+
+    fun clearSearch() {
+        _searchQuery.value = ""
+        val currentState = _ingredientsState.value
+        if (currentState is IngredientState.Success) {
+            _filteredIngredientsState.value = currentState
         }
     }
 
@@ -43,10 +95,20 @@ class IngredientViewModel(private val getIngredientsUseCase: GetIngredientsUseCa
         } else {
             ingredientsBasket.add(ingredient)
         }
+        _basketCount.value = ingredientsBasket.size
+        _basketItems.value = ingredientsBasket.toList()
     }
 
     fun isIngredientInBasket(ingredient: IngredientResponse): Boolean {
         return ingredientsBasket.contains(ingredient)
+    }
+
+    fun getSelectedIngredientNames(): List<String> {
+        return ingredientsBasket.mapNotNull { it.strIngredient }
+    }
+
+    fun getBasketIngredients(): List<IngredientResponse> {
+        return ingredientsBasket.toList()
     }
 }
 

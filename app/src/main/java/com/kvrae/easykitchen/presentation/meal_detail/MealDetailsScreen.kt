@@ -3,6 +3,7 @@ package com.kvrae.easykitchen.presentation.meal_detail
 import android.content.Context
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -37,11 +38,11 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
-import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -59,8 +60,10 @@ import androidx.navigation.NavController
 import coil.compose.SubcomposeAsyncImage
 import com.kvrae.easykitchen.R
 import com.kvrae.easykitchen.data.remote.dto.MealDetail
+import com.kvrae.easykitchen.presentation.meals.MealsViewModel
 import com.kvrae.easykitchen.presentation.miscellaneous.components.CustomAlertDialogWithContent
 import com.kvrae.easykitchen.utils.openYoutube
+import org.koin.androidx.compose.koinViewModel
 
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -70,7 +73,12 @@ fun MealDetailsScreen(
     meal : MealDetail,
     context: Context = LocalContext.current
 ) {
+    val mealsViewModel = koinViewModel<MealsViewModel>()
+    val savedMealIds by mealsViewModel.savedMealIds.collectAsState()
+    val isFavorite = savedMealIds.contains(meal.id)
+
     var isButtonExtended by remember { mutableStateOf(false) }
+    var selectedTab by remember { mutableStateOf(0) }
 
     val scrollState = rememberScrollState()
     val imageHeight = 300f
@@ -82,9 +90,7 @@ fun MealDetailsScreen(
             else -> 0f
         }
         }
-    }
-    var isFavorite by rememberSaveable {
-        mutableStateOf(false)
+
     }
     val favoriteIcon = if (!isFavorite) Icons.Rounded.FavoriteBorder else Icons.Rounded.Favorite
 
@@ -115,22 +121,23 @@ fun MealDetailsScreen(
                     .background(MaterialTheme.colorScheme.surface)
                     .fillMaxWidth()
                     .fillMaxHeight()
-                    .padding(24.dp)
+                    .padding(horizontal = 24.dp, vertical = 28.dp)
             ) {
                 // Recipe Title
                 Text(
                     text = meal.name.orEmpty(),
                     style = MaterialTheme.typography.headlineMedium,
                     color = MaterialTheme.colorScheme.primary,
-                    modifier = Modifier.padding(bottom = 16.dp)
+                    modifier = Modifier.padding(bottom = 12.dp),
+                    fontWeight = androidx.compose.ui.text.font.FontWeight.ExtraBold
                 )
 
                 // Info Pills Row
                 Row(
                     modifier = Modifier
                         .fillMaxWidth()
-                        .padding(bottom = 20.dp),
-                    horizontalArrangement = Arrangement.spacedBy(8.dp),
+                        .padding(bottom = 28.dp),
+                    horizontalArrangement = Arrangement.spacedBy(10.dp),
                     verticalAlignment = Alignment.CenterVertically
                 ) {
                     InfoChip(
@@ -147,96 +154,195 @@ fun MealDetailsScreen(
                     )
                 }
 
-                // Ingredients Section Card
+                // Ingredients & Instructions Section Card
                 Column(
                     modifier = Modifier
                         .fillMaxWidth()
-                        .clip(RoundedCornerShape(16.dp))
-                        .background(MaterialTheme.colorScheme.secondaryContainer)
-                        .padding(16.dp)
+                        .clip(RoundedCornerShape(20.dp))
+                        .background(MaterialTheme.colorScheme.secondaryContainer.copy(alpha = 0.25f))
+                        .padding(20.dp)
                 ) {
+                    // Modern Tab Row with custom styling
                     Row(
-                        verticalAlignment = Alignment.CenterVertically,
-                        modifier = Modifier.padding(bottom = 12.dp)
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .clip(RoundedCornerShape(16.dp))
+                            .background(MaterialTheme.colorScheme.surface)
+                            .padding(4.dp),
+                        horizontalArrangement = Arrangement.spacedBy(4.dp)
                     ) {
-                        Icon(
-                            imageVector = ImageVector.vectorResource(R.drawable.ingredients),
-                            contentDescription = "Ingredients",
-                            tint = MaterialTheme.colorScheme.onSecondaryContainer,
-                            modifier = Modifier.size(24.dp)
-                        )
-                        Spacer(Modifier.width(8.dp))
-                        Text(
-                            text = stringResource(R.string.ingredients),
-                            style = MaterialTheme.typography.titleLarge,
-                            color = MaterialTheme.colorScheme.onSecondaryContainer
-                        )
-                    }
-
-                    Row(
-                        modifier = Modifier.fillMaxWidth(),
-                        horizontalArrangement = Arrangement.spacedBy(16.dp)
-                    ) {
-                        Column(
-                            modifier = Modifier.weight(1f),
-                            verticalArrangement = Arrangement.spacedBy(8.dp)
+                        // Ingredients Tab
+                        Box(
+                            modifier = Modifier
+                                .weight(1f)
+                                .clip(RoundedCornerShape(14.dp))
+                                .background(
+                                    if (selectedTab == 0)
+                                        MaterialTheme.colorScheme.primary.copy(alpha = 0.15f)
+                                    else
+                                        Color.Transparent
+                                )
+                                .clickable { selectedTab = 0 }
+                                .padding(horizontal = 12.dp, vertical = 14.dp),
+                            contentAlignment = Alignment.Center
                         ) {
-                            repeat(meal.ingredients.size) { index ->
+                            Row(
+                                verticalAlignment = Alignment.CenterVertically,
+                                horizontalArrangement = Arrangement.Center,
+                                modifier = Modifier.fillMaxWidth()
+                            ) {
+                                Icon(
+                                    imageVector = ImageVector.vectorResource(R.drawable.ingredients),
+                                    contentDescription = "Ingredients",
+                                    tint = if (selectedTab == 0)
+                                        MaterialTheme.colorScheme.primary
+                                    else
+                                        MaterialTheme.colorScheme.onSurfaceVariant,
+                                    modifier = Modifier.size(18.dp)
+                                )
+                                Spacer(Modifier.width(8.dp))
                                 Text(
-                                    text = "• ${meal.ingredients[index]}",
-                                    style = MaterialTheme.typography.bodyMedium,
-                                    color = MaterialTheme.colorScheme.onSecondaryContainer
+                                    text = stringResource(R.string.ingredients),
+                                    style = MaterialTheme.typography.labelMedium,
+                                    fontWeight = if (selectedTab == 0)
+                                        androidx.compose.ui.text.font.FontWeight.SemiBold
+                                    else
+                                        androidx.compose.ui.text.font.FontWeight.Normal,
+                                    color = if (selectedTab == 0)
+                                        MaterialTheme.colorScheme.primary
+                                    else
+                                        MaterialTheme.colorScheme.onSurfaceVariant
                                 )
                             }
                         }
-                        Column(
-                            modifier = Modifier.weight(0.8f),
-                            verticalArrangement = Arrangement.spacedBy(8.dp)
+
+                        // Instructions Tab
+                        Box(
+                            modifier = Modifier
+                                .weight(1f)
+                                .clip(RoundedCornerShape(14.dp))
+                                .background(
+                                    if (selectedTab == 1)
+                                        MaterialTheme.colorScheme.primary.copy(alpha = 0.15f)
+                                    else
+                                        Color.Transparent
+                                )
+                                .clickable { selectedTab = 1 }
+                                .padding(horizontal = 12.dp, vertical = 14.dp),
+                            contentAlignment = Alignment.Center
                         ) {
-                            repeat(meal.measures.size) { index ->
+                            Row(
+                                verticalAlignment = Alignment.CenterVertically,
+                                horizontalArrangement = Arrangement.Center,
+                                modifier = Modifier.fillMaxWidth()
+                            ) {
+                                Icon(
+                                    imageVector = Icons.AutoMirrored.Rounded.List,
+                                    contentDescription = "Instructions",
+                                    tint = if (selectedTab == 1)
+                                        MaterialTheme.colorScheme.primary
+                                    else
+                                        MaterialTheme.colorScheme.onSurfaceVariant,
+                                    modifier = Modifier.size(18.dp)
+                                )
+                                Spacer(Modifier.width(8.dp))
                                 Text(
-                                    text = meal.measures[index],
-                                    style = MaterialTheme.typography.bodyMedium,
-                                    color = MaterialTheme.colorScheme.onSecondaryContainer
+                                    text = stringResource(R.string.instructions),
+                                    style = MaterialTheme.typography.labelMedium,
+                                    fontWeight = if (selectedTab == 1)
+                                        androidx.compose.ui.text.font.FontWeight.SemiBold
+                                    else
+                                        androidx.compose.ui.text.font.FontWeight.Normal,
+                                    color = if (selectedTab == 1)
+                                        MaterialTheme.colorScheme.primary
+                                    else
+                                        MaterialTheme.colorScheme.onSurfaceVariant
                                 )
                             }
                         }
                     }
-                }
 
-                Spacer(modifier = Modifier.height(20.dp))
+                    Spacer(modifier = Modifier.height(24.dp))
 
-                // Instructions Section Card
-                Column(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .clip(RoundedCornerShape(16.dp))
-                        .background(MaterialTheme.colorScheme.tertiaryContainer)
-                        .padding(16.dp)
-                ) {
-                    Row(
-                        verticalAlignment = Alignment.CenterVertically,
-                        modifier = Modifier.padding(bottom = 12.dp)
-                    ) {
-                        Icon(
-                            imageVector = Icons.AutoMirrored.Rounded.List,
-                            contentDescription = "Instructions",
-                            tint = MaterialTheme.colorScheme.onTertiaryContainer,
-                            modifier = Modifier.size(24.dp)
-                        )
-                        Spacer(Modifier.width(8.dp))
+                    // Tab Content with enhanced styling
+                    if (selectedTab == 0) {
+                        // Ingredients Tab
+                        Row(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .align(Alignment.CenterHorizontally),
+                            horizontalArrangement = Arrangement.spacedBy(16.dp),
+                            verticalAlignment = Alignment.CenterVertically
+                        ) {
+                            Column(
+                                modifier = Modifier
+                                    .weight(1f)
+                                    .alignByBaseline(),
+                                verticalArrangement = Arrangement.spacedBy(12.dp)
+                            ) {
+                                repeat(meal.ingredients.size) { index ->
+                                    Box(
+                                        modifier = Modifier
+                                            .fillMaxWidth()
+                                            .clip(RoundedCornerShape(10.dp))
+                                            .background(MaterialTheme.colorScheme.surface.copy(alpha = 0.5f))
+                                            .padding(horizontal = 12.dp, vertical = 10.dp),
+                                        contentAlignment = Alignment.CenterStart
+                                    ) {
+                                        Row(
+                                            horizontalArrangement = Arrangement.spacedBy(8.dp),
+                                            verticalAlignment = Alignment.CenterVertically,
+                                            modifier = Modifier.fillMaxWidth()
+                                        ) {
+                                            Text(
+                                                text = "•",
+                                                style = MaterialTheme.typography.bodyMedium,
+                                                color = MaterialTheme.colorScheme.primary,
+                                                fontWeight = androidx.compose.ui.text.font.FontWeight.Bold
+                                            )
+                                            Text(
+                                                text = meal.ingredients[index],
+                                                style = MaterialTheme.typography.bodyMedium,
+                                                color = MaterialTheme.colorScheme.onSurface
+                                            )
+                                        }
+                                    }
+                                }
+                            }
+                            Column(
+                                modifier = Modifier
+                                    .weight(0.65f)
+                                    .alignByBaseline(),
+                                verticalArrangement = Arrangement.spacedBy(12.dp)
+                            ) {
+                                repeat(meal.measures.size) { index ->
+                                    Box(
+                                        modifier = Modifier
+                                            .fillMaxWidth()
+                                            .clip(RoundedCornerShape(10.dp))
+                                            .background(MaterialTheme.colorScheme.primary.copy(alpha = 0.1f))
+                                            .padding(horizontal = 12.dp, vertical = 10.dp),
+                                        contentAlignment = Alignment.Center
+                                    ) {
+                                        Text(
+                                            text = meal.measures[index],
+                                            style = MaterialTheme.typography.bodyMedium,
+                                            color = MaterialTheme.colorScheme.primary,
+                                            fontWeight = androidx.compose.ui.text.font.FontWeight.Medium
+                                        )
+                                    }
+                                }
+                            }
+                        }
+                    } else {
+                        // Instructions Tab
                         Text(
-                            text = stringResource(R.string.instructions),
-                            style = MaterialTheme.typography.titleLarge,
-                            color = MaterialTheme.colorScheme.onTertiaryContainer
+                            text = meal.instructions.orEmpty(),
+                            style = MaterialTheme.typography.bodyLarge,
+                            color = MaterialTheme.colorScheme.onSurface,
+                            lineHeight = MaterialTheme.typography.bodyLarge.lineHeight.times(1.2f)
                         )
                     }
-                    Text(
-                        text = meal.instructions.orEmpty(),
-                        style = MaterialTheme.typography.bodyLarge,
-                        color = MaterialTheme.colorScheme.onTertiaryContainer,
-                        lineHeight = MaterialTheme.typography.bodyLarge.lineHeight
-                    )
                 }
 
                 Spacer(modifier = Modifier.height(80.dp))
@@ -311,7 +417,9 @@ fun MealDetailsScreen(
                     .clip(CircleShape)
                     .background(MaterialTheme.colorScheme.background),
                 onClick = {
-                    isFavorite = !isFavorite
+                    // Find the meal in the meals list to get the MealResponse
+                    val mealResponse = mealsViewModel.findMealById(meal.id)
+                    mealResponse?.let { mealsViewModel.toggleFavorite(it) }
                 }
             ) {
                 Icon(
@@ -350,7 +458,9 @@ fun MealDetailsScreen(
                             .clip(CircleShape)
                             .background(MaterialTheme.colorScheme.background),
                         onClick = {
-                            isFavorite = !isFavorite
+                            // Find the meal in the meals list to get the MealResponse
+                            val mealResponse = mealsViewModel.findMealById(meal.id)
+                            mealResponse?.let { mealsViewModel.toggleFavorite(it) }
                         }
                     ) {
                         Icon(
@@ -391,22 +501,23 @@ private fun InfoChip(
 ) {
     Row(
         modifier = Modifier
-            .clip(RoundedCornerShape(50))
-            .background(MaterialTheme.colorScheme.primaryContainer)
-            .padding(horizontal = 12.dp, vertical = 6.dp),
+            .clip(RoundedCornerShape(14.dp))
+            .background(MaterialTheme.colorScheme.primary.copy(alpha = 0.12f))
+            .padding(horizontal = 14.dp, vertical = 10.dp),
         verticalAlignment = Alignment.CenterVertically,
-        horizontalArrangement = Arrangement.spacedBy(6.dp)
+        horizontalArrangement = Arrangement.spacedBy(8.dp)
     ) {
         Icon(
             imageVector = icon,
             contentDescription = null,
-            tint = MaterialTheme.colorScheme.onPrimaryContainer,
-            modifier = Modifier.size(16.dp)
+            tint = MaterialTheme.colorScheme.primary,
+            modifier = Modifier.size(18.dp)
         )
         Text(
             text = text.ifBlank { stringResource(id = R.string.not_available) },
-            style = MaterialTheme.typography.bodySmall,
-            color = MaterialTheme.colorScheme.onPrimaryContainer
+            style = MaterialTheme.typography.labelMedium,
+            color = MaterialTheme.colorScheme.onSurface,
+            fontWeight = androidx.compose.ui.text.font.FontWeight.Medium
         )
     }
 }

@@ -1,181 +1,79 @@
 package com.kvrae.easykitchen.ui.theme
 import androidx.compose.ui.graphics.Color
 
-// Light Theme - Vibrant Food-Inspired Colors
-val primaryLight = Color(0xFFFF6D00) // Vibrant Orange - appetizing and energetic
+// Light Theme - Modern Red-Orange & Blue Color Scheme
+val primaryLight = Color(0xFFED6E62)
 val onPrimaryLight = Color(0xFFFFFFFF)
-val primaryContainerLight = Color(0xFFFFE0CC) // Light peachy orange
-val onPrimaryContainerLight = Color(0xFF2A1700)
-val secondaryLight = Color(0xFFFF9B4F) // Toasted apricot
-val onSecondaryLight = Color(0xFF2A1400)
-val secondaryContainerLight = Color(0xFFFFE1C8) // Soft apricot cream
-val onSecondaryContainerLight = Color(0xFF321400)
-val tertiaryLight = Color(0xFFFFC389) // Honeyed orange
-val onTertiaryLight = Color(0xFF351600)
-val tertiaryContainerLight = Color(0xFFFFE7D3) // Light honey glaze
-val onTertiaryContainerLight = Color(0xFF3B1800)
+val primaryContainerLight = Color(0xFFFFDCD6)
+val onPrimaryContainerLight = Color(0xFF3B0D06)
+
+val secondaryLight = Color(0xFF5B7D97)
+val onSecondaryLight = Color(0xFFFFFFFF)
+val secondaryContainerLight = Color(0xFFD3E1F0)
+val onSecondaryContainerLight = Color(0xFF1B2E3F)
+
+val tertiaryLight = Color(0xFFF4A88B)
+val onTertiaryLight = Color(0xFFFFFFFF)
+val tertiaryContainerLight = Color(0xFFFFE8E1)
+val onTertiaryContainerLight = Color(0xFF4A1A0E)
+
 val errorLight = Color(0xFFBA1A1A)
 val onErrorLight = Color(0xFFFFFFFF)
 val errorContainerLight = Color(0xFFFFDAD6)
 val onErrorContainerLight = Color(0xFF410002)
-val backgroundLight = Color(0xFFFFFBF9) // Warm cream background
-val onBackgroundLight = Color(0xFF221A15)
-val surfaceLight = Color(0xFFFFFBF9)
-val onSurfaceLight = Color(0xFF221A15)
-val surfaceVariantLight = Color(0xFFFFF4E0) // Soft butter yellow
-val onSurfaceVariantLight = Color(0xFF524639)
-val outlineLight = Color(0xFF857667)
-val outlineVariantLight = Color(0xFFD6C8B8)
+
+val backgroundLight = Color(0xFFFFFBF9)
+val onBackgroundLight = Color(0xFF1F1B16)
+
+val surfaceLight = Color(0xFFFFFFFF)
+val onSurfaceLight = Color(0xFF1F1B16)
+
+val surfaceVariantLight = Color(0xFFF5E6E3)
+val onSurfaceVariantLight = Color(0xFF504540)
+
+val outlineLight = Color(0xFF84746B)
+val outlineVariantLight = Color(0xFFD8C8C3)
 val scrimLight = Color(0xFF000000)
-val inverseSurfaceLight = Color(0xFF38302A)
-val inverseOnSurfaceLight = Color(0xFFFFF0E8)
-val inversePrimaryLight = Color(0xFFFFB77C)
 
-// Light Theme - Medium Contrast
-val primaryLightMediumContrast = Color(0xFFE85D00) // Deeper orange
-val onPrimaryLightMediumContrast = Color(0xFFFFFFFF)
-val primaryContainerLightMediumContrast = Color(0xFFFF8A33)
-val onPrimaryContainerLightMediumContrast = Color(0xFFFFFFFF)
-val secondaryLightMediumContrast = Color(0xFFFFAA66) // Spiced orange
-val onSecondaryLightMediumContrast = Color(0xFF2A1400)
-val secondaryContainerLightMediumContrast = Color(0xFFFFD0A6) // Warm caramel
-val onSecondaryContainerLightMediumContrast = Color(0xFF2F1300)
-val tertiaryLightMediumContrast = Color(0xFFFFD29F) // Creamy butterscotch
-val onTertiaryLightMediumContrast = Color(0xFF2F1200)
-val tertiaryContainerLightMediumContrast = Color(0xFFFFE8CF) // Soft butterscotch
-val onTertiaryContainerLightMediumContrast = Color(0xFF3B1800)
-val errorLightMediumContrast = Color(0xFF8C0009)
-val onErrorLightMediumContrast = Color(0xFFFFFFFF)
-val errorContainerLightMediumContrast = Color(0xFFDA342E)
-val onErrorContainerLightMediumContrast = Color(0xFFFFFFFF)
-val backgroundLightMediumContrast = Color(0xFFFFFBF9)
-val onBackgroundLightMediumContrast = Color(0xFF221A15)
-val surfaceLightMediumContrast = Color(0xFFFFFBF9)
-val onSurfaceLightMediumContrast = Color(0xFF221A15)
-val surfaceVariantLightMediumContrast = Color(0xFFFFF4E0)
-val onSurfaceVariantLightMediumContrast = Color(0xFF4E4235)
-val outlineLightMediumContrast = Color(0xFF6C5F50)
-val outlineVariantLightMediumContrast = Color(0xFF8A7A6A)
-val scrimLightMediumContrast = Color(0xFF000000)
-val inverseSurfaceLightMediumContrast = Color(0xFF38302A)
-val inverseOnSurfaceLightMediumContrast = Color(0xFFFFF0E8)
-val inversePrimaryLightMediumContrast = Color(0xFFFFB77C)
-// Light Theme - High Contrast
-val primaryLightHighContrast = Color(0xFF7A3600) // Dark orange for high contrast
-val onPrimaryLightHighContrast = Color(0xFFFFFFFF)
-val primaryContainerLightHighContrast = Color(0xFFE85D00)
-val onPrimaryContainerLightHighContrast = Color(0xFFFFFFFF)
-val secondaryLightHighContrast = Color(0xFF4C1D00) // Deep roasted orange
-val onSecondaryLightHighContrast = Color(0xFFFFFFFF)
-val secondaryContainerLightHighContrast = Color(0xFFB34700) // Bold amber
-val onSecondaryContainerLightHighContrast = Color(0xFFFFFFFF)
-val tertiaryLightHighContrast = Color(0xFF5A2400) // Dark caramel
-val onTertiaryLightHighContrast = Color(0xFFFFFFFF)
-val tertiaryContainerLightHighContrast = Color(0xFFCC6C2C) // Rich burnt sugar
-val onTertiaryContainerLightHighContrast = Color(0xFFFFFFFF)
-val errorLightHighContrast = Color(0xFF4E0002)
-val onErrorLightHighContrast = Color(0xFFFFFFFF)
-val errorContainerLightHighContrast = Color(0xFF8C0009)
-val onErrorContainerLightHighContrast = Color(0xFFFFFFFF)
-val backgroundLightHighContrast = Color(0xFFFFFBF9)
-val onBackgroundLightHighContrast = Color(0xFF221A15)
-val surfaceLightHighContrast = Color(0xFFFFFBF9)
-val onSurfaceLightHighContrast = Color(0xFF000000)
-val surfaceVariantLightHighContrast = Color(0xFFFFF4E0)
-val onSurfaceVariantLightHighContrast = Color(0xFF2E2418)
-val outlineLightHighContrast = Color(0xFF4E4235)
-val outlineVariantLightHighContrast = Color(0xFF4E4235)
-val scrimLightHighContrast = Color(0xFF000000)
-val inverseSurfaceLightHighContrast = Color(0xFF38302A)
-val inverseOnSurfaceLightHighContrast = Color(0xFFFFFFFF)
-val inversePrimaryLightHighContrast = Color(0xFFFFDEC5)
+val inverseSurfaceLight = Color(0xFF35302A)
+val inverseOnSurfaceLight = Color(0xFFF9F0E8)
+val inversePrimaryLight = Color(0xFFFFB4A8)
 
-// Dark Theme - Vibrant Food-Inspired Colors
-val primaryDark = Color(0xFFFFB77C) // Soft peachy orange for dark mode
-val onPrimaryDark = Color(0xFF4D2600)
-val primaryContainerDark = Color(0xFFFF8A33) // Medium orange
-val onPrimaryContainerDark = Color(0xFFFFFFFF)
-val secondaryDark = Color(0xFFFFC48F) // Toasted apricot glow
-val onSecondaryDark = Color(0xFF3B1A00)
-val secondaryContainerDark = Color(0xFFB34700) // Bold amber
-val onSecondaryContainerDark = Color(0xFFFFE8CF)
-val tertiaryDark = Color(0xFFFFD6A8) // Honey butter
-val onTertiaryDark = Color(0xFF422000)
-val tertiaryContainerDark = Color(0xFFCC6C2C) // Burnt sugar
-val onTertiaryContainerDark = Color(0xFFFFE8CF)
+// --- DARK THEME - Harmonious with Light Theme ---
+// Same Red-Orange Primary & Blue Secondary, optimized for dark backgrounds
+val primaryDark = Color(0xFFFFB4A8)      // Light coral (tint of ED6E62)
+val onPrimaryDark = Color(0xFF5C1B0F)   // Dark red-brown
+val primaryContainerDark = Color(0xFF8E2D23)  // Deep red-orange
+val onPrimaryContainerDark = Color(0xFFFFDAD4)
+
+val secondaryDark = Color(0xFFB7C9E0)   // Light slate blue (tint of 5B7D97)
+val onSecondaryDark = Color(0xFF1B3047) // Dark blue
+val secondaryContainerDark = Color(0xFF3A4A63) // Medium blue
+val onSecondaryContainerDark = Color(0xFFD3E1F0)
+
+val tertiaryDark = Color(0xFFFFB4A8)    // Light peachy (tint of F4A88B)
+val onTertiaryDark = Color(0xFF5C1F15) // Dark brown
+val tertiaryContainerDark = Color(0xFF8E3F2F) // Medium peach
+val onTertiaryContainerDark = Color(0xFFFFE8E1)
+
 val errorDark = Color(0xFFFFB4AB)
 val onErrorDark = Color(0xFF690005)
 val errorContainerDark = Color(0xFF93000A)
 val onErrorContainerDark = Color(0xFFFFDAD6)
-val backgroundDark = Color(0xFF1A1410) // Rich dark brown
-val onBackgroundDark = Color(0xFFF0E4DA)
-val surfaceDark = Color(0xFF1A1410)
-val onSurfaceDark = Color(0xFFF0E4DA)
-val surfaceVariantDark = Color(0xFF524639) // Warm dark brown
-val onSurfaceVariantDark = Color(0xFFD6C8B8)
-val outlineDark = Color(0xFF9F9281)
-val outlineVariantDark = Color(0xFF524639)
+
+val backgroundDark = Color(0xFF0F0D0C)   // Deep, rich dark base
+val onBackgroundDark = Color(0xFFEBE0DE)
+
+val surfaceDark = Color(0xFF141211)     // Elevated surface (slightly lighter than background)
+val onSurfaceDark = Color(0xFFEBE0DE)
+
+val surfaceVariantDark = Color(0xFF26211F) // For cards and fields (same red-brown family)
+val onSurfaceVariantDark = Color(0xFFD8C2BE)
+
+val outlineDark = Color(0xFF9A8A84)
+val outlineVariantDark = Color(0xFF534341)
 val scrimDark = Color(0xFF000000)
-val inverseSurfaceDark = Color(0xFFF0E4DA)
-val inverseOnSurfaceDark = Color(0xFF38302A)
-val inversePrimaryDark = Color(0xFFFF6D00)
 
-// Dark Theme - Medium Contrast
-val primaryDarkMediumContrast = Color(0xFFFFBD8A) // Brighter peachy orange
-val onPrimaryDarkMediumContrast = Color(0xFF2A1400)
-val primaryContainerDarkMediumContrast = Color(0xFFFF9B4F)
-val onPrimaryContainerDarkMediumContrast = Color(0xFF000000)
-val secondaryDarkMediumContrast = Color(0xFFFFCE9F) // Brighter toasted apricot
-val onSecondaryDarkMediumContrast = Color(0xFF2A1400)
-val secondaryContainerDarkMediumContrast = Color(0xFFFFB26A) // Warm amber glaze
-val onSecondaryContainerDarkMediumContrast = Color(0xFF000000)
-val tertiaryDarkMediumContrast = Color(0xFFFFDCB3) // Light honey butter
-val onTertiaryDarkMediumContrast = Color(0xFF2A1400)
-val tertiaryContainerDarkMediumContrast = Color(0xFFE08A44) // Deep caramel
-val onTertiaryContainerDarkMediumContrast = Color(0xFF000000)
-val errorDarkMediumContrast = Color(0xFFFFBAB1)
-val onErrorDarkMediumContrast = Color(0xFF370001)
-val errorContainerDarkMediumContrast = Color(0xFFFF5449)
-val onErrorContainerDarkMediumContrast = Color(0xFF000000)
-val backgroundDarkMediumContrast = Color(0xFF1A1410)
-val onBackgroundDarkMediumContrast = Color(0xFFF0E4DA)
-val surfaceDarkMediumContrast = Color(0xFF1A1410)
-val onSurfaceDarkMediumContrast = Color(0xFFFFFAF8)
-val surfaceVariantDarkMediumContrast = Color(0xFF524639)
-val onSurfaceVariantDarkMediumContrast = Color(0xFFDBCDBC)
-val outlineDarkMediumContrast = Color(0xFFB1A596)
-val outlineVariantDarkMediumContrast = Color(0xFF918677)
-val scrimDarkMediumContrast = Color(0xFF000000)
-val inverseSurfaceDarkMediumContrast = Color(0xFFF0E4DA)
-val inverseOnSurfaceDarkMediumContrast = Color(0xFF312922)
-val inversePrimaryDarkMediumContrast = Color(0xFFE85D00)
-
-// Dark Theme - High Contrast
-val primaryDarkHighContrast = Color(0xFFFFFAF8) // Near white with warm tint
-val onPrimaryDarkHighContrast = Color(0xFF000000)
-val primaryContainerDarkHighContrast = Color(0xFFFFBD8A)
-val onPrimaryContainerDarkHighContrast = Color(0xFF000000)
-val secondaryDarkHighContrast = Color(0xFFFFF0E4) // Pale apricot cream
-val onSecondaryDarkHighContrast = Color(0xFF000000)
-val secondaryContainerDarkHighContrast = Color(0xFFFFC48F)
-val onSecondaryContainerDarkHighContrast = Color(0xFF000000)
-val tertiaryDarkHighContrast = Color(0xFFFFF3E6) // Pale honey cream
-val onTertiaryDarkHighContrast = Color(0xFF000000)
-val tertiaryContainerDarkHighContrast = Color(0xFFFFD6A8)
-val onTertiaryContainerDarkHighContrast = Color(0xFF000000)
-val errorDarkHighContrast = Color(0xFFFFF9F9)
-val onErrorDarkHighContrast = Color(0xFF000000)
-val errorContainerDarkHighContrast = Color(0xFFFFBAB1)
-val onErrorContainerDarkHighContrast = Color(0xFF000000)
-val backgroundDarkHighContrast = Color(0xFF1A1410)
-val onBackgroundDarkHighContrast = Color(0xFFF0E4DA)
-val surfaceDarkHighContrast = Color(0xFF1A1410)
-val onSurfaceDarkHighContrast = Color(0xFFFFFFFF)
-val surfaceVariantDarkHighContrast = Color(0xFF524639)
-val onSurfaceVariantDarkHighContrast = Color(0xFFFFFAF8)
-val outlineDarkHighContrast = Color(0xFFDBCDBC)
-val outlineVariantDarkHighContrast = Color(0xFFDBCDBC)
-val scrimDarkHighContrast = Color(0xFF000000)
-val inverseSurfaceDarkHighContrast = Color(0xFFF0E4DA)
-val inverseOnSurfaceDarkHighContrast = Color(0xFF000000)
-val inversePrimaryDarkHighContrast = Color(0xFF5D2900)
+val inverseSurfaceDark = Color(0xFFEBE0DE)
+val inverseOnSurfaceDark = Color(0xFF362E2D)
+val inversePrimaryDark = Color(0xFFED6E62) // Same as light primary

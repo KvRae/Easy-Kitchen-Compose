@@ -3,17 +3,20 @@ package com.kvrae.easykitchen.presentation.miscellaneous.components
 import android.util.Log
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.rounded.Add
@@ -21,7 +24,9 @@ import androidx.compose.material.icons.rounded.Clear
 import androidx.compose.material.icons.rounded.Favorite
 import androidx.compose.material.icons.rounded.FavoriteBorder
 import androidx.compose.material.icons.rounded.Place
+import androidx.compose.material.icons.rounded.Restaurant
 import androidx.compose.material3.Card
+import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
@@ -32,12 +37,14 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import coil.compose.SubcomposeAsyncImage
@@ -55,11 +62,18 @@ fun MealCard(
     meal: Meal = Meal(),
     onMealClick: (String) -> Unit
 ) {
+    val shadowAlpha = if (isSystemInDarkTheme()) 0.4f else 0.25f
     Card(
         modifier = modifier
-            .clip(RoundedCornerShape(8.dp))
-            .width(240.dp)
-            .padding(8.dp),
+            .width(220.dp)
+            .padding(8.dp)
+            .shadow(
+                elevation = 8.dp,
+                shape = RoundedCornerShape(24.dp),
+                spotColor = MaterialTheme.colorScheme.primary.copy(alpha = shadowAlpha)
+            ),
+        shape = RoundedCornerShape(24.dp),
+        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface)
     ) {
         Column(
             modifier = Modifier
@@ -67,7 +81,7 @@ fun MealCard(
                 .clickable {
                     onMealClick(meal.id.orEmpty())
                 }
-                .padding(8.dp),
+                .padding(12.dp),
             verticalArrangement = Arrangement.Top,
             horizontalAlignment = Alignment.Start
         ) {
@@ -79,28 +93,41 @@ fun MealCard(
                     }
                 },
                 contentDescription = stringResource(R.string.meal_image),
-                contentScale = ContentScale.Fit,
+                contentScale = ContentScale.Crop,
                 modifier = Modifier
-                    .clip(RoundedCornerShape(16.dp))
-                    .height(200.dp)
-                    .align(Alignment.CenterHorizontally),
+                    .fillMaxWidth()
+                    .height(160.dp)
+                    .clip(RoundedCornerShape(20.dp)),
             )
-            Spacer(modifier = Modifier.height(8.dp))
+            Spacer(modifier = Modifier.height(12.dp))
             Text(
                 text = meal.name.orEmpty(),
                 overflow = TextOverflow.Ellipsis,
                 maxLines = 1,
-                style = MaterialTheme.typography.titleSmall,
-                fontWeight = FontWeight.Bold,
-                modifier = Modifier.padding(horizontal = 8.dp)
+                style = MaterialTheme.typography.titleMedium,
+                fontWeight = FontWeight.ExtraBold,
+                color = MaterialTheme.colorScheme.onSurface,
+                modifier = Modifier.padding(horizontal = 4.dp)
             )
-            Spacer(modifier = Modifier.height(4.dp))
-            Text(
-                text = meal.area.orEmpty(),
-                style = MaterialTheme.typography.bodyMedium,
-                fontWeight = FontWeight.Light,
-                modifier = Modifier.padding(horizontal = 8.dp)
-            )
+            Spacer(modifier = Modifier.height(6.dp))
+            Row(
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.spacedBy(4.dp),
+                modifier = Modifier.padding(horizontal = 4.dp)
+            ) {
+                Icon(
+                    imageVector = Icons.Rounded.Place,
+                    contentDescription = null,
+                    tint = MaterialTheme.colorScheme.primary,
+                    modifier = Modifier.size(14.dp)
+                )
+                Text(
+                    text = meal.area.orEmpty(),
+                    style = MaterialTheme.typography.labelMedium,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    fontWeight = FontWeight.Medium
+                )
+            }
         }
     }
 }
@@ -109,33 +136,48 @@ fun MealCard(
 fun MealShimmerCard(modifier: Modifier = Modifier) {
     Box(
         modifier = Modifier
-            .clip(RoundedCornerShape(16.dp))
+            .fillMaxWidth()
+            .height(160.dp)
+            .clip(RoundedCornerShape(20.dp))
             .shimmer()
-            .height(200.dp)
-            .background(MaterialTheme.colorScheme.onBackground)
+            .background(MaterialTheme.colorScheme.surfaceVariant)
     )
 }
 
 @Composable
 fun CategoryCard(
-    category: Category
+    category: Category,
+    onCategoryClick: (String) -> Unit
 ) {
+    val shadowAlpha = if (isSystemInDarkTheme()) 0.2f else 0.1f
     Card(
         modifier = Modifier
             .padding(8.dp)
-            .clip(RoundedCornerShape(50)),
+            .shadow(
+                elevation = 4.dp,
+                shape = RoundedCornerShape(50),
+                spotColor = MaterialTheme.colorScheme.primary.copy(alpha = shadowAlpha)
+            )
+            .clickable { onCategoryClick(category.name.orEmpty()) },
+        shape = RoundedCornerShape(50),
+        colors = CardDefaults.cardColors(
+            containerColor = MaterialTheme.colorScheme.surfaceVariant.copy(
+                alpha = 0.45f
+            )
+        )
     ) {
         Row(
             modifier = Modifier
-                .padding(8.dp),
+                .padding(6.dp)
+                .padding(end = 12.dp),
             horizontalArrangement = Arrangement.Start,
             verticalAlignment = Alignment.CenterVertically
         ) {
             Box(
                 modifier = Modifier
-                    .size(42.dp)
-                    .clip(RoundedCornerShape(60))
-                    .background(MaterialTheme.colorScheme.tertiary)
+                    .size(40.dp)
+                    .clip(CircleShape)
+                    .background(MaterialTheme.colorScheme.primaryContainer)
                     .padding(4.dp),
 
                 ) {
@@ -143,9 +185,9 @@ fun CategoryCard(
                     model = category.image.orEmpty(),
                     loading = {
                         CircularProgressIndicator(
-                            color = MaterialTheme.colorScheme.onPrimary,
-                            strokeWidth = 2.dp
-
+                            color = MaterialTheme.colorScheme.primary,
+                            strokeWidth = 2.dp,
+                            modifier = Modifier.size(20.dp)
                         )
                     },
                     contentDescription = stringResource(R.string.meal_image),
@@ -153,12 +195,12 @@ fun CategoryCard(
                     modifier = Modifier.fillMaxSize(),
                 )
             }
+            Spacer(modifier = Modifier.width(8.dp))
             Text(
                 text = category.name.orEmpty(),
-                color = MaterialTheme.colorScheme.onBackground,
-                style = MaterialTheme.typography.titleSmall,
-                fontWeight = FontWeight.Bold,
-                modifier = Modifier.padding(horizontal = 8.dp)
+                color = MaterialTheme.colorScheme.onSurface,
+                style = MaterialTheme.typography.labelLarge,
+                fontWeight = FontWeight.SemiBold
             )
         }
     }
@@ -170,60 +212,102 @@ fun MealByAreaAnsCategoryCard(
     meal: Meal = Meal(),
     onMealClick: (String) -> Unit
 ) {
+    val shadowAlpha = if (isSystemInDarkTheme()) 0.3f else 0.15f
     Card(
         modifier = modifier
+            .width(340.dp) // Fixed width for horizontal scrolling
             .padding(8.dp)
-            .clip(RoundedCornerShape(8.dp))
+            .shadow(
+                elevation = 12.dp,
+                shape = RoundedCornerShape(24.dp),
+                spotColor = MaterialTheme.colorScheme.primary.copy(alpha = shadowAlpha)
+            ),
+        shape = RoundedCornerShape(24.dp),
+        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface)
     ) {
         Row(
             modifier = Modifier
-                .fillMaxSize()
-                .clickable {
-                    onMealClick(meal.id.orEmpty())
-                }
-                .padding(8.dp),
-            verticalAlignment = Alignment.CenterVertically,
-            horizontalArrangement = Arrangement.Start
+                .fillMaxWidth()
+                .clickable { onMealClick(meal.id.orEmpty()) }
+                .padding(12.dp),
+            verticalAlignment = Alignment.CenterVertically
         ) {
-            SubcomposeAsyncImage(
-                model = meal.image,
-                loading = {
-                    CircularProgressIndicator()
-                },
-                contentDescription = stringResource(R.string.meal_image),
-                contentScale = ContentScale.Fit,
+            Box(
                 modifier = Modifier
-                    .clip(RoundedCornerShape(50))
-                    .height(64.dp),
-            )
-            Spacer(modifier = Modifier.height(8.dp))
+                    .size(100.dp)
+                    .shadow(elevation = 4.dp, shape = RoundedCornerShape(20.dp))
+                    .clip(RoundedCornerShape(20.dp))
+                    .background(MaterialTheme.colorScheme.surfaceVariant)
+            ) {
+                SubcomposeAsyncImage(
+                    model = meal.image,
+                    loading = {
+                        Box(
+                            modifier = Modifier.fillMaxSize(),
+                            contentAlignment = Alignment.Center
+                        ) {
+                            CircularProgressIndicator(
+                                strokeWidth = 2.dp,
+                                modifier = Modifier.size(24.dp)
+                            )
+                        }
+                    },
+                    contentDescription = stringResource(R.string.meal_image),
+                    contentScale = ContentScale.Crop,
+                    modifier = Modifier.fillMaxSize(),
+                )
+            }
+
+            Spacer(modifier = Modifier.width(16.dp))
+            
             Column(
-                modifier = Modifier
-                    .fillMaxSize()
-                    .padding(8.dp),
-                verticalArrangement = Arrangement.Top,
-                horizontalAlignment = Alignment.Start
+                modifier = Modifier.weight(1f),
+                verticalArrangement = Arrangement.Center
             ) {
                 Text(
                     text = meal.name.orEmpty(),
-                    style = MaterialTheme.typography.titleSmall,
-                    fontWeight = FontWeight.Bold,
-                    modifier = Modifier.padding(horizontal = 8.dp)
+                    style = MaterialTheme.typography.titleMedium,
+                    fontWeight = FontWeight.ExtraBold,
+                    color = MaterialTheme.colorScheme.onSurface,
+                    maxLines = 2,
+                    overflow = TextOverflow.Ellipsis
                 )
+
+                Spacer(modifier = Modifier.height(8.dp))
+
+                Row(verticalAlignment = Alignment.CenterVertically) {
+                    Icon(
+                        imageVector = Icons.Rounded.Restaurant,
+                        contentDescription = null,
+                        tint = MaterialTheme.colorScheme.primary,
+                        modifier = Modifier.size(16.dp)
+                    )
+                    Spacer(modifier = Modifier.width(4.dp))
+                    Text(
+                        text = meal.category.orEmpty(),
+                        style = MaterialTheme.typography.labelMedium,
+                        color = MaterialTheme.colorScheme.primary,
+                        fontWeight = FontWeight.Bold
+                    )
+                }
+                
                 Spacer(modifier = Modifier.height(4.dp))
-                Text(
-                    text = meal.category.orEmpty(),
-                    style = MaterialTheme.typography.bodyMedium,
-                    fontWeight = FontWeight.Light,
-                    modifier = Modifier.padding(horizontal = 8.dp)
-                )
-                Spacer(modifier = Modifier.height(4.dp))
-                Text(
-                    text = meal.area.orEmpty(),
-                    style = MaterialTheme.typography.bodyMedium,
-                    fontWeight = FontWeight.Light,
-                    modifier = Modifier.padding(horizontal = 8.dp)
-                )
+
+                Row(verticalAlignment = Alignment.CenterVertically) {
+                    Icon(
+                        imageVector = Icons.Rounded.Place,
+                        contentDescription = null,
+                        tint = MaterialTheme.colorScheme.onSurfaceVariant,
+                        modifier = Modifier.size(16.dp)
+                    )
+                    Spacer(modifier = Modifier.width(4.dp))
+                    Text(
+                        text = meal.area.orEmpty(),
+                        style = MaterialTheme.typography.bodySmall,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant,
+                        fontWeight = FontWeight.Medium
+                    )
+                }
             }
         }
     }
@@ -239,50 +323,105 @@ fun IngredientCard(
     Card(
         modifier = modifier
             .padding(8.dp)
-            .clip(RoundedCornerShape(8.dp))
+            .clip(RoundedCornerShape(20.dp))
+            .clickable { onIngredientClick(ingredient.name.orEmpty()) },
+        shape = RoundedCornerShape(20.dp),
+        colors = CardDefaults.cardColors(
+            containerColor = if (isChecked)
+                MaterialTheme.colorScheme.primary
+            else
+                MaterialTheme.colorScheme.secondaryContainer.copy(alpha = 0.3f)
+        )
     ) {
-        Row(
+        Column(
             modifier = Modifier
                 .fillMaxSize()
-                .padding(8.dp),
-            verticalAlignment = Alignment.CenterVertically,
-            horizontalArrangement = Arrangement.SpaceBetween
+                .padding(14.dp),
+            horizontalAlignment = Alignment.CenterHorizontally,
+            verticalArrangement = Arrangement.Center
         ) {
-            SubcomposeAsyncImage(
-                model = ingredient.image,
-                loading = {
-                    CircularProgressIndicator()
-                },
-                contentDescription = stringResource(R.string.meal_image),
-                contentScale = ContentScale.Fit,
+            // Image with modern container
+            Box(
                 modifier = Modifier
-                    .clip(RoundedCornerShape(50))
-                    .height(48.dp)
-                    .background(MaterialTheme.colorScheme.background)
-                    .padding(4.dp),
+                    .fillMaxWidth(0.6f)
+                    .aspectRatio(1f)
+                    .clip(RoundedCornerShape(16.dp))
+                    .background(
+                        if (isChecked)
+                            MaterialTheme.colorScheme.onPrimary.copy(alpha = 0.2f)
+                        else
+                            MaterialTheme.colorScheme.secondaryContainer,
+                    ),
+                contentAlignment = Alignment.Center
+            ) {
+                SubcomposeAsyncImage(
+                    model = ingredient.image,
+                    loading = {
+                        CircularProgressIndicator(
+                            color = MaterialTheme.colorScheme.primary,
+                            strokeWidth = 2.5.dp,
+                            modifier = Modifier.size(32.dp)
+                        )
+                    },
+                    contentDescription = stringResource(R.string.meal_image),
+                    contentScale = ContentScale.Crop,
+                    modifier = Modifier
+                        .fillMaxSize()
+                        .clip(RoundedCornerShape(16.dp))
+                )
+            }
 
-            )
+            Spacer(modifier = Modifier.height(12.dp))
+
+            // Ingredient Name
             Text(
                 text = ingredient.name.orEmpty(),
                 style = MaterialTheme.typography.titleSmall,
+                fontWeight = FontWeight.ExtraBold,
+                color = if (isChecked) MaterialTheme.colorScheme.onPrimary else MaterialTheme.colorScheme.onSurface,
+                textAlign = TextAlign.Center,
+                maxLines = 2,
+                overflow = TextOverflow.Ellipsis,
+                modifier = Modifier.fillMaxWidth()
             )
 
-            IconToggleButton(
-                checked = isChecked,
-                onCheckedChange = {
-                    onIngredientClick("Name")
-                }
+            Spacer(modifier = Modifier.height(10.dp))
+
+            // Add/Remove Button with modern style
+            Box(
+                modifier = Modifier
+                    .size(48.dp)
+                    .clip(RoundedCornerShape(14.dp))
+                    .background(
+                        if (isChecked)
+                            MaterialTheme.colorScheme.onPrimary.copy(alpha = 0.2f)
+                        else
+                            MaterialTheme.colorScheme.secondaryContainer,
+                        shape = RoundedCornerShape(14.dp)
+                    ),
+                contentAlignment = Alignment.Center
             ) {
-                Icon(
-                    imageVector = if (!isChecked) Icons.Rounded.Add else Icons.Rounded.Clear,
-                    contentDescription = "Add/Remove Icon"
-                )
+                IconToggleButton(
+                    checked = isChecked,
+                    onCheckedChange = {
+                        onIngredientClick(ingredient.name.orEmpty())
+                    },
+                    modifier = Modifier.size(48.dp)
+                ) {
+                    Icon(
+                        imageVector = if (!isChecked) Icons.Rounded.Add else Icons.Rounded.Clear,
+                        contentDescription = if (isChecked) "Remove" else "Add",
+                        tint = if (isChecked)
+                            MaterialTheme.colorScheme.onPrimary
+                        else
+                            MaterialTheme.colorScheme.onSurfaceVariant,
+                        modifier = Modifier.size(24.dp)
+                    )
+                }
             }
         }
-
     }
 }
-
 
 @Composable
 fun MealImageCoveredCard(
@@ -309,7 +448,7 @@ fun MealImageCoveredCard(
             contentDescription = stringResource(R.string.meal_image),
             contentScale = ContentScale.FillWidth,
             modifier = Modifier
-                .height(150.dp)
+                .height(180.dp)
                 .fillMaxWidth()
         )
 
@@ -318,88 +457,120 @@ fun MealImageCoveredCard(
                 .fillMaxWidth()
                 .background(
                     brush = Brush.verticalGradient(
-                        colors = listOf(Color.Transparent, Color.Black.copy(0.7f))
+                        colors = listOf(
+                            Color.Transparent,
+                            Color.Transparent,
+                            Color.Black.copy(0.5f),
+                            Color.Black.copy(0.85f)
+                        )
                     )
                 )
-                .height(150.dp)
+                .height(180.dp)
         ) {
             val favoriteIcon = if (isFavorite)
                 Icons.Rounded.Favorite
             else Icons.Rounded.FavoriteBorder
             IconButton(
                 modifier = Modifier
-                    .padding(4.dp)
+                    .padding(12.dp)
                     .align(Alignment.TopEnd)
                     .clip(RoundedCornerShape(32.dp))
-                    .size(46.dp)
-                    .background(MaterialTheme.colorScheme.background),
+                    .size(42.dp)
+                    .background(MaterialTheme.colorScheme.surface.copy(alpha = 0.9f)),
                 onClick = {
                     onFavoriteClick(meal.id.orEmpty())
                 }
             ) {
                 Icon(
                     imageVector = favoriteIcon,
-                    contentDescription = "Add Icon",
-                    tint = MaterialTheme.colorScheme.primary
+                    contentDescription = stringResource(R.string.meal_image),
+                    tint = MaterialTheme.colorScheme.primary,
+                    modifier = Modifier.size(28.dp)
                 )
             }
             Text(
+                text = meal.name.orEmpty(),
+                style = MaterialTheme.typography.headlineSmall,
+                softWrap = true,
+                fontWeight = FontWeight.ExtraBold,
+                color = Color.White,
+                maxLines = 2,
+                overflow = TextOverflow.Ellipsis,
                 modifier = Modifier
                     .align(Alignment.CenterStart)
-                    .padding(bottom = 16.dp, start = 8.dp, end = 8.dp),
-                text = meal.name.orEmpty(),
-                style = MaterialTheme.typography.titleLarge,
-                softWrap = true,
-                fontWeight = FontWeight.Black,
-                color = Color.White
+                    .padding(start = 16.dp, bottom = 16.dp)
+                    .fillMaxWidth(0.7f)
             )
-            Box(
+
+            Column(
                 modifier = Modifier
                     .align(Alignment.BottomStart)
-                    .padding(bottom = 8.dp)
-                    .clip(RoundedCornerShape(topEnd = 32.dp, bottomEnd = 32.dp))
-                    .background(MaterialTheme.colorScheme.background)
+                    .fillMaxWidth(0.75f)
+                    .padding(start = 16.dp, end = 12.dp, bottom = 12.dp),
+                verticalArrangement = Arrangement.spacedBy(8.dp)
             ) {
-                Text(
-                    modifier = Modifier.padding(
-                        start = 16.dp,
-                        end = 16.dp,
-                        top = 8.dp,
-                        bottom = 8.dp
-                    ),
-                    text = meal.area.orEmpty(),
-                    style = MaterialTheme.typography.titleMedium,
-                    fontWeight = FontWeight.Bold,
-                    color = MaterialTheme.colorScheme.tertiary
-                )
-            }
-            if(ingredinets.size > 3)
-                Box(
-                    modifier = Modifier
-                        .fillMaxWidth(0.3f)
-                        .align(Alignment.BottomEnd)
-                        .padding(bottom = 8.dp)
-                        .clip(RoundedCornerShape(topStart = 32.dp, bottomStart = 32.dp))
-                        .background(MaterialTheme.colorScheme.background)
-                )
-                {
-                    Row {
-                        repeat(3) {
-                            Log.d("Ingredients List", ingredinets[it])
-                            val name = ingredinets[it]
-                            SubcomposeAsyncImage(
-                                model = "$INGREDIENT_IMAGE_URL$name.png",
-                                contentDescription = stringResource(R.string.meal_image),
-                                contentScale = ContentScale.Fit,
-                                modifier = Modifier
-                                    .clip(RoundedCornerShape(50))
-                                    .height(32.dp)
-                                    .padding(4.dp),
-                            )
 
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.spacedBy(8.dp),
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    Box(
+                        modifier = Modifier
+                            .clip(RoundedCornerShape(20.dp))
+                            .background(MaterialTheme.colorScheme.primary.copy(alpha = 0.95f))
+                            .padding(horizontal = 12.dp, vertical = 6.dp)
+                    ) {
+                        Text(
+                            text = meal.area.orEmpty(),
+                            style = MaterialTheme.typography.labelMedium,
+                            fontWeight = FontWeight.SemiBold,
+                            color = MaterialTheme.colorScheme.onPrimary
+                        )
+                    }
+
+                    if (ingredinets.isNotEmpty()) {
+                        Box(
+                            modifier = Modifier
+                                .clip(RoundedCornerShape(20.dp))
+                                .background(MaterialTheme.colorScheme.secondary.copy(alpha = 0.85f))
+                                .padding(horizontal = 8.dp, vertical = 4.dp)
+                        ) {
+                            Text(
+                                text = "${ingredinets.size} ingredients",
+                                style = MaterialTheme.typography.labelSmall,
+                                fontWeight = FontWeight.Medium,
+                                color = MaterialTheme.colorScheme.onSecondary
+                            )
                         }
                     }
                 }
+            }
+
+            if (ingredinets.size > 3) {
+                Row(
+                    modifier = Modifier
+                        .align(Alignment.BottomEnd)
+                        .padding(bottom = 12.dp, end = 12.dp)
+                        .clip(RoundedCornerShape(20.dp))
+                        .background(MaterialTheme.colorScheme.surface.copy(alpha = 0.95f))
+                        .padding(horizontal = 4.dp, vertical = 4.dp),
+                    horizontalArrangement = Arrangement.spacedBy(2.dp)
+                ) {
+                    repeat(minOf(3, ingredinets.size)) {
+                        Log.d("Ingredients List", ingredinets[it])
+                        val name = ingredinets[it]
+                        SubcomposeAsyncImage(
+                            model = "$INGREDIENT_IMAGE_URL$name.png",
+                            contentDescription = stringResource(R.string.meal_image),
+                            contentScale = ContentScale.Crop,
+                            modifier = Modifier
+                                .clip(RoundedCornerShape(50))
+                                .size(32.dp),
+                        )
+                    }
+                }
+            }
         }
     }
 }
@@ -410,10 +581,10 @@ fun MealCoveredImageShimmer(modifier: Modifier = Modifier) {
         modifier = Modifier
             .padding(8.dp)
             .fillMaxWidth()
-            .height(150.dp)
+            .height(180.dp)
             .clip(RoundedCornerShape(16.dp))
             .shimmer()
-            .background(MaterialTheme.colorScheme.onBackground)
+            .background(MaterialTheme.colorScheme.surfaceVariant)
 
     )
 }
@@ -438,14 +609,14 @@ fun MealInfoCard(
         Icon(
             imageVector = icon,
             contentDescription = "an Icon",
-            tint = MaterialTheme.colorScheme.onBackground
+            tint = MaterialTheme.colorScheme.onTertiaryContainer
         )
 
         Spacer(Modifier.padding(4.dp))
         Text(
             text = text,
             style = MaterialTheme.typography.labelSmall,
-            color = MaterialTheme.colorScheme.onBackground
+            color = MaterialTheme.colorScheme.onTertiaryContainer
         )
     }
 }

@@ -25,10 +25,12 @@ fun CircularLoadingScreen(modifier: Modifier = Modifier) {
     Box(
         modifier
             .fillMaxSize()
-            .background(MaterialTheme.colorScheme.background),
+            .background(MaterialTheme.colorScheme.surface),
         contentAlignment = Alignment.Center
     ) {
-        CircularProgressIndicator()
+        LottieAnimation(
+            rawRes = R.raw.food_loading,
+        )
 
     }
 }
@@ -45,7 +47,9 @@ fun LoadingTransparentScreen(modifier: Modifier = Modifier) {
             modifier.fillMaxSize(),
             contentAlignment = Alignment.Center
         ) {
-            CircularProgressIndicator()
+            LottieAnimation(
+                rawRes = R.raw.food_loading,
+            )
         }
 
     }
@@ -55,7 +59,7 @@ fun LoadingTransparentScreen(modifier: Modifier = Modifier) {
 fun MealsImageCoveredListLoad(modifier: Modifier = Modifier) {
     Column(
         modifier = modifier
-            .background(MaterialTheme.colorScheme.background)
+            .background(MaterialTheme.colorScheme.surface)
         ,
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
@@ -74,9 +78,7 @@ fun LottieAnimation(
     val restart = iterations == 1
     val composition by rememberLottieComposition(LottieCompositionSpec.RawRes(rawRes))
     LottieAnimation(
-        modifier = Modifier
-            .background(MaterialTheme.colorScheme.surface)
-            .fillMaxSize(),
+        modifier = Modifier.fillMaxSize(),
         composition = composition,
         iterations = iterations,
         restartOnPlay = restart,

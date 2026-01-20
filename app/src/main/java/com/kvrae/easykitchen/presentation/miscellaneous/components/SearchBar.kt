@@ -13,13 +13,14 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.rounded.ArrowBack
-import androidx.compose.material.icons.rounded.ArrowBack
+import androidx.compose.material.icons.rounded.Clear
 import androidx.compose.material.icons.rounded.Search
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.ListItem
 import androidx.compose.material3.ListItemDefaults
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextField
 import androidx.compose.material3.TextFieldDefaults
@@ -115,19 +116,15 @@ fun SearchBarField(
 ) {
 
     Box {
-        TextField(
+        OutlinedTextField(
+            shape = RoundedCornerShape(16.dp),
             modifier = Modifier
-                .padding(8.dp)
-                .clip(RoundedCornerShape(56.dp))
+                .padding(16.dp)
                 .height(56.dp)
                 .fillMaxWidth(),
             value = "",
             placeholder = { Text(text = placeholder.orEmpty())},
             onValueChange = {},
-            colors = TextFieldDefaults.colors(
-                unfocusedIndicatorColor = Color.Transparent,
-                focusedIndicatorColor = Color.Transparent
-            ),
             leadingIcon = {
                 Icon(imageVector = Icons.Rounded.Search, contentDescription = "Search Icon")
             }
@@ -143,4 +140,40 @@ fun SearchBarField(
                 }
         )
     }
+}
+
+@Composable
+fun SearchField(
+    query: String,
+    onQueryChange: (String) -> Unit,
+    onClearClick: () -> Unit,
+    modifier: Modifier = Modifier
+) {
+    OutlinedTextField(
+        shape = RoundedCornerShape(16.dp),
+        modifier = modifier
+            .height(56.dp),
+        value = query,
+        onValueChange = onQueryChange,
+        placeholder = { Text(text = "Search ingredients...") },
+        leadingIcon = {
+            Icon(
+                imageVector = Icons.Rounded.Search,
+                contentDescription = "Search Icon",
+                tint = MaterialTheme.colorScheme.onSurfaceVariant
+            )
+        },
+        trailingIcon = {
+            if (query.isNotEmpty()) {
+                IconButton(onClick = onClearClick) {
+                    Icon(
+                        imageVector = Icons.Rounded.Clear,
+                        contentDescription = "Clear Search",
+                        tint = MaterialTheme.colorScheme.onSurfaceVariant
+                    )
+                }
+            }
+        },
+        singleLine = true
+    )
 }
