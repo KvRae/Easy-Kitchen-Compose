@@ -138,6 +138,12 @@ dependencies {
     // Compose Test dependencies
     testImplementation(libs.junit)
 
+    // Testing dependencies
+    testImplementation("io.mockk:mockk:1.13.5")
+    testImplementation("io.ktor:ktor-client-mock:${libs.versions.ktor.version.get()}")
+    testImplementation("org.jetbrains.kotlinx:kotlinx-coroutines-test:1.7.3")
+    testImplementation("org.jetbrains.kotlinx:kotlinx-serialization-json:${libs.versions.serialization.version.get()}")
+
     //  AndroidX Test dependencies
     androidTestImplementation(libs.androidx.junit)
     androidTestImplementation(libs.androidx.espresso.core)
