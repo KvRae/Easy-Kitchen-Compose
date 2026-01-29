@@ -1,6 +1,7 @@
 package com.kvrae.easykitchen.presentation.register
 
 import android.content.Context
+import android.util.Log
 import android.widget.Toast
 import androidx.compose.animation.core.FastOutSlowInEasing
 import androidx.compose.animation.core.animateFloatAsState
@@ -46,13 +47,17 @@ import androidx.navigation.NavController
 import com.kvrae.easykitchen.R
 import com.kvrae.easykitchen.presentation.miscellaneous.components.FormButton
 import com.kvrae.easykitchen.presentation.miscellaneous.components.PasswordInput
+import com.kvrae.easykitchen.presentation.miscellaneous.components.TermsAndConditionsText
 import com.kvrae.easykitchen.presentation.miscellaneous.components.TextFormButton
 import com.kvrae.easykitchen.presentation.miscellaneous.components.TextInput
 import com.kvrae.easykitchen.presentation.miscellaneous.screens.LoadingTransparentScreen
 import com.kvrae.easykitchen.utils.LOGIN_SCREEN_ROUTE
 import com.kvrae.easykitchen.utils.REGISTER_SCREEN_ROUTE
+import com.kvrae.easykitchen.utils.openUrl
 import com.kvrae.easykitchen.utils.popThenNavigateTo
 import org.koin.androidx.compose.koinViewModel
+
+private const val TAG = "RegisterScreen"
 
 @Composable
 fun RegisterScreen(
@@ -96,7 +101,8 @@ fun RegisterScreen(
 fun RegisterScreenContent(
     modifier: Modifier = Modifier,
     viewModel: RegisterViewModel,
-    onLoginClick: () -> Unit
+    onLoginClick: () -> Unit,
+    context: Context = LocalContext.current
 ) {
     val logo = if (!isSystemInDarkTheme()) R.drawable.logo_dark else R.drawable.logo_light
     var isVisible by remember { mutableStateOf(false) }
@@ -185,8 +191,8 @@ fun RegisterScreenContent(
                 onValueChange = {
                     viewModel.username.value = it
                 },
-                placeholder = "name@example.com",
-                label = "Full Name",
+                placeholder = "JohnDoe",
+                label = "Userame",
                 leadingIcon = Icons.Rounded.AccountCircle,
             )
 
@@ -196,7 +202,7 @@ fun RegisterScreenContent(
                 onValueChange = {
                     viewModel.email.value = it
                 },
-                placeholder = "your.email@example.com",
+                placeholder = "email@example.com",
                 label = "Email Address",
                 leadingIcon = Icons.Rounded.Email,
             )
@@ -214,6 +220,8 @@ fun RegisterScreenContent(
 
             // Confirm Password Input
             PasswordInput(
+                value = viewModel.confirmPassword.value,
+                onValueChange = { viewModel.confirmPassword.value = it },
                 placeholder = "Repeat your password",
                 label = "Confirm Password",
                 leadingIcon = Icons.Rounded.Lock,
@@ -234,20 +242,31 @@ fun RegisterScreenContent(
                 viewModel.register()
             }
         )
+        Spacer(modifier = Modifier.height(16.dp))
 
-        // Terms & Conditions
-        Text(
-            text = "By signing up, you agree to our Terms & Conditions",
-            style = MaterialTheme.typography.labelSmall.copy(
-                fontSize = 12.sp
-            ),
-            color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.7f),
-            textAlign = TextAlign.Center,
+
+        // Terms & Conditions with clickable links
+        TermsAndConditionsText(
             modifier = Modifier
                 .padding(horizontal = 24.dp, vertical = 12.dp)
-                .alpha(contentAlpha)
+                .alpha(contentAlpha),
+            onPrivacyClick = {
+                Log.d(TAG, "Privacy Policy clicked")
+                openUrl(
+                    context = context,
+                    uri = "https://kvrae.github.io/EasyKitchenWebsite/privacy.html"
+                )
+            },
+            onTermsClick = {
+                Log.d(TAG, "Terms & Conditions clicked")
+                openUrl(
+                    context = context,
+                    uri = "https://kvrae.github.io/EasyKitchenWebsite/terms.html"
+                )
+            },
+            contentAlpha = contentAlpha
         )
-        Spacer(modifier = Modifier.height(16.dp))
+        Spacer(modifier = Modifier.height(8.dp))
         Spacer(modifier = Modifier.weight(1f))
 
         // Login Link Section

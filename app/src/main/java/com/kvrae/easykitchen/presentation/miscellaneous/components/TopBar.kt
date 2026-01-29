@@ -41,7 +41,8 @@ fun TopBar(
     onResetChat: (() -> Unit)? = null,
     actionIcon: Int = getTapBarIcon(name),
     ingredientsSize: Int = 0,
-    username: String = ""
+    username: String = "",
+    isLimitReached: Boolean = false
 ) {
     val showResetDialog = remember { mutableStateOf(false) }
 
@@ -121,14 +122,16 @@ fun TopBar(
         },
         actions = {
             if (name == MAIN_CHAT_ROUTE) {
-                // Chat screen - show reset button
-                IconButton(onClick = { showResetDialog.value = true }) {
-                    Icon(
-                        painter = painterResource(id = actionIcon),
-                        contentDescription = "Reset Chat",
-                        tint = MaterialTheme.colorScheme.primary,
-                        modifier = Modifier.size(24.dp)
-                    )
+                // Chat screen - show reset button only if limit not reached
+                if (!isLimitReached) {
+                    IconButton(onClick = { showResetDialog.value = true }) {
+                        Icon(
+                            painter = painterResource(id = actionIcon),
+                            contentDescription = "Reset Chat",
+                            tint = MaterialTheme.colorScheme.primary,
+                            modifier = Modifier.size(24.dp)
+                        )
+                    }
                 }
             } else if (name == MAIN_COMPOSE_ROUTE) {
                 // Ingredients screen - show basket with badge

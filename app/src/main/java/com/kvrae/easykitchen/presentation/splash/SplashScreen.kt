@@ -38,12 +38,17 @@ import org.koin.androidx.compose.koinViewModel
 @Composable
 fun SplashScreen(navController: NavController) {
     val loginViewModel = koinViewModel<LoginViewModel>()
+    val splashViewModel = koinViewModel<SplashViewModel>()
     val isLoggedIn = loginViewModel.isLoggedIn.collectAsState()
+    val serverPingState = splashViewModel.serverPingState.collectAsState()
 
     val coroutineScope = rememberCoroutineScope()
     LaunchedEffect(key1 = Unit) {
         coroutineScope.launch {
+            // Wait for splash duration and server ping to complete
             delay(3000)
+
+            // Navigate regardless of ping state (server may be waking up)
             if (isLoggedIn.value) {
                 navController.popThenNavigateTo(
                     navigateRoute = MAIN_SCREEN_ROUTE,

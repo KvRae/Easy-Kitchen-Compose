@@ -11,11 +11,11 @@
     <string name="don_t_have_an_account">Don\'t have an account?</string>
     <string name="sign_up">Sign Up</string>
     <string name="login">Login</string>
-    <string name="google_client_id">291647479976–0mnmsbgl9a8ptjfbhi15s1s49j9f980p.apps.googleusercontent.com</string>
     <string name="sign_in_cancelled_by_user">Sign-in cancelled by user</string>
     <string name="message">Message…</string>
     <string name="remember_me">Remember Me</string>
     <string name="forget_password">Forget Password?</string>
+    <string name="default_web_client_id">291647479976-m4mnp1cosgcivjjjmjapj2l5cso8o6kq.apps.googleusercontent.com</string>
     <string name="ingredients">Ingredients</string>
     <string name="instructions">Instructions</string>
     <string name="not_available">N/A</string>

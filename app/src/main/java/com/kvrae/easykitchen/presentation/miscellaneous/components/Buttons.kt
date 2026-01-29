@@ -34,7 +34,7 @@ fun FormButton(
         shape = RoundedCornerShape(16.dp),
         colors = ButtonDefaults.buttonColors(
             containerColor = MaterialTheme.colorScheme.primary,
-            contentColor = MaterialTheme.colorScheme.onBackground,
+            contentColor = MaterialTheme.colorScheme.onPrimary,
             disabledContainerColor = MaterialTheme.colorScheme.primary.copy(alpha = 0.5f),
             disabledContentColor = MaterialTheme.colorScheme.onPrimary.copy(alpha = 0.5f)
         ),
@@ -68,7 +68,7 @@ fun TextFormButton(
         Text(
             text = text,
             style = MaterialTheme.typography.labelLarge,
-            color = color,
+            color = if (enabled) color else color.copy(alpha = 0.5f),
             fontWeight = FontWeight.SemiBold
         )
     }
@@ -97,7 +97,8 @@ fun TextBoxForm(
         Text(
             text = text,
             style = MaterialTheme.typography.bodyMedium,
-            color = MaterialTheme.colorScheme.onSurfaceVariant,
+            color = MaterialTheme.colorScheme.onSurface,
+            fontWeight = FontWeight.Medium
         )
     }
 }

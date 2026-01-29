@@ -49,7 +49,13 @@ app/
 1) Prerequisites: Android Studio with Android SDK 21+, JDK matching your IDE toolchain, and an
    emulator/device.
 2) Clone and set `local.properties` with your `sdk.dir`.
-3) Sync the project in Android Studio.
+3) **Google Sign-In Setup**: Follow the instructions in `YOUR_SETUP_INFO.md` to configure Google
+   authentication.
+    - Get your SHA-1: Run `./get-sha1.sh`
+    - Create OAuth Client in Google Cloud Console
+    - Paste Client ID in `app/src/main/res/values/strings.xml` (line 32)
+    - See `GOOGLE_SIGN_IN_SETUP.md` for detailed instructions
+4) Sync the project in Android Studio.
 
 Build and run from the IDE, or via CLI:
 
@@ -63,7 +69,32 @@ Run unit tests:
 ./gradlew test
 ```
 
+## Google Sign-In Configuration
+
+This app uses Google Sign-In for user authentication (mobile-side only, no backend required).
+
+**Quick Setup**:
+
+```bash
+# 1. Get your SHA-1 fingerprint
+./get-sha1.sh
+
+# 2. Go to https://console.cloud.google.com/apis/credentials
+# 3. Create OAuth 2.0 Client ID (Android)
+# 4. Paste Client ID in app/src/main/res/values/strings.xml
+
+# 5. Rebuild
+./gradlew clean build
+```
+
+**Documentation**:
+
+- **Quick Start**: `YOUR_SETUP_INFO.md` - Has your SHA-1 and quick instructions
+- **Detailed Guide**: `GOOGLE_SIGN_IN_SETUP.md` - Complete step-by-step guide
+- **Quick Reference**: `QUICK_SETUP_GOOGLE_AUTH.md` - 5-minute setup card
+
 ## Notes
 
 - If you hit dependency cache issues, retry with `./gradlew --refresh-dependencies`.
 - Ktor and Room components rely on proper Gradle sync; ensure network access on first setup.
+- **Google Sign-In** requires proper OAuth configuration - see setup docs above.

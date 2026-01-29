@@ -27,10 +27,43 @@ sealed class AuthException(message: String) : Exception(message) {
 
     // Password recovery exceptions
     sealed class PasswordRecovery(message: String) : AuthException(message) {
-        class InvalidEmail : PasswordRecovery("Email address is invalid")
-        class UserNotFound : PasswordRecovery("No account found with this email")
+        class InvalidEmail(errorMessage: String = "Email address is invalid") :
+            PasswordRecovery(errorMessage)
+
+        class UserNotFound(errorMessage: String = "No account found with this email") :
+            PasswordRecovery(errorMessage)
         class ConnectionTimeout : PasswordRecovery("Connection timed out")
         class ServerUnreachable : PasswordRecovery("Unable to connect to server")
+        class NetworkError(errorMessage: String) : PasswordRecovery(errorMessage)
+        class UnknownError(errorMessage: String) : PasswordRecovery(errorMessage)
+    }
+
+    // OTP Verification exceptions
+    sealed class OtpVerification(message: String) : AuthException(message) {
+        class InvalidCode(errorMessage: String = "Invalid verification code") :
+            OtpVerification(errorMessage)
+
+        class ExpiredCode(errorMessage: String = "Verification code has expired") :
+            OtpVerification(errorMessage)
+
+        class VerificationFailed(errorMessage: String = "Unable to verify code") :
+            OtpVerification(errorMessage)
+
+        class ConnectionTimeout : OtpVerification("Connection timed out")
+        class ServerUnreachable : OtpVerification("Unable to connect to server")
+        class UnknownError(errorMessage: String) : OtpVerification(errorMessage)
+    }
+
+    // Password Reset exceptions
+    sealed class PasswordReset(message: String) : AuthException(message) {
+        class WeakPassword(errorMessage: String = "Invalid password. Please use at least 6 characters.") :
+            PasswordReset(errorMessage)
+
+        class AccountNotFound(errorMessage: String = "Account not found. Please try again.") :
+            PasswordReset(errorMessage)
+
+        class ConnectionTimeout : PasswordReset("Connection timed out")
+        class ServerUnreachable : PasswordReset("Unable to connect to server")
+        class UnknownError(errorMessage: String) : PasswordReset(errorMessage)
     }
 }
-

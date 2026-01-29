@@ -1,82 +1,127 @@
 package com.kvrae.easykitchen.presentation.login
 
-import android.app.Activity
-import android.content.Intent
+import android.app.Application
 import android.util.Log
+import androidx.credentials.GetCredentialRequest
+import androidx.credentials.exceptions.GetCredentialCancellationException
+import androidx.credentials.exceptions.GetCredentialException
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.google.android.gms.auth.api.signin.GoogleSignInAccount
-import com.google.android.gms.auth.api.signin.GoogleSignInClient
-import com.google.android.gms.tasks.Task
 import com.kvrae.easykitchen.data.remote.dto.User
-import com.kvrae.easykitchen.domain.usecases.GetGoogleSignInClientUseCase
-import com.kvrae.easykitchen.domain.usecases.GetSignInIntentUseCase
-import com.kvrae.easykitchen.domain.usecases.HandleSignInResultUseCase
-import com.kvrae.easykitchen.domain.usecases.SendIdTokenToBackendUseCase
+import com.kvrae.easykitchen.domain.usecases.BuildGoogleCredentialRequestUseCase
+import com.kvrae.easykitchen.domain.usecases.HandleGoogleCredentialResultUseCase
+import com.kvrae.easykitchen.utils.UserPreferencesManager
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
 
 class GoogleAuthViewModel(
-    private val getGoogleSignInClientUseCase: GetGoogleSignInClientUseCase,
-    private val getSignInIntentUseCase: GetSignInIntentUseCase,
-    private val handleSignInResultUseCase: HandleSignInResultUseCase,
-    private val sendIdTokenToBackendUseCase: SendIdTokenToBackendUseCase
-
+    private val buildGoogleCredentialRequestUseCase: BuildGoogleCredentialRequestUseCase,
+    private val handleGoogleCredentialResultUseCase: HandleGoogleCredentialResultUseCase,
+    private val userPreferencesManager: UserPreferencesManager,
+    private val application: Application
 ) : ViewModel() {
     private val _googleAuthState = MutableStateFlow<GoogleAuthState>(GoogleAuthState.Idle)
     val googleAuthState: StateFlow<GoogleAuthState> = _googleAuthState
 
-    fun getGoogleSignInClient(activity: Activity): GoogleSignInClient {
-        return getGoogleSignInClientUseCase(activity)
-    }
-
-    fun getSignInIntent(googleSignInClient: GoogleSignInClient): Intent {
-        return getSignInIntentUseCase(googleSignInClient)
-    }
-
-    fun handleSignInResult(completedTask: Task<GoogleSignInAccount>) {
+    fun signIn(serverClientId: String) {
         viewModelScope.launch {
-            _googleAuthState.value = GoogleAuthState.Loading
-            val result = handleSignInResultUseCase(completedTask)
-            _googleAuthState.value = when  {
-                result.isSuccess -> {
-                    val idToken = result.getOrThrow()
-                    val backendResult = sendIdTokenToBackendUseCase(idToken)
-                    when {
-                        idToken.isEmpty() -> {
-                            Log.d("GoogleAuthViewModel", "handleSignInResult: ID token is empty")
-                            GoogleAuthState.Error("ID token is empty")
-                        }
-                        backendResult.isSuccess -> {
-                            Log.d("GoogleAuthViewModel", "handleSignInResult: ${backendResult.getOrNull()}")
-                            GoogleAuthState.Success(backendResult.getOrNull()?: User())
-                        }
-                        backendResult.isFailure -> {
-                            Log.d("GoogleAuthViewModel", "handleSignInResult: ${backendResult
-                                .exceptionOrNull()?.message}")
-                            GoogleAuthState.Error(backendResult
-                                .exceptionOrNull()?.message ?: "Backend authentication failed")
-                        }
-                        else -> {
-                            Log.d("GoogleAuthViewModel", "handleSignInResult: Content is not available")
-                            GoogleAuthState.Error("Content is not available")
-                        }
-                    }
-                }
-                result.isFailure -> {
-                    Log.d("GoogleAuthViewModel", "handleSignInResult: ${result.exceptionOrNull()?.message}")
-                    GoogleAuthState.Error(result
-                    .exceptionOrNull()?.message ?: "Google sign in failed")
+            try {
+                Log.d("GoogleAuthViewModel", "=== SIGN IN FLOW STARTED ===")
+                Log.d(
+                    "GoogleAuthViewModel",
+                    "Starting Google sign in with clientId: $serverClientId"
+                )
 
+                // Proactively clear any cached credential state to avoid reauth loops
+                Log.d("GoogleAuthViewModel", "Clearing cached credential state before sign-in...")
+                try {
+                    androidx.credentials.CredentialManager.create(application)
+                        .clearCredentialState(androidx.credentials.ClearCredentialStateRequest())
+                    Log.d("GoogleAuthViewModel", "Credential state cleared successfully")
+                } catch (e: Exception) {
+                    Log.w(
+                        "GoogleAuthViewModel",
+                        "Failed to clear credential state (non-fatal): ${e.message}"
+                    )
                 }
-                else -> {
-                    Log.d("GoogleAuthViewModel", "handleSignInResult: Content is not available")
-                    GoogleAuthState.Error("Content is not available")
+
+                _googleAuthState.value = GoogleAuthState.Loading
+                Log.d("GoogleAuthViewModel", "State set to Loading")
+
+                val request: GetCredentialRequest =
+                    buildGoogleCredentialRequestUseCase(serverClientId)
+                Log.d(
+                    "GoogleAuthViewModel",
+                    "Credential request built successfully with fresh nonce"
+                )
+
+                Log.d("GoogleAuthViewModel", "Calling handleGoogleCredentialResultUseCase...")
+                val result = handleGoogleCredentialResultUseCase(request)
+                Log.d(
+                    "GoogleAuthViewModel",
+                    "Credential result received: isSuccess=${result.isSuccess}"
+                )
+
+                if (result.isSuccess) {
+                    val user = result.getOrNull() ?: User()
+                    Log.d(
+                        "GoogleAuthViewModel",
+                        "User retrieved - email: ${user.email}, username: ${user.username}"
+                    )
+                    // Persist minimal data (ID token placeholder stored as email; replace when backend is available)
+                    userPreferencesManager.saveUsername(user.username ?: "")
+                    userPreferencesManager.saveEmail(user.email ?: "")
+                    userPreferencesManager.saveLoginState(true)
+                    Log.d("GoogleAuthViewModel", "User data saved to preferences")
+                    _googleAuthState.value = GoogleAuthState.Success(user)
+                    Log.d("GoogleAuthViewModel", "State set to Success")
+                } else {
+                    val ex = result.exceptionOrNull()
+                    Log.e(
+                        "GoogleAuthViewModel",
+                        "Result failed with exception: ${ex?.javaClass?.simpleName}",
+                        ex
+                    )
+                    if (ex is GetCredentialCancellationException) {
+                        Log.w("GoogleAuthViewModel", "Sign-in cancelled or reauth required", ex)
+                        // Show error message for persistent reauth issues
+                        _googleAuthState.value = GoogleAuthState.Error(
+                            "Google Sign-In unavailable. Try regular login."
+                        )
+                        Log.d("GoogleAuthViewModel", "State set to Error - server/auth issue")
+                        return@launch
+                    }
+                    val message = when (ex) {
+                        is GetCredentialException -> "Auth service unavailable. Try again later."
+                        else -> ex?.message ?: "Google sign-in failed"
+                    }
+                    Log.e("GoogleAuthViewModel", "Sign in error: $message", ex)
+                    _googleAuthState.value = GoogleAuthState.Error(message)
+                    Log.d("GoogleAuthViewModel", "State set to Error with message: $message")
                 }
+            } catch (e: Exception) {
+                Log.e("GoogleAuthViewModel", "=== EXCEPTION IN SIGN IN FLOW ===", e)
+                if (e is GetCredentialCancellationException) {
+                    Log.w("GoogleAuthViewModel", "Sign-in cancelled or reauth required", e)
+                    // Show error message for persistent reauth issues
+                    _googleAuthState.value = GoogleAuthState.Error(
+                        "Google Sign-In unavailable. Try regular login."
+                    )
+                    Log.d("GoogleAuthViewModel", "State set to Error - server/auth issue")
+                    return@launch
+                }
+                Log.e("GoogleAuthViewModel", "Sign in failed with exception: ${e.message}", e)
+                val message = when (e) {
+                    is GetCredentialException -> "Auth service unavailable. Try again later."
+                    else -> e.message ?: "Google sign-in failed"
+                }
+                _googleAuthState.value = GoogleAuthState.Error(message)
+                Log.d("GoogleAuthViewModel", "State set to Error with message: $message")
             }
         }
     }
+
     fun resetGoogleAuthState() {
         _googleAuthState.value = GoogleAuthState.Idle
     }

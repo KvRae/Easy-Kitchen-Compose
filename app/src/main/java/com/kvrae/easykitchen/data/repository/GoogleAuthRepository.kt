@@ -1,71 +1,92 @@
 package com.kvrae.easykitchen.data.repository
 
-import android.app.Activity
-import android.content.Intent
-import com.google.android.gms.auth.api.signin.GoogleSignIn
-import com.google.android.gms.auth.api.signin.GoogleSignInAccount
-import com.google.android.gms.auth.api.signin.GoogleSignInClient
-import com.google.android.gms.auth.api.signin.GoogleSignInOptions
-import com.google.android.gms.common.api.ApiException
-import com.google.android.gms.tasks.Task
-import com.kvrae.easykitchen.R
+import android.content.Context
+import android.util.Log
+import androidx.credentials.ClearCredentialStateRequest
+import androidx.credentials.CredentialManager
+import androidx.credentials.GetCredentialRequest
+import androidx.credentials.GetCredentialResponse
+import androidx.credentials.exceptions.GetCredentialCancellationException
+import androidx.credentials.exceptions.GetCredentialException
+import com.google.android.libraries.identity.googleid.GoogleIdTokenCredential
 import com.kvrae.easykitchen.data.remote.dto.User
-import com.kvrae.easykitchen.utils.GOOGLE_LOGIN_URL
-import io.ktor.client.HttpClient
-import io.ktor.client.request.post
-import io.ktor.client.request.setBody
-import io.ktor.client.statement.HttpResponse
-import io.ktor.http.ContentType
-import io.ktor.http.contentType
-import io.ktor.http.isSuccess
 
+/**
+ * Repository for handling Google Sign-In via modern Credential Manager + Google Identity Services.
+ * This mobile-first implementation retrieves an ID token using Credential Manager.
+ * If you need verified profile (email/displayName), validate the token on a backend.
+ */
 interface AuthRepository {
-    fun getGoogleSignInClient(activity: Activity): GoogleSignInClient
-    fun getSignInIntent(googleSignInClient: GoogleSignInClient): Intent
-    fun handleSignInResult(completedTask: Task<GoogleSignInAccount>): Result<String> // Return ID token
-    suspend fun sendIdTokenToBackend(idToken: String): Result<User> // Send token to your backend
+    suspend fun getGoogleUserFromCredentials(request: GetCredentialRequest): Result<User>
 }
 
-class AuthRepositoryImpl(private val client: HttpClient) : AuthRepository {
+class AuthRepositoryImpl(private val context: Context) : AuthRepository {
 
-    override fun getGoogleSignInClient(activity: Activity): GoogleSignInClient {
-        val gso = GoogleSignInOptions.Builder(GoogleSignInOptions.DEFAULT_SIGN_IN)
-            .requestIdToken(activity.getString(R.string.google_client_id))
-            .requestEmail()
-            .requestProfile()
-            .build()
-        return GoogleSignIn.getClient(activity, gso)
-    }
-
-    override fun getSignInIntent(googleSignInClient: GoogleSignInClient): Intent {
-        return googleSignInClient.signInIntent
-    }
-
-    override fun handleSignInResult(completedTask: Task<GoogleSignInAccount>): Result<String> {
+    override suspend fun getGoogleUserFromCredentials(request: GetCredentialRequest): Result<User> {
         return try {
-            val account = completedTask.getResult(ApiException::class.java)
-            val idToken = account.idToken ?: throw Exception("ID token is null")
-            Result.success(idToken)
-        } catch (e: ApiException) {
+            Log.d("AuthRepositoryImpl", "Starting credential retrieval...")
+            val credentialManager = CredentialManager.create(context)
+            Log.d("AuthRepositoryImpl", "CredentialManager created successfully")
+
+            Log.d(
+                "AuthRepositoryImpl",
+                "Calling getCredential with context: ${context.javaClass.simpleName}"
+            )
+            val response: GetCredentialResponse =
+                credentialManager.getCredential(context = context, request = request)
+            Log.d(
+                "AuthRepositoryImpl",
+                "Credential response received, type: ${response.credential.type}"
+            )
+
+            Log.d("AuthRepositoryImpl", "Creating GoogleIdTokenCredential from response data")
+            val credential = GoogleIdTokenCredential.createFrom(response.credential.data)
+            Log.d("AuthRepositoryImpl", "GoogleIdTokenCredential created from response")
+
+            val idToken = credential.idToken
+            val displayName = credential.displayName
+            val email = credential.id // This is the email address
+
+            Log.d(
+                "AuthRepositoryImpl",
+                "User email: $email, displayName: $displayName, idToken length: ${idToken.length}"
+            )
+
+            val user = User(
+                email = email, // Use the actual email instead of ID token
+                username = displayName
+                    ?: email.substringBefore("@") // Use display name or email prefix
+            )
+            Log.d("AuthRepositoryImpl", "User object created successfully: $user")
+            Result.success(user)
+        } catch (e: GetCredentialCancellationException) {
+            // User canceled OR provider requires re-auth (e.g., error 16). Clear any cached session.
+            Log.w(
+                "AuthRepositoryImpl",
+                "GetCredentialCancellationException caught: ${e.type}, message: ${e.message}",
+                e
+            )
+            runCatching {
+                CredentialManager.create(context)
+                    .clearCredentialState(ClearCredentialStateRequest())
+                Log.d("AuthRepositoryImpl", "Credential state cleared successfully")
+            }.onFailure {
+                Log.e("AuthRepositoryImpl", "Failed to clear credential state", it)
+            }
+            // Surface the original exception so UI can show a friendly message without crashing
+            Result.failure(e)
+        } catch (e: GetCredentialException) {
+            // Surface credential-specific errors (e.g., reauth/account issues)
+            val message = "Credential error: ${e.javaClass.simpleName} (${e.type})"
+            Log.e("AuthRepositoryImpl", message, e)
             Result.failure(e)
         } catch (e: Exception) {
-            Result.failure(e)
-        }
-    }
-
-    override suspend fun sendIdTokenToBackend(idToken: String): Result<User> {
-        return try {
-            val response: HttpResponse = client.post(GOOGLE_LOGIN_URL) {
-                contentType(ContentType.Application.Json)
-                setBody(idToken)
-            }
-            if (response.status.isSuccess()) {
-                val user = User() // Parse the response body to User object
-                Result.success(user)
-            } else {
-                Result.failure(Exception("Backend authentication failed with status: ${response.status.value}"))
-            }
-        } catch (e: Exception) {
+            Log.e(
+                "AuthRepositoryImpl",
+                "Unexpected error getting credentials: ${e.javaClass.simpleName} - ${e.message}",
+                e
+            )
+            e.printStackTrace()
             Result.failure(e)
         }
     }

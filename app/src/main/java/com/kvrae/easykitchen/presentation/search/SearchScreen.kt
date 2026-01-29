@@ -49,6 +49,7 @@ fun SearchScreen(
     val searchResults by viewModel.searchResults.collectAsState()
     val searchQuery = viewModel.searchQuery.value
     val focusManager = LocalFocusManager.current
+    val savedMealIds by viewModel.savedMealIds.collectAsState()
 
     Column(
         modifier = modifier
@@ -83,7 +84,10 @@ fun SearchScreen(
                             onMealClick = {
                                 navController.navigate("$MEAL_DETAILS_SCREEN_ROUTE/${meal.idResponse}")
                             },
-                            onFavoriteClick = {}
+                            onFavoriteClick = {
+                                viewModel.toggleFavorite(meal)
+                            },
+                            isFavorite = savedMealIds.contains(meal.idResponse)
                         )
                     }
                 }

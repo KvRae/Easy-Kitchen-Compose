@@ -28,31 +28,79 @@ class IngredientViewModel(private val getIngredientsUseCase: GetIngredientsUseCa
     private val _basketItems = MutableStateFlow<List<IngredientResponse>>(emptyList())
     val basketItems: StateFlow<List<IngredientResponse>> = _basketItems
 
+    private var isDataLoaded = false
+
     init {
         getIngredients()
     }
 
     fun getIngredients() {
-        _ingredientsState.value = IngredientState.Loading
         viewModelScope.launch {
-            val result = getIngredientsUseCase()
-            _ingredientsState.value = when {
-                result.isSuccess -> {
-                    val ingredients = result.getOrNull()!!
-                    _filteredIngredientsState.value = IngredientState.Success(ingredients)
-                    IngredientState.Success(ingredients)
+            _ingredientsState.value = IngredientState.Loading
+            try {
+                val result = getIngredientsUseCase()
+                if (result.isSuccess) {
+                    val ingredients = result.getOrNull() ?: emptyList()
+
+                    if (ingredients.isEmpty()) {
+                        _ingredientsState.value =
+                            IngredientState.Error("No ingredients available at the moment. Please try again later.")
+                        _filteredIngredientsState.value =
+                            IngredientState.Error("No ingredients available at the moment. Please try again later.")
+                    } else {
+                        isDataLoaded = true
+                        _ingredientsState.value = IngredientState.Success(ingredients)
+                        // Re-apply search filter if there's an active query
+                        filterIngredients(_searchQuery.value)
+                    }
+                } else {
+                    val exception = result.exceptionOrNull()
+                    val errorMessage = when {
+                        exception?.message?.contains("timeout", ignoreCase = true) == true ->
+                            "Connection timeout. Please check your internet and try again."
+
+                        exception?.message?.contains(
+                            "Unable to resolve host",
+                            ignoreCase = true
+                        ) == true ->
+                            "No internet connection. Please check your network settings."
+
+                        exception?.message?.contains("500", ignoreCase = true) == true ->
+                            "Server is temporarily unavailable. Please try again later."
+
+                        exception?.message?.contains(
+                            "unexpected format",
+                            ignoreCase = true
+                        ) == true ->
+                            "Unable to load ingredients. Please try again later."
+
+                        else ->
+                            "Unable to load ingredients. Please check your connection and try again."
+                    }
+
+                    // If we have data, don't show error screen, just stay on current state
+                    if (!isDataLoaded) {
+                        val error = IngredientState.Error(errorMessage)
+                        _ingredientsState.value = error
+                        _filteredIngredientsState.value = error
+                    }
                 }
-                result.isFailure -> {
-                    val error = IngredientState.Error(
-                        result.exceptionOrNull()?.message ?: "Failed to load data"
-                    )
+            } catch (e: Exception) {
+                android.util.Log.e("IngredientViewModel", "Error loading ingredients", e)
+                if (!isDataLoaded) {
+                    val errorMessage = when {
+                        e.message?.contains("timeout", ignoreCase = true) == true ->
+                            "Connection timeout. Please check your internet and try again."
+
+                        e.message?.contains("Unable to resolve host", ignoreCase = true) == true ->
+                            "No internet connection. Please check your network settings."
+
+                        else ->
+                            "An unexpected error occurred. Please try again."
+                    }
+                    val error = IngredientState.Error(errorMessage)
+                    _ingredientsState.value = error
                     _filteredIngredientsState.value = error
-                    error
-                }
-                else -> {
-                    val error = IngredientState.Error("Unknown error")
-                    _filteredIngredientsState.value = error
-                    error
                 }
             }
         }
@@ -90,8 +138,8 @@ class IngredientViewModel(private val getIngredientsUseCase: GetIngredientsUseCa
 
 
     fun updateIngredientInBasket(ingredient: IngredientResponse) {
-        if (ingredientsBasket.contains(ingredient)) {
-            ingredientsBasket.remove(ingredient)
+        if (ingredientsBasket.any { it.idResponse == ingredient.idResponse }) {
+            ingredientsBasket.removeAll { it.idResponse == ingredient.idResponse }
         } else {
             ingredientsBasket.add(ingredient)
         }
@@ -100,7 +148,7 @@ class IngredientViewModel(private val getIngredientsUseCase: GetIngredientsUseCa
     }
 
     fun isIngredientInBasket(ingredient: IngredientResponse): Boolean {
-        return ingredientsBasket.contains(ingredient)
+        return ingredientsBasket.any { it.idResponse == ingredient.idResponse }
     }
 
     fun getSelectedIngredientNames(): List<String> {

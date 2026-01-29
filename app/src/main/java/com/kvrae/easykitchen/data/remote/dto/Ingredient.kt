@@ -14,6 +14,20 @@ data class IngredientResponse(
     val strIngredient: String?,
 )
 
+@Serializable
+data class IngredientApiResponse(
+    val message: String? = null,
+    val count: Int? = null,
+    val data: List<IngredientResponse>? = null,
+    val error: String? = null
+)
+
+@Serializable
+data class IngredientErrorResponse(
+    val message: String? = null,
+    val error: String? = null
+)
+
 data class Ingredient(
     val id: String? = null,
     val name: String? = null,

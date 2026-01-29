@@ -38,7 +38,7 @@ class LoginViewModel(
         viewModelScope.launch {
             // Validate inputs before setting Loading state
             if (username.isBlank()) {
-                _loginState.value = LoginState.Error("Username cannot be empty")
+                _loginState.value = LoginState.Error("Username or email cannot be empty")
                 return@launch
             }
             if (password.isBlank()) {
@@ -50,7 +50,15 @@ class LoginViewModel(
             _loginState.value = LoginState.Loading
             android.util.Log.d("LoginViewModel", "State set to Loading")
 
-            val result = loginUseCase(LoginRequest(username.trim(), password.trim()))
+            // Detect if input is email or username
+            val isEmail = username.contains("@")
+            val loginRequest = if (isEmail) {
+                LoginRequest(email = username.trim(), password = password.trim())
+            } else {
+                LoginRequest(username = username.trim(), password = password.trim())
+            }
+
+            val result = loginUseCase(loginRequest)
             android.util.Log.d("LoginViewModel", "Login result received: ${result.isSuccess}")
 
             _loginState.value = when {
