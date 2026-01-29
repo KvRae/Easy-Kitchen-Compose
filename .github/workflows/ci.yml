@@ -1,1 +1,393 @@
+name: Android CI/CD Pipeline
+
+on:
+  push:
+    branches:
+      - develop      # Development branch
+      - test         # Pre-production branch
+      - main         # Production branch
+  pull_request:
+    branches:
+      - develop
+      - test
+      - main
+
+# Cancel in-progress runs for the same workflow
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+env:
+  # Java version for Android build
+  JAVA_VERSION: '21'
+  JAVA_DISTRIBUTION: 'temurin'
+
+  # Android Build Tools
+  GRADLE_OPTS: -Dorg.gradle.jvmargs="-Xmx4g -XX:MaxMetaspaceSize=1g -XX:+HeapDumpOnOutOfMemoryError"
+
+jobs:
+  # ============================================================================
+  # Stage 1: Code Quality & Validation
+  # ============================================================================
+  code-quality:
+    name: 🔍 Code Quality Check
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: 📥 Checkout Code
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0  # Full history for better analysis
+
+      - name: ☕ Setup JDK
+        uses: actions/setup-java@v4
+        with:
+          distribution: ${{ env.JAVA_DISTRIBUTION }}
+          java-version: ${{ env.JAVA_VERSION }}
+          cache: 'gradle'
+
+      - name: 🔐 Grant Execute Permission for Gradlew
+        run: chmod +x gradlew
+
+      - name: 📊 Run Lint Checks
+        run: ./gradlew lint
+        continue-on-error: true  # Don't fail build on lint errors (yet)
+
+      - name: 📤 Upload Lint Reports
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: lint-reports
+          path: app/build/reports/lint-*.html
+          retention-days: 30
+
+      # Placeholder: Add detekt, ktlint, or other static analysis tools
+      # - name: 🔎 Run Detekt
+      #   run: ./gradlew detekt
+
+      # Placeholder: Code coverage threshold check
+      # - name: 📈 Check Code Coverage
+      #   run: ./gradlew jacocoTestReport
+
+  # ============================================================================
+  # Stage 2: Build & Test
+  # ============================================================================
+  build-and-test:
+    name: 🏗️ Build & Test
+    runs-on: ubuntu-latest
+    needs: code-quality
+
+    strategy:
+      matrix:
+        variant: [ Debug, Release ]
+
+    steps:
+      - name: 📥 Checkout Code
+        uses: actions/checkout@v4
+
+      - name: ☕ Setup JDK
+        uses: actions/setup-java@v4
+        with:
+          distribution: ${{ env.JAVA_DISTRIBUTION }}
+          java-version: ${{ env.JAVA_VERSION }}
+          cache: 'gradle'
+
+      - name: 🔐 Grant Execute Permission for Gradlew
+        run: chmod +x gradlew
+
+      - name: 🏗️ Build ${{ matrix.variant }} APK
+        run: ./gradlew assemble${{ matrix.variant }}
+
+      - name: 🧪 Run Unit Tests
+        run: ./gradlew test${{ matrix.variant }}UnitTest
+
+      - name: 📊 Generate Test Reports
+        if: always()
+        run: ./gradlew test${{ matrix.variant }}UnitTest --continue
+
+      - name: 📤 Upload Test Reports
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: test-reports-${{ matrix.variant }}
+          path: |
+            app/build/reports/tests/
+            app/build/test-results/
+          retention-days: 30
+
+      - name: 📤 Upload APK Artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: apk-${{ matrix.variant }}-${{ github.sha }}
+          path: app/build/outputs/apk/${{ matrix.variant }}/*.apk
+          retention-days: 30
+
+  # ============================================================================
+  # Stage 3: Instrumented Tests (Placeholder)
+  # ============================================================================
+  instrumented-tests:
+    name: 🤖 Instrumented Tests
+    runs-on: ubuntu-latest
+    needs: build-and-test
+    if: false  # Disabled by default - enable when ready
+
+    steps:
+      - name: 📥 Checkout Code
+        uses: actions/checkout@v4
+
+      # Placeholder: Setup Android Emulator
+      # - name: 🤖 Run Instrumented Tests
+      #   uses: reactivecircus/android-emulator-runner@v2
+      #   with:
+      #     api-level: 34
+      #     target: google_apis
+      #     arch: x86_64
+      #     script: ./gradlew connectedDebugAndroidTest
+
+      - name: ℹ️ Instrumented Tests Placeholder
+        run: echo "Instrumented tests will be configured here"
+
+  # ============================================================================
+  # Stage 4: DEVELOP - Firebase App Distribution (Development)
+  # ============================================================================
+  deploy-develop:
+    name: 🚀 Deploy to Development (Firebase)
+    runs-on: ubuntu-latest
+    needs: build-and-test
+    if: github.ref == 'refs/heads/develop' && github.event_name == 'push'
+    environment: development
+
+    steps:
+      - name: 📥 Checkout Code
+        uses: actions/checkout@v4
+
+      - name: ☕ Setup JDK
+        uses: actions/setup-java@v4
+        with:
+          distribution: ${{ env.JAVA_DISTRIBUTION }}
+          java-version: ${{ env.JAVA_VERSION }}
+          cache: 'gradle'
+
+      - name: 🔐 Grant Execute Permission for Gradlew
+        run: chmod +x gradlew
+
+      - name: 🏗️ Build Debug APK
+        run: ./gradlew assembleDebug
+
+      # Placeholder: Firebase App Distribution
+      - name: 🔥 Deploy to Firebase App Distribution (Development)
+        if: false  # Enable when Firebase is configured
+        # uses: wzieba/Firebase-Distribution-Github-Action@v1
+        # with:
+        #   appId: ${{ secrets.FIREBASE_APP_ID_DEV }}
+        #   serviceCredentialsFileContent: ${{ secrets.FIREBASE_SERVICE_ACCOUNT }}
+        #   groups: developers
+        #   file: app/build/outputs/apk/debug/app-debug.apk
+        #   releaseNotes: |
+        #     Development Build
+        #     Branch: ${{ github.ref_name }}
+        #     Commit: ${{ github.sha }}
+        run: |
+          echo "🔥 Firebase App Distribution for DEVELOP branch"
+          echo "APK: app/build/outputs/apk/debug/app-debug.apk"
+          echo "Configure Firebase App Distribution here"
+
+      - name: 📤 Upload Debug APK
+        uses: actions/upload-artifact@v4
+        with:
+          name: app-debug-develop
+          path: app/build/outputs/apk/debug/*.apk
+          retention-days: 30
+
+  # ============================================================================
+  # Stage 5: TEST - Firebase App Distribution (Pre-Production)
+  # ============================================================================
+  deploy-test:
+    name: 🧪 Deploy to Pre-Production (Firebase)
+    runs-on: ubuntu-latest
+    needs: build-and-test
+    if: github.ref == 'refs/heads/test' && github.event_name == 'push'
+    environment: pre-production
+
+    steps:
+      - name: 📥 Checkout Code
+        uses: actions/checkout@v4
+
+      - name: ☕ Setup JDK
+        uses: actions/setup-java@v4
+        with:
+          distribution: ${{ env.JAVA_DISTRIBUTION }}
+          java-version: ${{ env.JAVA_VERSION }}
+          cache: 'gradle'
+
+      - name: 🔐 Grant Execute Permission for Gradlew
+        run: chmod +x gradlew
+
+      # Placeholder: Decode signing keys
+      # - name: 🔑 Decode Keystore
+      #   run: |
+      #     echo "${{ secrets.KEYSTORE_BASE64 }}" | base64 --decode > app/keystore.jks
+
+      - name: 🏗️ Build Release APK (Unsigned for now)
+        run: ./gradlew assembleRelease
+        # Add signing configuration when ready:
+        # env:
+        #   KEYSTORE_PASSWORD: ${{ secrets.KEYSTORE_PASSWORD }}
+        #   KEY_ALIAS: ${{ secrets.KEY_ALIAS }}
+        #   KEY_PASSWORD: ${{ secrets.KEY_PASSWORD }}
+
+      # Placeholder: Firebase App Distribution for Testers
+      - name: 🔥 Deploy to Firebase App Distribution (Pre-Production)
+        if: false  # Enable when Firebase is configured
+        # uses: wzieba/Firebase-Distribution-Github-Action@v1
+        # with:
+        #   appId: ${{ secrets.FIREBASE_APP_ID_TEST }}
+        #   serviceCredentialsFileContent: ${{ secrets.FIREBASE_SERVICE_ACCOUNT }}
+        #   groups: testers,qa
+        #   file: app/build/outputs/apk/release/app-release.apk
+        #   releaseNotes: |
+        #     Pre-Production Build
+        #     Branch: ${{ github.ref_name }}
+        #     Commit: ${{ github.sha }}
+        run: |
+          echo "🔥 Firebase App Distribution for TEST branch"
+          echo "APK: app/build/outputs/apk/release/app-release.apk"
+          echo "Configure Firebase App Distribution for testers"
+
+      - name: 📤 Upload Release APK
+        uses: actions/upload-artifact@v4
+        with:
+          name: app-release-test
+          path: app/build/outputs/apk/release/*.apk
+          retention-days: 90
+
+  # ============================================================================
+  # Stage 6: MAIN - Production Release
+  # ============================================================================
+  deploy-production:
+    name: 🚀 Deploy to Production
+    runs-on: ubuntu-latest
+    needs: build-and-test
+    if: github.ref == 'refs/heads/main' && github.event_name == 'push'
+    environment: production
+
+    steps:
+      - name: 📥 Checkout Code
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0  # Full history for release notes
+
+      - name: ☕ Setup JDK
+        uses: actions/setup-java@v4
+        with:
+          distribution: ${{ env.JAVA_DISTRIBUTION }}
+          java-version: ${{ env.JAVA_VERSION }}
+          cache: 'gradle'
+
+      - name: 🔐 Grant Execute Permission for Gradlew
+        run: chmod +x gradlew
+
+      # Placeholder: Decode signing keys for production
+      # - name: 🔑 Decode Production Keystore
+      #   run: |
+      #     echo "${{ secrets.PROD_KEYSTORE_BASE64 }}" | base64 --decode > app/keystore.jks
+
+      - name: 🏗️ Build Production Release APK
+        run: ./gradlew assembleRelease
+        # Add production signing when ready:
+        # env:
+        #   KEYSTORE_PASSWORD: ${{ secrets.PROD_KEYSTORE_PASSWORD }}
+        #   KEY_ALIAS: ${{ secrets.PROD_KEY_ALIAS }}
+        #   KEY_PASSWORD: ${{ secrets.PROD_KEY_PASSWORD }}
+
+      - name: 🏗️ Build App Bundle (AAB)
+        run: ./gradlew bundleRelease
+
+      # Placeholder: Firebase App Distribution for Production
+      - name: 🔥 Deploy to Firebase App Distribution (Production)
+        if: false  # Enable when Firebase is configured
+        # uses: wzieba/Firebase-Distribution-Github-Action@v1
+        # with:
+        #   appId: ${{ secrets.FIREBASE_APP_ID_PROD }}
+        #   serviceCredentialsFileContent: ${{ secrets.FIREBASE_SERVICE_ACCOUNT }}
+        #   groups: production-users
+        #   file: app/build/outputs/apk/release/app-release.apk
+        run: |
+          echo "🔥 Firebase App Distribution for PRODUCTION"
+          echo "Configure production Firebase distribution"
+
+      # Placeholder: Google Play Store Deployment
+      - name: 🎮 Deploy to Google Play Store (Internal Testing)
+        if: false  # Enable when Play Console is configured
+        # uses: r0adkll/upload-google-play@v1
+        # with:
+        #   serviceAccountJsonPlainText: ${{ secrets.PLAY_SERVICE_ACCOUNT_JSON }}
+        #   packageName: com.kvrae.easykitchen
+        #   releaseFiles: app/build/outputs/bundle/release/app-release.aab
+        #   track: internal
+        #   status: completed
+        run: |
+          echo "🎮 Google Play Store deployment placeholder"
+          echo "Bundle: app/build/outputs/bundle/release/app-release.aab"
+          echo "Configure Play Console API access"
+
+      # Create GitHub Release
+      - name: 📝 Extract Version Name
+        id: version
+        run: |
+          VERSION=$(grep "versionName" app/build.gradle.kts | awk '{print $3}' | tr -d '"')
+          echo "version=$VERSION" >> $GITHUB_OUTPUT
+
+      - name: 🏷️ Create GitHub Release
+        if: false  # Enable when ready
+        # uses: softprops/action-gh-release@v1
+        # with:
+        #   tag_name: v${{ steps.version.outputs.version }}
+        #   name: Release v${{ steps.version.outputs.version }}
+        #   body: |
+        #     Production Release
+        #     Version: ${{ steps.version.outputs.version }}
+        #     Commit: ${{ github.sha }}
+        #   files: |
+        #     app/build/outputs/apk/release/*.apk
+        #     app/build/outputs/bundle/release/*.aab
+        #   draft: false
+        #   prerelease: false
+        run: |
+          echo "🏷️ GitHub Release placeholder"
+          echo "Version: ${{ steps.version.outputs.version }}"
+          echo "Configure GitHub releases here"
+
+      - name: 📤 Upload Production Artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: app-production-${{ github.sha }}
+          path: |
+            app/build/outputs/apk/release/*.apk
+            app/build/outputs/bundle/release/*.aab
+          retention-days: 365  # Keep production builds for 1 year
+
+  # ============================================================================
+  # Stage 7: Notifications (Optional)
+  # ============================================================================
+  notify:
+    name: 📢 Send Notifications
+    runs-on: ubuntu-latest
+    needs: [ deploy-develop, deploy-test, deploy-production ]
+    if: always() && (needs.deploy-develop.result != 'skipped' || needs.deploy-test.result != 'skipped' || needs.deploy-production.result != 'skipped')
+
+    steps:
+      - name: 📢 Notification Placeholder
+        run: |
+          echo "📢 Notifications configuration placeholder"
+          echo "Add Slack, Discord, Email, or other notifications here"
+
+      # Placeholder: Slack Notification
+      # - name: 📣 Send Slack Notification
+      #   uses: 8398a7/action-slack@v3
+      #   with:
+      #     status: ${{ job.status }}
+      #     text: 'Deployment completed for ${{ github.ref_name }}'
+      #     webhook_url: ${{ secrets.SLACK_WEBHOOK }}
+      #   if: always()
 
