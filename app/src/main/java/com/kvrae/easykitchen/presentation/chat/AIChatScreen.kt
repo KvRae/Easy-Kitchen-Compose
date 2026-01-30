@@ -22,6 +22,7 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.rounded.Send
+import androidx.compose.material.icons.rounded.ErrorOutline
 import androidx.compose.material.icons.rounded.RestaurantMenu
 import androidx.compose.material.icons.rounded.SignalWifiConnectedNoInternet4
 import androidx.compose.material3.CircularProgressIndicator
@@ -105,9 +106,10 @@ fun ChatScreen(
     Column(
         modifier = modifier.background(MaterialTheme.colorScheme.surface)
     ) {
+
         // Chat Messages or Error/Empty State
         when {
-            // Handle Limit Exceeded State
+            // Handle Limit Exceeded State when no messages
             isLimitReached && viewModel.chatMessages.isEmpty() -> {
                 Column(
                     modifier = Modifier
@@ -123,8 +125,8 @@ fun ChatScreen(
                 }
             }
 
-            // Handle Error State
-            chatState is ChatState.Error -> {
+            // Handle Error State ONLY when no messages exist
+            chatState is ChatState.Error && viewModel.chatMessages.isEmpty() -> {
                 val errorMessage = (chatState as ChatState.Error).message
                 val isNetworkError =
                     !isNetworkOn || errorMessage.contains("connection", ignoreCase = true) ||
@@ -150,7 +152,7 @@ fun ChatScreen(
                 EmptyChatPlaceHolder()
             }
 
-            // Handle Messages Display
+            // Handle Messages Display (including when there's an error but messages exist)
             else -> {
                 LazyColumn(
                     modifier = Modifier
@@ -162,6 +164,17 @@ fun ChatScreen(
                 ) {
                     items(viewModel.chatMessages.size) { index ->
                         MessageItem(message = viewModel.chatMessages[index])
+                    }
+
+                    // Show error banner if there's an error but messages exist
+                    if (chatState is ChatState.Error && viewModel.chatMessages.isNotEmpty()) {
+                        item {
+                            ErrorMessageBanner(
+                                message = ErrorMessageMapper.mapErrorMessage(
+                                    (chatState as ChatState.Error).message
+                                )
+                            )
+                        }
                     }
 
                     if (chatState is ChatState.Loading) {
@@ -410,3 +423,34 @@ fun ChefTypingIndicator() {
         )
     }
 }
+
+@Composable
+fun ErrorMessageBanner(message: String) {
+    Box(
+        modifier = Modifier
+            .fillMaxWidth()
+            .clip(RoundedCornerShape(12.dp))
+            .background(MaterialTheme.colorScheme.errorContainer.copy(alpha = 0.5f))
+            .padding(12.dp)
+    ) {
+        Row(
+            modifier = Modifier.fillMaxWidth(),
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.spacedBy(12.dp)
+        ) {
+            Icon(
+                imageVector = Icons.Rounded.ErrorOutline,
+                contentDescription = "Error",
+                tint = MaterialTheme.colorScheme.error,
+                modifier = Modifier.size(20.dp)
+            )
+            Text(
+                text = message,
+                style = MaterialTheme.typography.bodySmall,
+                color = MaterialTheme.colorScheme.error,
+                modifier = Modifier.weight(1f)
+            )
+        }
+    }
+}
+

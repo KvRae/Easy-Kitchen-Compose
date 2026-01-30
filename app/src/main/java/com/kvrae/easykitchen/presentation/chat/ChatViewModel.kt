@@ -33,6 +33,7 @@ class ChatViewModel(
 
     val chatMessages = mutableStateListOf<Message>()
 
+
     init {
         viewModelScope.launch {
             _messageLimitStatus.value = getMessageLimitStatusUseCase(maxDailyMessages)

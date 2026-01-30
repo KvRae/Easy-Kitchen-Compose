@@ -381,16 +381,13 @@ fun MealDetailsScreen(
                                     modifier = Modifier.padding(start = 4.dp),
                                     text="Available on Youtube ",
                                     style = MaterialTheme.typography.bodyMedium,
-
-
-
                                 )
                             }
                         }
-
                     }
                 )
-            }}
+            }
+        }
         if (imageAlpha > 0f) {
             IconButton(
                 modifier = Modifier
