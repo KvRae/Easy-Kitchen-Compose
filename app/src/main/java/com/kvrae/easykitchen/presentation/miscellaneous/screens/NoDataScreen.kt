@@ -82,7 +82,7 @@ fun NoDataScreen(
         ) {
             LottieAnimation(
                 modifier = Modifier.size(100.dp),
-                rawRes = R.raw.not_found,
+                rawRes = R.raw.nodata_lottie,
             )
         }
 

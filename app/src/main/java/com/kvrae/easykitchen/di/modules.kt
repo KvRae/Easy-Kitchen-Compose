@@ -47,8 +47,10 @@ import com.kvrae.easykitchen.data.repository.RegisterRepositoryImpl
 import com.kvrae.easykitchen.data.repository.SavedMealRepository
 import com.kvrae.easykitchen.data.repository.ServerHealthRepository
 import com.kvrae.easykitchen.data.repository.ServerHealthRepositoryImpl
+import com.kvrae.easykitchen.data.repository.UserPreferencesRepositoryImpl
 import com.kvrae.easykitchen.data.util.SystemDateProvider
 import com.kvrae.easykitchen.domain.repository.MessageLimitRepository
+import com.kvrae.easykitchen.domain.repository.UserPreferencesRepository
 import com.kvrae.easykitchen.domain.usecases.BuildGoogleCredentialRequestUseCase
 import com.kvrae.easykitchen.domain.usecases.ClearSavedMealsUseCase
 import com.kvrae.easykitchen.domain.usecases.DeleteSavedMealUseCase
@@ -80,6 +82,7 @@ import com.kvrae.easykitchen.presentation.login.GoogleAuthViewModel
 import com.kvrae.easykitchen.presentation.login.LoginViewModel
 import com.kvrae.easykitchen.presentation.meals.MealsViewModel
 import com.kvrae.easykitchen.presentation.meals.SavedMealsViewModel
+import com.kvrae.easykitchen.presentation.onboarding.OnboardingViewModel
 import com.kvrae.easykitchen.presentation.register.RegisterViewModel
 import com.kvrae.easykitchen.presentation.splash.SplashViewModel
 import com.kvrae.easykitchen.utils.UserPreferencesManager
@@ -165,6 +168,7 @@ val dataModule = module {
     single<LocationRepository> { LocationRepositoryImpl(get()) }
 
     single { UserPreferencesManager(get()) }
+    single<UserPreferencesRepository> { UserPreferencesRepositoryImpl(get<UserPreferencesManager>()) }
 
     // Server Health
     single<ServerHealthRemoteDataSource> { ServerHealthRemoteDataSourceImpl(get()) }
@@ -213,7 +217,8 @@ val domainModule = module {
 }
 
 val presentationModule = module {
-    viewModel { SplashViewModel(get<PingServerUseCase>()) }
+    viewModel { SplashViewModel(get<PingServerUseCase>(), get<UserPreferencesRepository>()) }
+    viewModel { OnboardingViewModel(get<UserPreferencesRepository>()) }
     viewModel { MealsViewModel(get(), get(), get(), get()) }
     single { IngredientViewModel(get()) }
     viewModel { FilteredMealsViewModel(get(), get()) }

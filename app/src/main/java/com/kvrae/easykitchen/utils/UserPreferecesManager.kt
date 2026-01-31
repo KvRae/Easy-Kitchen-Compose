@@ -21,6 +21,7 @@ class UserPreferencesManager(context: Context) {
         private val EMAIL = stringPreferencesKey("email")
         private val MESSAGE_LIMIT_COUNT = intPreferencesKey("message_limit_count")
         private val MESSAGE_LIMIT_DATE = stringPreferencesKey("message_limit_date")
+        private val IS_ONBOARDING_COMPLETED = booleanPreferencesKey("is_onboarding_completed")
     }
 
     // Save login state
@@ -91,5 +92,16 @@ class UserPreferencesManager(context: Context) {
             preferences.remove(MESSAGE_LIMIT_COUNT)
             preferences.remove(MESSAGE_LIMIT_DATE)
         }
+    }
+
+    // Onboarding completion tracking
+    suspend fun setOnboardingCompleted(completed: Boolean) {
+        dataStore.edit { preferences ->
+            preferences[IS_ONBOARDING_COMPLETED] = completed
+        }
+    }
+
+    suspend fun isOnboardingCompleted(): Boolean {
+        return dataStore.data.first()[IS_ONBOARDING_COMPLETED] ?: false
     }
 }

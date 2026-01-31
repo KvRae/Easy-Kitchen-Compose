@@ -77,7 +77,10 @@ fun HomeScreen(
         }
     ) {
         when(homeState){
-            is HomeState.Loading -> CircularLoadingScreen()
+            is HomeState.Loading -> CircularLoadingScreen(
+                lottieRawRes = R.raw.food_loading,
+                size = 360.dp
+            )
             is HomeState.Success -> HomeScreenContent(
                 modifier = modifier,
                 navController = navController,

@@ -26,6 +26,7 @@ import com.kvrae.easykitchen.presentation.login.LoginScreen
 import com.kvrae.easykitchen.presentation.main.MainScreen
 import com.kvrae.easykitchen.presentation.meal_detail.MealDetailsScreen
 import com.kvrae.easykitchen.presentation.meals.MealsViewModel
+import com.kvrae.easykitchen.presentation.onboarding.OnboardingScreen
 import com.kvrae.easykitchen.presentation.register.RegisterScreen
 import com.kvrae.easykitchen.presentation.search.SearchScreen
 import com.kvrae.easykitchen.presentation.splash.SplashScreen
@@ -42,6 +43,7 @@ fun App() {
 
 // App Navigation routes
 const val SPLASH_SCREEN_ROUTE = "splash"
+const val ONBOARDING_SCREEN_ROUTE = "onboarding"
 const val LOGIN_SCREEN_ROUTE = "login"
 const val REGISTER_SCREEN_ROUTE = "register"
 const val FORGET_PASS_SCREEN_ROUTE = "forget"
@@ -69,6 +71,8 @@ sealed class Screen(
     val route: String,
 ) {
     data object SplashScreen : Screen(SPLASH_SCREEN_ROUTE)
+
+    data object OnboardingScreen : Screen(ONBOARDING_SCREEN_ROUTE)
 
     data object LoginScreen : Screen(LOGIN_SCREEN_ROUTE)
 
@@ -103,6 +107,12 @@ fun Navigation() {
     NavHost(navController = navController, startDestination = Screen.SplashScreen.route) {
         composable(Screen.SplashScreen.route) {
             SplashScreen(
+                navController = navController,
+            )
+        }
+
+        composable(Screen.OnboardingScreen.route) {
+            OnboardingScreen(
                 navController = navController,
             )
         }
