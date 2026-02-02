@@ -71,9 +71,7 @@ fun HomeScreen(
         isRefreshing = isRefreshing,
         state = refreshingState,
         onRefresh = {
-            isRefreshing = true
             viewModel.getData(forceRefresh = true)
-            isRefreshing = false
         }
     ) {
         when(homeState){

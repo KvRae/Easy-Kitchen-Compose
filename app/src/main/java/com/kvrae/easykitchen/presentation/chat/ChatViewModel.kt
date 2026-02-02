@@ -58,10 +58,13 @@ class ChatViewModel(
                     return@launch
                 }
 
-                _chatState.value = ChatState.Loading
+                val currentMessage = userMessage
+                userMessage = ""
 
-                chatMessages.add(Message(Role.USER, userMessage))
-                val response = geminiChatUseCase(userMessage)
+                _chatState.value = ChatState.Loading
+                chatMessages.add(Message(Role.USER, currentMessage))
+
+                val response = geminiChatUseCase(currentMessage)
 
                 response.fold(
                     onSuccess = { result ->
@@ -69,15 +72,15 @@ class ChatViewModel(
                         chatMessages.add(Message(Role.ASSISTANT, result))
                     },
                     onFailure = { error ->
-                        _chatState.value =
-                            ChatState.Error(error.message ?: "Failed to send message")
+                        val errorMsg = error.message ?: "Unable to get a response from Chef"
+                        _chatState.value = ChatState.Error(errorMsg)
+                        // Don't add error messages to chat history to keep it clean
                     }
                 )
 
-                userMessage = ""
-
             } catch (e: Exception) {
-                _chatState.value = ChatState.Error(e.message ?: "An unexpected error occurred")
+                val errorMsg = e.message ?: "An unexpected error occurred. Please try again."
+                _chatState.value = ChatState.Error(errorMsg)
             }
 
         }

@@ -49,26 +49,31 @@ fun ChatErrorPlaceHolder(
                 Icons.Rounded.ErrorOutline,
             contentDescription = "Error",
             modifier = Modifier.fillMaxWidth(0.2f),
-            tint = MaterialTheme.colorScheme.error
-
+            tint = if (isNetworkError)
+                MaterialTheme.colorScheme.error
+            else
+                MaterialTheme.colorScheme.primary.copy(alpha = 0.6f)
         )
 
-        // Error Title
-        Text(
-            text = if (isNetworkError) "Connection Error" else "Something went wrong",
-            style = MaterialTheme.typography.titleMedium,
-            fontWeight = FontWeight.Bold,
-            color = MaterialTheme.colorScheme.onSurface,
-            textAlign = TextAlign.Center
-        )
-
-        // Error Message
+        // Error Message (Main Content)
         Text(
             text = message,
-            style = MaterialTheme.typography.bodyMedium,
-            color = MaterialTheme.colorScheme.onSurfaceVariant,
+            style = MaterialTheme.typography.titleMedium,
+            fontWeight = FontWeight.SemiBold,
+            color = MaterialTheme.colorScheme.onSurface,
             textAlign = TextAlign.Center,
             modifier = Modifier.fillMaxWidth()
         )
+
+        // Helpful hint
+        if (!isNetworkError) {
+            Text(
+                text = "Try sending your message again or rephrase your question.",
+                style = MaterialTheme.typography.bodySmall,
+                color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.7f),
+                textAlign = TextAlign.Center,
+                modifier = Modifier.fillMaxWidth()
+            )
+        }
     }
 }

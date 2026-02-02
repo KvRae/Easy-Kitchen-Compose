@@ -129,9 +129,10 @@ fun ChatScreen(
             chatState is ChatState.Error && viewModel.chatMessages.isEmpty() -> {
                 val errorMessage = (chatState as ChatState.Error).message
                 val isNetworkError =
-                    !isNetworkOn || errorMessage.contains("connection", ignoreCase = true) ||
-                            errorMessage.contains("timeout", ignoreCase = true) ||
-                            errorMessage.contains("offline", ignoreCase = true)
+                    errorMessage.contains("connection", ignoreCase = true) || errorMessage.contains(
+                        "timeout",
+                        ignoreCase = true
+                    ) || errorMessage.contains("offline", ignoreCase = true)
 
                 Column(
                     modifier = Modifier
