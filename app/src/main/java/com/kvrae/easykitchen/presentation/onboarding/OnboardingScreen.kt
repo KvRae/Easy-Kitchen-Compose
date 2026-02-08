@@ -1,6 +1,12 @@
 package com.kvrae.easykitchen.presentation.onboarding
 
 import androidx.compose.animation.AnimatedContent
+import androidx.compose.animation.core.LinearOutSlowInEasing
+import androidx.compose.animation.core.RepeatMode
+import androidx.compose.animation.core.animateFloat
+import androidx.compose.animation.core.infiniteRepeatable
+import androidx.compose.animation.core.rememberInfiniteTransition
+import androidx.compose.animation.core.tween
 import androidx.compose.animation.slideInHorizontally
 import androidx.compose.animation.slideOutHorizontally
 import androidx.compose.animation.togetherWith
@@ -30,13 +36,14 @@ import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
-import androidx.compose.runtime.remember
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
@@ -54,7 +61,7 @@ fun OnboardingScreen(
     modifier: Modifier = Modifier,
     navController: NavController,
 ) {
-    var currentStep by remember { mutableIntStateOf(0) }
+    var currentStep by rememberSaveable { mutableIntStateOf(0) }
     val totalSteps = 3
 
     Box(
@@ -281,43 +288,55 @@ private fun OnboardingStepContent(
             .padding(bottom = 160.dp), // Leave space for navigation bar
         horizontalAlignment = Alignment.CenterHorizontally,
         verticalArrangement = androidx.compose.foundation.layout.Arrangement.spacedBy(
-            12.dp,
+            8.dp,
             Alignment.CenterVertically
         )
     ) {
         Spacer(modifier = Modifier.height(24.dp))
 
-        // Lottie Animation with enhanced styling
-        Box(
+        // Lottie Animation with smooth bouncy animation
+        val transition = rememberInfiniteTransition(label = "lottie_bounce")
+        val offsetY by transition.animateFloat(
+            initialValue = 0f,
+            targetValue = -12f,
+            animationSpec = infiniteRepeatable(
+                animation = tween(
+                    durationMillis = 2600,
+                    easing = LinearOutSlowInEasing
+                ),
+                repeatMode = RepeatMode.Reverse
+            ),
+            label = "bounce_offset"
+        )
+        val scale by transition.animateFloat(
+            initialValue = 1f,
+            targetValue = 1.02f,
+            animationSpec = infiniteRepeatable(
+                animation = tween(
+                    durationMillis = 2600,
+                    easing = LinearOutSlowInEasing
+                ),
+                repeatMode = RepeatMode.Reverse
+            ),
+            label = "bounce_scale"
+        )
+
+        com.airbnb.lottie.compose.LottieAnimation(
+            composition = com.airbnb.lottie.compose.rememberLottieComposition(
+                com.airbnb.lottie.compose.LottieCompositionSpec.RawRes(lottieRawRes)
+            ).value,
             modifier = Modifier
                 .fillMaxWidth(0.75f)
                 .height(320.dp)
-                .clip(
-                    androidx.compose.foundation.shape.RoundedCornerShape(28.dp)
-                )
-                .background(
-                    brush = Brush.verticalGradient(
-                        colors = listOf(
-                            MaterialTheme.colorScheme.primaryContainer.copy(alpha = 0.3f),
-                            MaterialTheme.colorScheme.secondaryContainer.copy(alpha = 0.3f)
-                        )
-                    )
-                )
-                .padding(12.dp),
-            contentAlignment = Alignment.Center
-        ) {
-            com.airbnb.lottie.compose.LottieAnimation(
-                composition = com.airbnb.lottie.compose.rememberLottieComposition(
-                    com.airbnb.lottie.compose.LottieCompositionSpec.RawRes(lottieRawRes)
-                ).value,
-                modifier = Modifier
-                    .fillMaxWidth(0.85f)
-                    .height(300.dp),
-                iterations = com.airbnb.lottie.compose.LottieConstants.IterateForever
-            )
-        }
+                .graphicsLayer {
+                    translationY = offsetY
+                    scaleX = scale
+                    scaleY = scale
+                },
+            iterations = com.airbnb.lottie.compose.LottieConstants.IterateForever
+        )
 
-        Spacer(modifier = Modifier.height(16.dp))
+        Spacer(modifier = Modifier.height(8.dp))
 
         // Title with enhanced typography
         Text(
