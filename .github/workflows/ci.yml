@@ -1,6 +1,9 @@
 name: Android CI/CD Pipeline
 
 on:
+  push:
+    branches:
+      - main         # Production releases on merge to main
   pull_request:
     branches:
       - develop      # Development branch
@@ -265,6 +268,8 @@ jobs:
     needs: build-and-test
     if: github.ref == 'refs/heads/main' && github.event_name == 'push'
     environment: production
+    permissions:
+      contents: write  # Required for creating releases
 
     steps:
       - name: 📥 Checkout Code
@@ -330,37 +335,75 @@ jobs:
       - name: 📝 Extract Version Name
         id: version
         run: |
-          VERSION=$(grep "versionName" app/build.gradle.kts | awk '{print $3}' | tr -d '"')
+          VERSION=$(grep "versionName" app/build.gradle.kts | grep -oP '"\K[^"]+')
+          VERSION_CODE=$(grep "versionCode" app/build.gradle.kts | grep -oP '\d+')
           echo "version=$VERSION" >> $GITHUB_OUTPUT
+          echo "versionCode=$VERSION_CODE" >> $GITHUB_OUTPUT
+          echo "Version: $VERSION (Code: $VERSION_CODE)"
 
       - name: 🏷️ Create GitHub Release
-        if: false  # Enable when ready
-        # uses: softprops/action-gh-release@v1
-        # with:
-        #   tag_name: v${{ steps.version.outputs.version }}
-        #   name: Release v${{ steps.version.outputs.version }}
-        #   body: |
-        #     Production Release
-        #     Version: ${{ steps.version.outputs.version }}
-        #     Commit: ${{ github.sha }}
-        #   files: |
-        #     app/build/outputs/apk/release/*.apk
-        #     app/build/outputs/bundle/release/*.aab
-        #   draft: false
-        #   prerelease: false
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: v${{ steps.version.outputs.version }}
+          name: Easy Kitchen v${{ steps.version.outputs.version }}
+          body: |
+            ## 🍽️ Easy Kitchen Release v${{ steps.version.outputs.version }}
+            
+            ### 📦 Release Information
+            - **Version Name:** ${{ steps.version.outputs.version }}
+            - **Version Code:** ${{ steps.version.outputs.versionCode }}
+            - **Build Date:** ${{ github.event.head_commit.timestamp }}
+            - **Commit:** ${{ github.sha }}
+            
+            ### 📥 Downloads
+            - **APK:** Download the APK file below for direct installation
+            - **AAB:** App Bundle for Play Store distribution
+            
+            ### 📝 Changes
+            ${{ github.event.head_commit.message }}
+            
+            ### ℹ️ Installation Instructions
+            1. Download the APK file
+            2. Enable "Install from Unknown Sources" in your device settings
+            3. Open the APK file to install
+            
+            ---
+            Built with ❤️ using GitHub Actions
+          files: |
+            app/build/outputs/apk/release/*.apk
+            app/build/outputs/bundle/release/*.aab
+          draft: false
+          prerelease: false
+          generate_release_notes: true
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: 📋 Create Workflow Summary
         run: |
-          echo "🏷️ GitHub Release placeholder"
-          echo "Version: ${{ steps.version.outputs.version }}"
-          echo "Configure GitHub releases here"
+          echo "## 🎉 Release Published Successfully!" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "### 📦 Release Details" >> $GITHUB_STEP_SUMMARY
+          echo "- **Version:** v${{ steps.version.outputs.version }}" >> $GITHUB_STEP_SUMMARY
+          echo "- **Version Code:** ${{ steps.version.outputs.versionCode }}" >> $GITHUB_STEP_SUMMARY
+          echo "- **Tag:** v${{ steps.version.outputs.version }}" >> $GITHUB_STEP_SUMMARY
+          echo "- **Commit:** \`${{ github.sha }}\`" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "### 🔗 Links" >> $GITHUB_STEP_SUMMARY
+          echo "- [View Release](https://github.com/${{ github.repository }}/releases/tag/v${{ steps.version.outputs.version }})" >> $GITHUB_STEP_SUMMARY
+          echo "- [Download APK](https://github.com/${{ github.repository }}/releases/download/v${{ steps.version.outputs.version }}/app-release.apk)" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "### ✅ Artifacts" >> $GITHUB_STEP_SUMMARY
+          echo "- APK: \`app-release.apk\`" >> $GITHUB_STEP_SUMMARY
+          echo "- AAB: \`app-release.aab\`" >> $GITHUB_STEP_SUMMARY
 
       - name: 📤 Upload Production Artifacts
-        uses: actions/upload-artifact@v6
+        uses: actions/upload-artifact@v4
         with:
           name: app-production-${{ github.sha }}
           path: |
             app/build/outputs/apk/release/*.apk
             app/build/outputs/bundle/release/*.aab
-          retention-days: 365  # Keep production builds for 1 year
+          retention-days: 90  # Keep production builds for 90 days
 
   # ============================================================================
   # Stage 7: Notifications (Optional)
