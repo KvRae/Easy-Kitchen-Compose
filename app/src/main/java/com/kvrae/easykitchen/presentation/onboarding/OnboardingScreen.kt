@@ -216,7 +216,6 @@ private fun BoxScope.OnboardingNavigationBar(
                         fontWeight = FontWeight.Medium
                     )
                 }
-
                 // Next button with hover effect
                 IconButton(
                     onClick = onNextClick,
