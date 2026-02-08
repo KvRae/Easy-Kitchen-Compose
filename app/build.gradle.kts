@@ -1,18 +1,34 @@
+import java.util.Properties
+
 plugins {
     alias(libs.plugins.android.application)
     alias(libs.plugins.jetbrains.kotlin.android)
     alias(libs.plugins.jetbrains.kotlin.serilization)
     alias(libs.plugins.google.ksp)
+    alias(libs.plugins.compose.compiler)
+    id("androidx.room")
+}
+
+val properties = Properties()
+val localPropertiesFile = rootProject.file("local.properties")
+
+if (localPropertiesFile.exists()) {
+    localPropertiesFile.inputStream().use { properties.load(it) }
 }
 
 android {
     namespace = "com.kvrae.easykitchen"
-    compileSdk = 34
+    compileSdk = 36
 
     defaultConfig {
+        buildConfigField("String", "API_KEY", "\"${properties.getProperty("API_KEY")}\"")
+        buildConfigField("String", "BASE_URL", "\"${properties.getProperty("BASE_URL")}\"")
+        buildConfigField("String", "BASE_URL_TEST", "\"${properties.getProperty("BASE_URL_TEST")}\"")
+        buildConfigField("String", "CHAT_BASE_URL", "\"${properties.getProperty("CHAT_BASE_URL")}\"")
+
         applicationId = "com.kvrae.easykitchen"
         minSdk = 26
-        targetSdk = 34
+        targetSdk = 36
         versionCode = 1
         versionName = "1.0"
 
@@ -32,18 +48,21 @@ android {
         }
     }
     compileOptions {
-        sourceCompatibility = JavaVersion.VERSION_1_8
-        targetCompatibility = JavaVersion.VERSION_1_8
-    }
-    kotlinOptions {
-        jvmTarget = "1.8"
+        sourceCompatibility = JavaVersion.VERSION_21
+        targetCompatibility = JavaVersion.VERSION_21
     }
     buildFeatures {
+        buildConfig = true
         compose = true
     }
-    composeOptions {
-        kotlinCompilerExtensionVersion = "1.5.1"
+    compileOptions {
+        sourceCompatibility = JavaVersion.VERSION_21
+        targetCompatibility = JavaVersion.VERSION_21
     }
+    kotlinOptions {
+        freeCompilerArgs = listOf("-XXLanguage:+WhenGuards")
+    }
+
     packaging {
         resources {
             excludes += "/META-INF/{AL2.0,LGPL2.1}"
@@ -55,6 +74,9 @@ android {
                 srcDirs("src\\main\\assets", "src\\main\\assets")
             }
         }
+    }
+    room {
+        schemaDirectory("$projectDir/schemas")
     }
 }
 
@@ -69,6 +91,7 @@ dependencies {
     implementation(libs.androidx.ui.tooling.preview)
     implementation(libs.androidx.material3)
     implementation(libs.androidx.ui.text.google.fonts)
+    implementation(libs.androidx.compose.material.icons.extended)
     // Lottie
     implementation(libs.android.lottie.compose)
     // Navigation Compose
@@ -77,20 +100,29 @@ dependencies {
     implementation(libs.coil.kt)
     // Ktor
     implementation(libs.bundles.ktor)
+
     // Koin
     implementation(libs.koin.android.compose)
     // Room
     implementation(libs.bundles.room)
-    annotationProcessor(libs.androidx.room.compiler)
+    implementation(libs.androidx.compose.material3)
+    ksp(libs.androidx.room.compiler)
     // google auth
     implementation(libs.google.auth.service)
+    // google location
+    implementation(libs.google.location.service)
+    // datastore
+    implementation(libs.androidx.datastore.preferences)
 
     // Shimmer
     implementation(libs.valentinilk.shimmer)
     // Accompanist Swipe Refresh
     implementation(libs.google.accompanist.swiperefresher)
+    // Accompanist Permissions
+    implementation(libs.google.accompanist.permissions)
 
-
+    // Gemini
+    implementation(libs.google.generativeai)
 
     // Compose Test dependencies
     testImplementation(libs.junit)

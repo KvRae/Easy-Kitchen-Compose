@@ -3,6 +3,7 @@ package com.kvrae.easykitchen.data.local.entity
 import androidx.room.Entity
 import androidx.room.PrimaryKey
 import com.kvrae.easykitchen.data.remote.dto.Meal
+import com.kvrae.easykitchen.data.remote.dto.MealResponse
 
 @Entity(tableName = "saved_meal")
 data class SavedMeal(
@@ -35,3 +36,27 @@ fun Meal.asSavedMeal() : SavedMeal {
         measures = this.measures
     )
 }
+
+fun MealResponse.toSavedMeal(): SavedMeal = SavedMeal(
+    id = idResponse,
+    name = strMeal,
+    source = strSource,
+    category = strCategory,
+    area = strArea,
+    image = strMealThumb,
+    instructions = strInstructions,
+    youtube = strYoutube,
+    ingredients = listOfNotNull(
+        strIngredient1, strIngredient2, strIngredient3, strIngredient4, strIngredient5,
+        strIngredient6, strIngredient7, strIngredient8, strIngredient9, strIngredient10,
+        strIngredient11, strIngredient12, strIngredient13, strIngredient14, strIngredient15,
+        strIngredient16, strIngredient17, strIngredient18, strIngredient19, strIngredient20
+    ).filter { it.isNotBlank() },
+    measures = listOfNotNull(
+        strMeasure1, strMeasure2, strMeasure3, strMeasure4, strMeasure5,
+        strMeasure6, strMeasure7, strMeasure8, strMeasure9, strMeasure10,
+        strMeasure11, strMeasure12, strMeasure13, strMeasure14, strMeasure15,
+        strMeasure16, strMeasure17, strMeasure18, strMeasure19, strMeasure20
+    ).filter { it.isNotBlank() },
+    isFavorite = true
+)

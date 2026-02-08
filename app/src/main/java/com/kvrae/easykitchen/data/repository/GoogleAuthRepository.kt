@@ -13,6 +13,7 @@ import com.kvrae.easykitchen.data.remote.dto.User
 import com.kvrae.easykitchen.utils.GOOGLE_LOGIN_URL
 import io.ktor.client.HttpClient
 import io.ktor.client.request.post
+import io.ktor.client.request.setBody
 import io.ktor.client.statement.HttpResponse
 import io.ktor.http.ContentType
 import io.ktor.http.contentType
@@ -56,7 +57,7 @@ class AuthRepositoryImpl(private val client: HttpClient) : AuthRepository {
         return try {
             val response: HttpResponse = client.post(GOOGLE_LOGIN_URL) {
                 contentType(ContentType.Application.Json)
-                body = idToken
+                setBody(idToken)
             }
             if (response.status.isSuccess()) {
                 val user = User() // Parse the response body to User object

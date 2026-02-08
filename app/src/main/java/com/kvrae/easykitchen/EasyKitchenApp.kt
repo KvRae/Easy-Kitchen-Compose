@@ -16,10 +16,10 @@ class EasyKitchenApp : Application() {
             androidContext(this@EasyKitchenApp)
             modules(
                 networkModule,
+                databaseModule,
                 dataModule,
                 domainModule,
-                presentationModule,
-                databaseModule
+                presentationModule
             )
         }
     }

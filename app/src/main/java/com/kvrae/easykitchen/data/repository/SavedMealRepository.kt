@@ -22,4 +22,8 @@ class SavedMealRepository(
         savedMealDao.deleteSavedMealById(id)
     }
 
+    suspend fun clearAll() {
+        savedMealDao.deleteAllSavedMeals()
+    }
+
 }

@@ -4,4 +4,6 @@ plugins {
     alias(libs.plugins.jetbrains.kotlin.android) apply false
     alias(libs.plugins.jetbrains.kotlin.serilization) apply false
     alias(libs.plugins.google.ksp) apply false
+    alias { libs.plugins.compose.compiler } apply false
+    id("androidx.room") version "2.8.4" apply false
 }
