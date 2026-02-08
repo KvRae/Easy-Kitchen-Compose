@@ -29,6 +29,7 @@ import com.kvrae.easykitchen.R
 import com.kvrae.easykitchen.presentation.login.LoginViewModel
 import com.kvrae.easykitchen.utils.LOGIN_SCREEN_ROUTE
 import com.kvrae.easykitchen.utils.MAIN_SCREEN_ROUTE
+import com.kvrae.easykitchen.utils.ONBOARDING_SCREEN_ROUTE
 import com.kvrae.easykitchen.utils.SPLASH_SCREEN_ROUTE
 import com.kvrae.easykitchen.utils.popThenNavigateTo
 import kotlinx.coroutines.delay
@@ -38,12 +39,18 @@ import org.koin.androidx.compose.koinViewModel
 @Composable
 fun SplashScreen(navController: NavController) {
     val loginViewModel = koinViewModel<LoginViewModel>()
+    val splashViewModel = koinViewModel<SplashViewModel>()
     val isLoggedIn = loginViewModel.isLoggedIn.collectAsState()
+    val serverPingState = splashViewModel.serverPingState.collectAsState()
+    val isOnboardingCompleted = splashViewModel.isOnboardingCompleted.collectAsState()
 
     val coroutineScope = rememberCoroutineScope()
     LaunchedEffect(key1 = Unit) {
         coroutineScope.launch {
+            // Wait for splash duration and server ping to complete
             delay(3000)
+
+            // Navigate based on auth and onboarding state
             if (isLoggedIn.value) {
                 navController.popThenNavigateTo(
                     navigateRoute = MAIN_SCREEN_ROUTE,
@@ -51,10 +58,19 @@ fun SplashScreen(navController: NavController) {
                 )
                 return@launch
             }
-            navController.popThenNavigateTo(
-                navigateRoute = LOGIN_SCREEN_ROUTE,
-                popRoute = SPLASH_SCREEN_ROUTE
-            )
+
+            // If not logged in, check if onboarding is completed
+            if (isOnboardingCompleted.value) {
+                navController.popThenNavigateTo(
+                    navigateRoute = LOGIN_SCREEN_ROUTE,
+                    popRoute = SPLASH_SCREEN_ROUTE
+                )
+            } else {
+                navController.popThenNavigateTo(
+                    navigateRoute = ONBOARDING_SCREEN_ROUTE,
+                    popRoute = SPLASH_SCREEN_ROUTE
+                )
+            }
         }
     }
     GradientSplashScreen()

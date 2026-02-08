@@ -38,40 +38,77 @@ class HomeViewModel(
     }
 
     fun getData(forceRefresh: Boolean = false) {
-        // Skip fetching if data is already loaded and not forcing refresh
-        if (isDataLoaded && !forceRefresh) {
-            return
-        }
-
+        _homeState.value = HomeState.Loading
         viewModelScope.launch {
-            // Only set to Loading if we don't have data already
-            if (!isDataLoaded) {
-                _homeState.value = HomeState.Loading
-            }
+            try {
+                val categoryResult = async { categoryUseCase() }.await()
+                val mealResult = async { mealsUseCase() }.await()
+                val locationResult = async { getUserLocationUseCase() }.await()
 
-            val categoryResult = async { categoryUseCase() }.await()
-            val mealResult = async { mealsUseCase() }.await()
-            val locationResult = async { getUserLocationUseCase() }.await()
-
-            // Store user location
-            locationResult.getOrNull()?.let {
-                _userLocation.value = it
-            }
-
-            _homeState.value = when {
-                categoryResult.isSuccess && mealResult.isSuccess -> {
-                    val categories = categoryResult.getOrNull() ?: emptyList()
-                    val meals = mealResult.getOrNull() ?: emptyList()
-                    isDataLoaded = true
-                    HomeState.Success(meals, categories)
-                }
-                categoryResult.isFailure || mealResult.isFailure -> {
-                    // Only show error if we don't already have data to show
-                    if (isDataLoaded) _homeState.value else HomeState.Error("Failed to load Data")
+                // Store user location
+                locationResult.getOrNull()?.let {
+                    _userLocation.value = it
                 }
 
-                else -> {
-                    if (isDataLoaded) _homeState.value else HomeState.Error("Contents Not Available!")
+                _homeState.value = when {
+                    categoryResult.isSuccess && mealResult.isSuccess -> {
+                        val categories = categoryResult.getOrNull() ?: emptyList()
+                        val meals = mealResult.getOrNull() ?: emptyList()
+
+                        // Check if data is actually empty
+                        if (categories.isEmpty() && meals.isEmpty()) {
+                            HomeState.Error("No recipes available at the moment. Please check your internet connection and try again.")
+                        } else {
+                            isDataLoaded = true
+                            HomeState.Success(meals, categories)
+                        }
+                    }
+
+                    categoryResult.isFailure && mealResult.isFailure -> {
+                        // Both failed - likely network or server issue
+                        val error = categoryResult.exceptionOrNull() ?: mealResult.exceptionOrNull()
+                        val message = when {
+                            error?.message?.contains("timeout", ignoreCase = true) == true ->
+                                "Connection timeout. Please check your internet and try again."
+
+                            error?.message?.contains(
+                                "Unable to resolve host",
+                                ignoreCase = true
+                            ) == true ->
+                                "No internet connection. Please check your network settings."
+
+                            error?.message?.contains("500", ignoreCase = true) == true ->
+                                "Server is temporarily unavailable. Please try again later."
+
+                            else ->
+                                "Unable to load recipes. Please check your connection and try again."
+                        }
+                        if (isDataLoaded) _homeState.value else HomeState.Error(message)
+                    }
+
+                    categoryResult.isFailure || mealResult.isFailure -> {
+                        // One failed - try to show partial data
+                        val categories = categoryResult.getOrNull() ?: emptyList()
+                        val meals = mealResult.getOrNull() ?: emptyList()
+
+                        if (categories.isNotEmpty() || meals.isNotEmpty()) {
+                            isDataLoaded = true
+                            HomeState.Success(meals, categories)
+                        } else {
+                            if (isDataLoaded) _homeState.value else HomeState.Error("Unable to load recipes. Please try again.")
+                        }
+                    }
+
+                    else -> {
+                        if (isDataLoaded) _homeState.value else HomeState.Error("Unable to load content. Please try again.")
+                    }
+                }
+            } catch (e: Exception) {
+                android.util.Log.e("HomeViewModel", "Error loading data", e)
+                _homeState.value = if (isDataLoaded) {
+                    _homeState.value
+                } else {
+                    HomeState.Error("An unexpected error occurred. Please try again.")
                 }
             }
         }

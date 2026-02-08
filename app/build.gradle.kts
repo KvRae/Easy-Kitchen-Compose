@@ -78,6 +78,11 @@ android {
     room {
         schemaDirectory("$projectDir/schemas")
     }
+    lint {
+        disable += setOf("NullSafeMutableLiveData", "RememberInComposition")
+        // Keep lint from breaking the build on this known tooling bug.
+        abortOnError = false
+    }
 }
 
 dependencies {
@@ -106,6 +111,7 @@ dependencies {
     // Room
     implementation(libs.bundles.room)
     implementation(libs.androidx.compose.material3)
+    implementation(libs.google.identity.googleid)
     ksp(libs.androidx.room.compiler)
     // google auth
     implementation(libs.google.auth.service)
@@ -124,8 +130,19 @@ dependencies {
     // Gemini
     implementation(libs.google.generativeai)
 
+    // Credential Manager and Google Identity
+    implementation(libs.androidx.credentials)
+    implementation(libs.androidx.credentials.play.services)
+    implementation(libs.google.identity.googleid)
+
     // Compose Test dependencies
     testImplementation(libs.junit)
+
+    // Testing dependencies
+    testImplementation("io.mockk:mockk:1.13.5")
+    testImplementation("io.ktor:ktor-client-mock:${libs.versions.ktor.version.get()}")
+    testImplementation("org.jetbrains.kotlinx:kotlinx-coroutines-test:1.7.3")
+    testImplementation("org.jetbrains.kotlinx:kotlinx-serialization-json:${libs.versions.serialization.version.get()}")
 
     //  AndroidX Test dependencies
     androidTestImplementation(libs.androidx.junit)

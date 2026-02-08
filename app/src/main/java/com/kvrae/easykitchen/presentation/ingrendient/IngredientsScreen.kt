@@ -109,7 +109,10 @@ fun IngredientsScreen(
                     }
 
                     is IngredientState.Error -> NoDataScreen(
-                        message = (filteredIngredientState as IngredientState.Error).message
+                        message = (filteredIngredientState as IngredientState.Error).message,
+                        onRetry = {
+                            viewModel.getIngredients()
+                        }
                     )
                 }
             }

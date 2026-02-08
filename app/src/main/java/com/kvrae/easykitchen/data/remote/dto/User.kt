@@ -4,30 +4,33 @@ import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 
 @Serializable
-class User {
+data class User(
     @SerialName("_id")
-    val id: String? = null
+    val id: String? = null,
     @SerialName("username")
-    val username: String? = null
+    val username: String? = null,
     @SerialName("email")
-    val email: String? = null
+    val email: String? = null,
     @SerialName("password")
-    val password: String? = null
+    val password: String? = null,
     @SerialName("phone")
     val phone: String? = null
-
-}
+)
 
 @Serializable
 data class LoginRequest(
     @SerialName("username")
-    val username: String,
+    val username: String? = null,
+    @SerialName("email")
+    val email: String? = null,
     @SerialName("password")
     val password: String
 )
 
 @Serializable
 data class LoginResponse(
+    @SerialName("message")
+    val message: String? = null,
     @SerialName("user")
     val user: User = User(),
     @SerialName("token")
@@ -54,4 +57,10 @@ data class RegisterResponse(
     val message: String = "",
     @SerialName("error")
     val error: String? = null
+)
+
+@Serializable
+data class ErrorResponse(
+    val error: String? = null,
+    val message: String? = null
 )

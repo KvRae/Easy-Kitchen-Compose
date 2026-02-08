@@ -32,6 +32,7 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.vector.ImageVector
@@ -60,7 +61,7 @@ fun HomeScreen(
 ) {
     val viewModel = koinViewModel<HomeViewModel>()
     val homeState by viewModel.homeState.collectAsState()
-    val isRefreshing by remember {
+    var isRefreshing by remember {
         mutableStateOf(false)
     }
     val refreshingState = rememberPullToRefreshState()
@@ -74,7 +75,10 @@ fun HomeScreen(
         }
     ) {
         when(homeState){
-            is HomeState.Loading -> CircularLoadingScreen()
+            is HomeState.Loading -> CircularLoadingScreen(
+                lottieRawRes = R.raw.food_loading,
+                size = 360.dp
+            )
             is HomeState.Success -> HomeScreenContent(
                 modifier = modifier,
                 navController = navController,
@@ -85,6 +89,9 @@ fun HomeScreen(
             is HomeState.Error -> NoDataScreen(
                 message = (homeState as HomeState.Error).message,
                 icon = Icons.Rounded.SearchOff,
+                onRetry = {
+                    viewModel.getData(forceRefresh = true)
+                }
             )
         }
     }

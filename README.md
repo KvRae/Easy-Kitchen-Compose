@@ -1,61 +1,100 @@
-# EasyKitchenCompose
-![Android SDK](https://img.shields.io/badge/Android%20SDK-26%2B-brightgreen)
-![Kotlin](https://img.shields.io/badge/Kotlin-1.9.0-blue)
-![Compose BOM](https://img.shields.io/badge/Compose%20BOM-2023.08.00-9cf)
-![AGP](https://img.shields.io/badge/AGP-8.7.1-yellow)
-![Ktor](https://img.shields.io/badge/Ktor-1.5.0-orange)
-![Room](https://img.shields.io/badge/Room-2.6.1-red)
+# Easy-Kitchen-Compose
+
+![Android SDK](https://img.shields.io/badge/Android%20SDK-21%2B-brightgreen)
+![Kotlin](https://img.shields.io/badge/Kotlin-1.5.21-blue)
+![Compose](https://img.shields.io/badge/Compose-1.0.0-9cf)
+![Gradle](https://img.shields.io/badge/Gradle-7.0.2-yellow)
+![Ktor](https://img.shields.io/badge/Ktor-1.6.2-orange)
+![Room](https://img.shields.io/badge/Room-2.3.0-red)
 ![Koin](https://img.shields.io/badge/Koin-3.1.2-blueviolet)
-![Coil](https://img.shields.io/badge/Coil-2.7.0-yellowgreen)
-![Compose Navigation](https://img.shields.io/badge/Compose%20Navigation-2.7.7-ff69b4)
+![Coil](https://img.shields.io/badge/Coil-1.3.2-yellowgreen)
+![Compose Navigation](https://img.shields.io/badge/Compose%20Navigation-2.4.0-ff69b4)
 
-## About
+EasyKitchenCompose is a Jetpack Compose recipe app that makes discovering, saving, and cooking meals
+delightful. It pairs a modern UI with clean architecture, remote data via Ktor, local persistence
+via Room, and DI via Koin.
 
-**EasyKitchenCompose** is a modern Android recipe application built entirely with **Jetpack Compose**. This app provides a seamless culinary experience, allowing users to discover delicious recipes, explore meal categories, browse by ingredients, and get personalized meal suggestions based on the time of day.
+## What you can do
 
-## Tech Stack
+- Browse and search meals by name, category, or area.
+- Open rich meal details with ingredients, steps, and media.
+- Save favorites locally for quick access.
+- Filter content (by area/category/ingredients) and navigate to tailored lists.
+- Chat assistant screen to help with cooking ideas.
 
-- **Jetpack Compose** - Modern declarative UI toolkit
-- **Ktor Client** - Networking with serialization support
-- **Room Database** - Local data persistence with KSP
-- **Koin** - Dependency injection
-- **Coil** - Image loading and caching
-- **Navigation Compose** - Type-safe navigation
-- **Lottie** - Beautiful animations
-- **Material 3** - Latest Material Design components
-- **Accompanist** - Swipe refresh functionality
-- **Google Play Services Auth** - User authentication
+## Architecture & tech
 
-## Features
+- Clean Architecture: presentation (Compose + ViewModel), domain (use cases, models, sealed
+  exceptions), data (repositories, remote Ktor client, Room cache).
+- Dependency Injection: Koin modules for data, domain, and presentation layers.
+- Networking: Ktor client + serialization; image loading via Coil.
+- Concurrency: Kotlin Coroutines/Flows.
+- Navigation: Jetpack Compose Navigation; single-activity, multi-screen flow.
+- Design system: Material 3-inspired theming with an orange-first palette and soft secondary
+  accents.
 
-### 🏠 Home Screen
-- **Time-based meal suggestions** - Get recipe ideas based on breakfast, lunch, or dinner time
-- **Category browsing** - Explore meals by categories (Desserts, Main dishes, etc.)
-- **Personalized recommendations** - Discover new recipes tailored to your preferences
-- **Pull-to-refresh** - Keep content fresh with swipe-to-refresh
+## Project layout
 
-### 🍽️ Meals Screen
-- **Comprehensive recipe catalog** - Browse through an extensive collection of meals
-- **Detailed meal information** - View complete recipe details including ingredients and instructions
-- **Smart filtering** - Find meals by category or area
+```
+app/
+  src/main/java/com/kvrae/easykitchen/
+    data/          # Remote data sources, DTOs, repositories
+    domain/        # Use cases, models, sealed exceptions
+    presentation/  # Compose UI, ViewModels, navigation
+  src/main/res/    # Theming, drawables, strings
+```
 
-### 🥗 Ingredients Screen
-- **Ingredient-based search** - Select ingredients to find matching recipes
-- **Shopping basket** - Add ingredients to a basket for meal planning
-- **Interactive selection** - Easy tap-to-add/remove ingredient management
+## Getting started
 
-### 🔐 Authentication
-- **User registration and login** - Secure account creation and access
-- **Password recovery** - Easy password reset with OTP verification
-- **Google Sign-In** - Quick authentication with Google account
+1) Prerequisites: Android Studio with Android SDK 21+, JDK matching your IDE toolchain, and an
+   emulator/device.
+2) Clone and set `local.properties` with your `sdk.dir`.
+3) **Google Sign-In Setup**: Follow the instructions in `YOUR_SETUP_INFO.md` to configure Google
+   authentication.
+    - Get your SHA-1: Run `./get-sha1.sh`
+    - Create OAuth Client in Google Cloud Console
+    - Paste Client ID in `app/src/main/res/values/strings.xml` (line 32)
+    - See `GOOGLE_SIGN_IN_SETUP.md` for detailed instructions
+4) Sync the project in Android Studio.
 
-### 🔍 Search
-- **Global search** - Find any recipe quickly
-- **Real-time results** - Instant search feedback as you type
+Build and run from the IDE, or via CLI:
 
-### 📱 Additional Features
-- **Offline support** - Access previously viewed recipes without internet
-- **Network status indicator** - Real-time connection status with snackbar notifications
-- **Beautiful animations** - Smooth transitions and Lottie loading animations
-- **Material Design 3** - Modern, polished UI following latest design guidelines
-- **Responsive design** - Optimized for different screen sizes
+```bash
+./gradlew clean assembleDebug
+```
+
+Run unit tests:
+
+```bash
+./gradlew test
+```
+
+## Google Sign-In Configuration
+
+This app uses Google Sign-In for user authentication (mobile-side only, no backend required).
+
+**Quick Setup**:
+
+```bash
+# 1. Get your SHA-1 fingerprint
+./get-sha1.sh
+
+# 2. Go to https://console.cloud.google.com/apis/credentials
+# 3. Create OAuth 2.0 Client ID (Android)
+# 4. Paste Client ID in app/src/main/res/values/strings.xml
+
+# 5. Rebuild
+./gradlew clean build
+```
+
+**Documentation**:
+
+- **Quick Start**: `YOUR_SETUP_INFO.md` - Has your SHA-1 and quick instructions
+- **Detailed Guide**: `GOOGLE_SIGN_IN_SETUP.md` - Complete step-by-step guide
+- **Quick Reference**: `QUICK_SETUP_GOOGLE_AUTH.md` - 5-minute setup card
+
+## Notes
+
+- If you hit dependency cache issues, retry with `./gradlew --refresh-dependencies`.
+- Ktor and Room components rely on proper Gradle sync; ensure network access on first setup.
+- **Google Sign-In** requires proper OAuth configuration - see setup docs above.

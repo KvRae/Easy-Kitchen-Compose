@@ -35,6 +35,7 @@ import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
 import com.kvrae.easykitchen.data.remote.dto.MealResponse
 import com.kvrae.easykitchen.data.remote.dto.asMealDetail
+import com.kvrae.easykitchen.presentation.meals.MealsViewModel
 import com.kvrae.easykitchen.presentation.miscellaneous.components.MealImageCoveredCard
 import com.kvrae.easykitchen.presentation.miscellaneous.screens.CircularLoadingScreen
 import com.kvrae.easykitchen.presentation.miscellaneous.screens.NoDataScreen
@@ -149,6 +150,9 @@ fun FilteredMealsContent(
     primaryTitle: String = "Perfect Matches",
     primarySubtitle: String = "Recipes with all your ingredients"
 ) {
+    val mealsViewModel = koinViewModel<MealsViewModel>()
+    val savedMealIds by mealsViewModel.savedMealIds.collectAsState()
+
     LazyColumn(
         modifier = modifier
             .fillMaxSize()
@@ -192,7 +196,10 @@ fun FilteredMealsContent(
                         onMealClick = {
                             onMealClick(exactMatches[index].idResponse ?: "")
                         },
-                        onFavoriteClick = {}
+                        onFavoriteClick = {
+                            mealsViewModel.toggleFavorite(exactMatches[index])
+                        },
+                        isFavorite = savedMealIds.contains(exactMatches[index].idResponse)
                     )
                 }
             }
@@ -237,7 +244,10 @@ fun FilteredMealsContent(
                         onMealClick = {
                             onMealClick(partialMatches[index].idResponse ?: "")
                         },
-                        onFavoriteClick = {}
+                        onFavoriteClick = {
+                            mealsViewModel.toggleFavorite(partialMatches[index])
+                        },
+                        isFavorite = savedMealIds.contains(partialMatches[index].idResponse)
                     )
                 }
             }

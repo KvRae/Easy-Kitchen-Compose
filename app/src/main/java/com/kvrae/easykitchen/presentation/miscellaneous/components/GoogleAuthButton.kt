@@ -1,9 +1,5 @@
 package com.kvrae.easykitchen.presentation.miscellaneous.components
 
-import androidx.activity.compose.LocalActivity
-import androidx.activity.compose.rememberLauncherForActivityResult
-import androidx.activity.result.ActivityResult
-import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
@@ -29,11 +25,9 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
-import com.google.android.gms.auth.api.signin.GoogleSignIn
-import com.google.android.gms.auth.api.signin.GoogleSignInStatusCodes
-import com.google.android.gms.common.api.ApiException
 import com.kvrae.easykitchen.R
 import com.kvrae.easykitchen.data.remote.dto.User
 import com.kvrae.easykitchen.presentation.login.GoogleAuthState
@@ -41,47 +35,24 @@ import com.kvrae.easykitchen.presentation.login.GoogleAuthViewModel
 import org.koin.androidx.compose.koinViewModel
 
 @Composable
-fun GoogleSignInButton(
+fun GoogleAuthButton(
     modifier: Modifier = Modifier,
     onSignInSuccess: (User) -> Unit,
     onSignInError: (String) -> Unit
 ) {
-    val activity = LocalActivity.current
     val viewModel = koinViewModel<GoogleAuthViewModel>()
-    val googleSignInClient = activity?.let { viewModel.getGoogleSignInClient(it) }
-
-    val signInLauncher = rememberLauncherForActivityResult(
-        contract = ActivityResultContracts.StartActivityForResult(),
-        onResult = { result: ActivityResult ->
-            @Suppress("DEPRECATION")
-            val task = GoogleSignIn.getSignedInAccountFromIntent(result.data)
-            try {
-                task.getResult(ApiException::class.java)
-                viewModel.handleSignInResult(task)
-            } catch (e: ApiException) {
-                val errorMessage = when (e.statusCode) {
-                    @Suppress("DEPRECATION")
-                    GoogleSignInStatusCodes.SIGN_IN_CANCELLED -> "Sign in cancelled"
-
-                    @Suppress("DEPRECATION")
-                    GoogleSignInStatusCodes.NETWORK_ERROR -> "Network error, please try again"
-
-                    else -> "Sign in failed"
-                }
-                onSignInError(errorMessage)
-            }
-        }
-    )
-
     val googleAuthState by viewModel.googleAuthState.collectAsState()
+    val clientId = stringResource(R.string.default_web_client_id)
 
-    LaunchedEffect(key1 = googleAuthState) {
+    LaunchedEffect(googleAuthState) {
         when (googleAuthState) {
             is GoogleAuthState.Success -> {
                 onSignInSuccess((googleAuthState as GoogleAuthState.Success).user)
+                viewModel.resetGoogleAuthState()
             }
             is GoogleAuthState.Error -> {
                 onSignInError((googleAuthState as GoogleAuthState.Error).message)
+                viewModel.resetGoogleAuthState()
             }
             else -> {}
         }
@@ -99,12 +70,7 @@ fun GoogleSignInButton(
             )
             .background(MaterialTheme.colorScheme.surface)
             .clickable {
-                viewModel.resetGoogleAuthState()
-                if (googleSignInClient != null) {
-                    @Suppress("DEPRECATION")
-                    val signInIntent = viewModel.getSignInIntent(googleSignInClient)
-                    signInLauncher.launch(signInIntent)
-                }
+                viewModel.signIn(clientId)
             },
         contentAlignment = Alignment.Center
     ) {

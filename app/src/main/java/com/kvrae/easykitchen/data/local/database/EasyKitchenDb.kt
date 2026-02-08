@@ -20,7 +20,8 @@ import com.kvrae.easykitchen.data.local.entity.SavedMeal
 
 @Database(
     entities = [SavedMeal::class, Meal::class, Ingredient::class, Category::class],
-    version = 4
+    version = 4,
+    exportSchema = false
 )
 @TypeConverters(MealTypeConverters::class)
 abstract class EasyKitchenDb: RoomDatabase() {

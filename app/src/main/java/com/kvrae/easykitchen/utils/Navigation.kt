@@ -26,6 +26,7 @@ import com.kvrae.easykitchen.presentation.login.LoginScreen
 import com.kvrae.easykitchen.presentation.main.MainScreen
 import com.kvrae.easykitchen.presentation.meal_detail.MealDetailsScreen
 import com.kvrae.easykitchen.presentation.meals.MealsViewModel
+import com.kvrae.easykitchen.presentation.onboarding.OnboardingScreen
 import com.kvrae.easykitchen.presentation.register.RegisterScreen
 import com.kvrae.easykitchen.presentation.search.SearchScreen
 import com.kvrae.easykitchen.presentation.splash.SplashScreen
@@ -42,6 +43,7 @@ fun App() {
 
 // App Navigation routes
 const val SPLASH_SCREEN_ROUTE = "splash"
+const val ONBOARDING_SCREEN_ROUTE = "onboarding"
 const val LOGIN_SCREEN_ROUTE = "login"
 const val REGISTER_SCREEN_ROUTE = "register"
 const val FORGET_PASS_SCREEN_ROUTE = "forget"
@@ -50,6 +52,7 @@ const val MEAL_DETAILS_SCREEN_ROUTE = "details"
 const val FILTERED_MEALS_ROUTE = "filtered_meals"
 const val BASKET_ROUTE = "basket"
 const val SAVED_MEALS_ROUTE = "saved_meals"
+const val SETTINGS_ROUTE = "settings"
 // Main screen routes
 const val MAIN_HOME_ROUTE = "Home"
 const val MAIN_MEALS_ROUTE = "Meals"
@@ -69,6 +72,8 @@ sealed class Screen(
 ) {
     data object SplashScreen : Screen(SPLASH_SCREEN_ROUTE)
 
+    data object OnboardingScreen : Screen(ONBOARDING_SCREEN_ROUTE)
+
     data object LoginScreen : Screen(LOGIN_SCREEN_ROUTE)
 
     data object RegisterScreen : Screen(REGISTER_SCREEN_ROUTE)
@@ -86,6 +91,8 @@ sealed class Screen(
     data object BasketScreen : Screen(BASKET_ROUTE)
 
     data object SavedMealsScreen : Screen(SAVED_MEALS_ROUTE)
+
+    data object SettingsScreen : Screen(SETTINGS_ROUTE)
 }
 
 // setting the navigation composable
@@ -100,6 +107,12 @@ fun Navigation() {
     NavHost(navController = navController, startDestination = Screen.SplashScreen.route) {
         composable(Screen.SplashScreen.route) {
             SplashScreen(
+                navController = navController,
+            )
+        }
+
+        composable(Screen.OnboardingScreen.route) {
+            OnboardingScreen(
                 navController = navController,
             )
         }
@@ -201,6 +214,11 @@ fun Navigation() {
         }
         composable(Screen.SavedMealsScreen.route) {
             com.kvrae.easykitchen.presentation.meals.SavedMealsScreen(navController = navController)
+        }
+        composable(Screen.SettingsScreen.route) {
+            com.kvrae.easykitchen.presentation.settings.SettingsScreen(
+                navController = navController
+            )
         }
     }
 }

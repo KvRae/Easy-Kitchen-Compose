@@ -1,5 +1,6 @@
 package com.kvrae.easykitchen.presentation.miscellaneous.components
 
+import android.content.Context
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -16,7 +17,6 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.rounded.Logout
 import androidx.compose.material.icons.rounded.Info
 import androidx.compose.material.icons.rounded.Restaurant
-import androidx.compose.material.icons.rounded.Settings
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
@@ -39,16 +39,20 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import com.kvrae.easykitchen.utils.navItems
+import com.kvrae.easykitchen.utils.openUrl
 
 @Composable
 fun ModalDrawerSheetContent(
     onItemClick: (String) -> Unit,
     selectedRoute: String,
-    onLogout: () -> Unit
+    onLogout: () -> Unit,
+    onSettingsClick: () -> Unit,
+    context: Context = LocalContext.current
 ) {
     var showLogoutDialog by remember { mutableStateOf(false) }
 
@@ -109,15 +113,22 @@ fun ModalDrawerSheetContent(
             color = MaterialTheme.colorScheme.outlineVariant
         )
 
-        DrawerFooterItem(
-            icon = Icons.Rounded.Settings,
-            label = "Settings",
-            onClick = { /* TODO */ }
-        )
+//        DrawerFooterItem(
+//            icon = Icons.Rounded.Settings,
+//            label = "Settings",
+//            onClick = {
+//                onSettingsClick()
+//            }
+//        )
         DrawerFooterItem(
             icon = Icons.Rounded.Info,
             label = "About EasyKitchen",
-            onClick = { /* TODO */ }
+            onClick = {
+                openUrl(
+                    uri = "https://kvrae.github.io/EasyKitchenWebsite/",
+                    context = context
+                )
+            }
         )
         DrawerFooterItem(
             icon = Icons.AutoMirrored.Rounded.Logout,
@@ -272,4 +283,3 @@ private fun LogoutConfirmationDialog(
         shape = RoundedCornerShape(24.dp)
     )
 }
-

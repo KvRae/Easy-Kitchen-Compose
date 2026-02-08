@@ -16,11 +16,22 @@ class RegisterViewModel(
     val username = mutableStateOf("")
     val email = mutableStateOf("")
     val password = mutableStateOf("")
+    val confirmPassword = mutableStateOf("")
 
     fun register() {
-        val fUsername = username.value
-        val fEmail = email.value
+        val fUsername = username.value.trim()
+        val fEmail = email.value.trim()
         val fPassword = password.value
+        val fConfirm = confirmPassword.value
+
+        if (fUsername.isEmpty() || fEmail.isEmpty() || fPassword.isEmpty() || fConfirm.isEmpty()) {
+            _registerState.value = RegisterState.Error("Please fill in all fields")
+            return
+        }
+        if (fPassword != fConfirm) {
+            _registerState.value = RegisterState.Error("Passwords do not match")
+            return
+        }
 
         viewModelScope.launch {
             _registerState.value = RegisterState.Loading
@@ -31,7 +42,7 @@ class RegisterViewModel(
                 }
                 result.isFailure -> {
                     RegisterState.Error(result.exceptionOrNull()?.message ?: "Unknown error")
-                    }
+                }
                 else -> {
                     RegisterState.Error("Unknown error")
                 }

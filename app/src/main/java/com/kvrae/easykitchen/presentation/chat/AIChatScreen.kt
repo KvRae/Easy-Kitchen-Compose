@@ -22,6 +22,7 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.rounded.Send
+import androidx.compose.material.icons.rounded.ErrorOutline
 import androidx.compose.material.icons.rounded.RestaurantMenu
 import androidx.compose.material.icons.rounded.SignalWifiConnectedNoInternet4
 import androidx.compose.material3.CircularProgressIndicator
@@ -47,7 +48,9 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.TextFieldValue
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
+import com.kvrae.easykitchen.domain.model.MessageLimitStatus
 import com.kvrae.easykitchen.presentation.miscellaneous.screens.NoDataScreen
+import com.kvrae.easykitchen.utils.ErrorMessageMapper
 import com.kvrae.easykitchen.utils.rememberNetworkConnectivity
 import com.kvrae.easykitchen.utils.stripMarkdown
 import org.koin.androidx.compose.koinViewModel
@@ -82,9 +85,14 @@ fun ChatScreen(
 ) {
     val viewModel = koinViewModel<ChatViewModel>()
     val chatState by viewModel.chatState.collectAsState()
+    val messageLimitStatus by viewModel.messageLimitStatus.collectAsState()
     val listState = rememberLazyListState()
     val focusManager = LocalFocusManager.current
     val isNetworkOn = rememberNetworkConnectivity()
+
+    val isLoading = chatState is ChatState.Loading
+    val isLimitReached = messageLimitStatus is MessageLimitStatus.LimitReached
+    val isInputEnabled = !isLoading && !isLimitReached
 
     if (!isNetworkOn) {
         NoDataScreen(
@@ -98,104 +106,164 @@ fun ChatScreen(
     Column(
         modifier = modifier.background(MaterialTheme.colorScheme.surface)
     ) {
-        // Chat Messages
-        if (viewModel.chatMessages.isEmpty() && chatState !is ChatState.Loading) {
-            // Empty State
-            EmptyChatPlaceHolder()
-        } else {
-            LazyColumn(
-                modifier = Modifier
-                    .weight(1f)
-                    .fillMaxWidth(),
-                state = listState,
-                contentPadding = PaddingValues(16.dp),
-                verticalArrangement = Arrangement.spacedBy(12.dp)
-            ) {
-                items(viewModel.chatMessages.size) { index ->
-                    MessageItem(message = viewModel.chatMessages[index])
-                }
 
-                if (chatState is ChatState.Loading) {
-                    item {
-                        ChefTypingIndicator()
+        // Chat Messages or Error/Empty State
+        when {
+            // Handle Limit Exceeded State when no messages
+            isLimitReached && viewModel.chatMessages.isEmpty() -> {
+                Column(
+                    modifier = Modifier
+                        .weight(1f)
+                        .fillMaxWidth(),
+                    verticalArrangement = Arrangement.Center,
+                    horizontalAlignment = Alignment.CenterHorizontally
+                ) {
+                    ChatErrorPlaceHolder(
+                        message = "You've reached your daily message limit of 5. Please try again tomorrow.",
+                        isNetworkError = false
+                    )
+                }
+            }
+
+            // Handle Error State ONLY when no messages exist
+            chatState is ChatState.Error && viewModel.chatMessages.isEmpty() -> {
+                val errorMessage = (chatState as ChatState.Error).message
+                val isNetworkError =
+                    errorMessage.contains("connection", ignoreCase = true) || errorMessage.contains(
+                        "timeout",
+                        ignoreCase = true
+                    ) || errorMessage.contains("offline", ignoreCase = true)
+
+                Column(
+                    modifier = Modifier
+                        .weight(1f)
+                        .fillMaxWidth(),
+                    verticalArrangement = Arrangement.Center,
+                    horizontalAlignment = Alignment.CenterHorizontally
+                ) {
+                    ChatErrorPlaceHolder(
+                        message = ErrorMessageMapper.mapErrorMessage(errorMessage),
+                        isNetworkError = isNetworkError
+                    )
+                }
+            }
+
+            // Handle Empty State
+            viewModel.chatMessages.isEmpty() && chatState !is ChatState.Loading -> {
+                EmptyChatPlaceHolder()
+            }
+
+            // Handle Messages Display (including when there's an error but messages exist)
+            else -> {
+                LazyColumn(
+                    modifier = Modifier
+                        .weight(1f)
+                        .fillMaxWidth(),
+                    state = listState,
+                    contentPadding = PaddingValues(16.dp),
+                    verticalArrangement = Arrangement.spacedBy(12.dp)
+                ) {
+                    items(viewModel.chatMessages.size) { index ->
+                        MessageItem(message = viewModel.chatMessages[index])
+                    }
+
+                    // Show error banner if there's an error but messages exist
+                    if (chatState is ChatState.Error && viewModel.chatMessages.isNotEmpty()) {
+                        item {
+                            ErrorMessageBanner(
+                                message = ErrorMessageMapper.mapErrorMessage(
+                                    (chatState as ChatState.Error).message
+                                )
+                            )
+                        }
+                    }
+
+                    if (chatState is ChatState.Loading) {
+                        item {
+                            ChefTypingIndicator()
+                        }
                     }
                 }
             }
         }
 
-        // Input Area
-        Surface(
-            modifier = Modifier.fillMaxWidth(),
-            tonalElevation = 8.dp,
-            shadowElevation = 16.dp,
-            color = MaterialTheme.colorScheme.surface,
-            shape = RoundedCornerShape(topStart = 24.dp, topEnd = 24.dp)
-        ) {
-            Row(
-                modifier = Modifier
-                    .navigationBarsPadding()
-                    .padding(horizontal = 20.dp, vertical = 16.dp),
-                verticalAlignment = Alignment.CenterVertically,
-                horizontalArrangement = Arrangement.spacedBy(12.dp)
+        // Input Area (Hidden when limit reached and no messages)
+        if (!(isLimitReached && viewModel.chatMessages.isEmpty())) {
+            Surface(
+                modifier = Modifier.fillMaxWidth(),
+                tonalElevation = 8.dp,
+                shadowElevation = 16.dp,
+                color = MaterialTheme.colorScheme.surface,
+                shape = RoundedCornerShape(topStart = 24.dp, topEnd = 24.dp)
             ) {
-                var textFieldValue by remember { mutableStateOf(TextFieldValue("")) }
-
-                TextField(
-                    value = textFieldValue,
-                    onValueChange = {
-                        textFieldValue = it
-                        viewModel.userMessage = it.text
-                    },
-                    placeholder = {
-                        Text(
-                            text = "Message your Chef...",
-                            style = MaterialTheme.typography.bodyMedium,
-                            color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.6f)
-                        )
-                    },
+                Row(
                     modifier = Modifier
-                        .weight(1f)
-                        .clip(RoundedCornerShape(28.dp)),
-                    colors = TextFieldDefaults.colors(
-                        focusedContainerColor = MaterialTheme.colorScheme.primaryContainer.copy(
-                            alpha = 0.15f
-                        ),
-                        unfocusedContainerColor = MaterialTheme.colorScheme.primaryContainer.copy(
-                            alpha = 0.1f
-                        ),
-                        focusedIndicatorColor = Color.Transparent,
-                        unfocusedIndicatorColor = Color.Transparent,
-                        disabledIndicatorColor = Color.Transparent,
-                        cursorColor = MaterialTheme.colorScheme.primary
-                    ),
-                    maxLines = 4,
-                    textStyle = MaterialTheme.typography.bodyMedium
-                )
-
-                val isNotEmpty = textFieldValue.text.isNotBlank()
-
-                Box(
-                    modifier = Modifier
-                        .size(48.dp)
-                        .clip(CircleShape)
-                        .background(
-                            if (isNotEmpty) MaterialTheme.colorScheme.primary
-                            else MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.5f)
-                        )
-                        .clickable(enabled = isNotEmpty) {
-                            viewModel.sendMessage()
-                            textFieldValue = TextFieldValue("")
-                            focusManager.clearFocus()
-                        },
-                    contentAlignment = Alignment.Center
+                        .navigationBarsPadding()
+                        .padding(horizontal = 20.dp, vertical = 16.dp),
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.spacedBy(12.dp)
                 ) {
-                    Icon(
-                        imageVector = Icons.AutoMirrored.Rounded.Send,
-                        contentDescription = "Send",
-                        tint = if (isNotEmpty) MaterialTheme.colorScheme.onPrimary
-                        else MaterialTheme.colorScheme.onSurfaceVariant,
-                        modifier = Modifier.size(20.dp)
+                    var textFieldValue by remember { mutableStateOf(TextFieldValue("")) }
+
+                    TextField(
+                        value = textFieldValue,
+                        onValueChange = {
+                            textFieldValue = it
+                            viewModel.userMessage = it.text
+                        },
+                        enabled = isInputEnabled,
+                        placeholder = {
+                            Text(
+                                text = "Message your Chef...",
+                                style = MaterialTheme.typography.bodyMedium,
+                                color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.6f)
+                            )
+                        },
+                        modifier = Modifier
+                            .weight(1f)
+                            .clip(RoundedCornerShape(28.dp)),
+                        colors = TextFieldDefaults.colors(
+                            focusedContainerColor = MaterialTheme.colorScheme.primaryContainer.copy(
+                                alpha = 0.15f
+                            ),
+                            unfocusedContainerColor = MaterialTheme.colorScheme.primaryContainer.copy(
+                                alpha = 0.1f
+                            ),
+                            focusedIndicatorColor = Color.Transparent,
+                            unfocusedIndicatorColor = Color.Transparent,
+                            disabledIndicatorColor = Color.Transparent,
+                            cursorColor = MaterialTheme.colorScheme.primary
+                        ),
+                        maxLines = 4,
+                        textStyle = MaterialTheme.typography.bodyMedium
                     )
+
+                    val isNotEmpty = textFieldValue.text.isNotBlank()
+                    val isSendEnabled = isInputEnabled && isNotEmpty
+
+                    Box(
+                        modifier = Modifier
+                            .size(48.dp)
+                            .clip(CircleShape)
+                            .background(
+                                if (isSendEnabled) MaterialTheme.colorScheme.primary
+                                else MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.5f)
+                            )
+                            .clickable(enabled = isSendEnabled) {
+                                viewModel.sendMessage()
+                                textFieldValue = TextFieldValue("")
+                                focusManager.clearFocus()
+                            },
+                        contentAlignment = Alignment.Center
+                    ) {
+                        Icon(
+                            imageVector = Icons.AutoMirrored.Rounded.Send,
+                            contentDescription = "Send",
+                            tint = if (isSendEnabled) MaterialTheme.colorScheme.onPrimary
+                            else MaterialTheme.colorScheme.onSurfaceVariant,
+                            modifier = Modifier.size(20.dp)
+                        )
+                    }
                 }
             }
         }
@@ -295,9 +363,9 @@ fun MessageItem(message: Message) {
                 .widthIn(max = 280.dp)
                 .clip(
                     RoundedCornerShape(
-                        topStart = 16.dp,
+                        topStart = if (isUser) 16.dp else 4.dp,
                         topEnd = 16.dp,
-                        bottomStart = if (isUser) 16.dp else 4.dp,
+                        bottomStart = 16.dp,
                         bottomEnd = if (isUser) 4.dp else 16.dp
                     )
                 )
@@ -356,3 +424,34 @@ fun ChefTypingIndicator() {
         )
     }
 }
+
+@Composable
+fun ErrorMessageBanner(message: String) {
+    Box(
+        modifier = Modifier
+            .fillMaxWidth()
+            .clip(RoundedCornerShape(12.dp))
+            .background(MaterialTheme.colorScheme.errorContainer.copy(alpha = 0.5f))
+            .padding(12.dp)
+    ) {
+        Row(
+            modifier = Modifier.fillMaxWidth(),
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.spacedBy(12.dp)
+        ) {
+            Icon(
+                imageVector = Icons.Rounded.ErrorOutline,
+                contentDescription = "Error",
+                tint = MaterialTheme.colorScheme.error,
+                modifier = Modifier.size(20.dp)
+            )
+            Text(
+                text = message,
+                style = MaterialTheme.typography.bodySmall,
+                color = MaterialTheme.colorScheme.error,
+                modifier = Modifier.weight(1f)
+            )
+        }
+    }
+}
+

@@ -66,6 +66,9 @@ fun MainScreen(
 
     // Get the ChatViewModel for reset chat functionality
     val chatViewModel = koinViewModel<ChatViewModel>()
+    val messageLimitStatus by chatViewModel.messageLimitStatus.collectAsState()
+    val isLimitReached =
+        messageLimitStatus is com.kvrae.easykitchen.domain.model.MessageLimitStatus.LimitReached
 
     var navItem by rememberSaveable {
         mutableStateOf(navItems.first().name)
@@ -92,6 +95,10 @@ fun MainScreen(
                     onLogout = {
                         scope.launch { drawerState.close() }
                         onLogout()
+                    },
+                    onSettingsClick = {
+                        scope.launch { drawerState.close() }
+                        navController.navigate(com.kvrae.easykitchen.utils.Screen.SettingsScreen.route)
                     }
                 )
             }
@@ -115,6 +122,7 @@ fun MainScreen(
                     }
                 }
             },
+            isLimitReached = isLimitReached
         )
     }
 }
@@ -130,6 +138,7 @@ fun MainScreenScaffold(
     onResetChat: (() -> Unit)? = null,
     onNavItemChange: (String) -> Unit,
     onMenuClick: () -> Unit,
+    isLimitReached: Boolean = false
 ) {
     val snackBarHostState = remember { SnackbarHostState() }
     val scope = rememberCoroutineScope()
@@ -191,7 +200,8 @@ fun MainScreenScaffold(
                 description = getNavItemByName(selectedRoute)?.description,
                 name = selectedRoute,
                 username = username,
-                ingredientsSize = ingredientsCount
+                ingredientsSize = ingredientsCount,
+                isLimitReached = isLimitReached
             )
         },
         bottomBar = {

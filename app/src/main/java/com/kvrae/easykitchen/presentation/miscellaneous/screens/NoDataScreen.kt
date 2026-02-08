@@ -7,14 +7,20 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.rounded.Refresh
 import androidx.compose.material.icons.rounded.SearchOff
+import androidx.compose.material3.Button
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
@@ -40,6 +46,7 @@ fun NoDataScreen(
     message: String = "Content Not Available",
     icon: ImageVector = Icons.Rounded.SearchOff,
     subtitle: String = "Try adjusting your filters or search terms",
+    onRetry: (() -> Unit)? = null
 ) {
     var isVisible by remember { mutableStateOf(false) }
 
@@ -75,7 +82,7 @@ fun NoDataScreen(
         ) {
             LottieAnimation(
                 modifier = Modifier.size(100.dp),
-                rawRes = R.raw.not_found,
+                rawRes = R.raw.nodata_lottie,
             )
         }
 
@@ -102,5 +109,29 @@ fun NoDataScreen(
             textAlign = TextAlign.Center,
             modifier = Modifier.padding(horizontal = 24.dp, vertical = 12.dp)
         )
+
+        // Retry Button (if callback provided)
+        if (onRetry != null) {
+            Spacer(modifier = Modifier.height(24.dp))
+            Button(
+                onClick = onRetry,
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(horizontal = 48.dp)
+                    .height(48.dp),
+                shape = RoundedCornerShape(12.dp)
+            ) {
+                Icon(
+                    imageVector = Icons.Rounded.Refresh,
+                    contentDescription = "Retry",
+                    modifier = Modifier.size(20.dp)
+                )
+                Spacer(modifier = Modifier.size(8.dp))
+                Text(
+                    text = "Try Again",
+                    style = MaterialTheme.typography.labelLarge
+                )
+            }
+        }
     }
 }

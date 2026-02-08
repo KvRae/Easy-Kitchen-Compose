@@ -4,12 +4,14 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.material3.CircularProgressIndicator
+import androidx.compose.foundation.layout.size
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.unit.Dp
+import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.Dialog
 import androidx.compose.ui.window.DialogProperties
 import com.airbnb.lottie.compose.LottieAnimation
@@ -21,7 +23,11 @@ import com.kvrae.easykitchen.presentation.miscellaneous.components.MealCoveredIm
 
 
 @Composable
-fun CircularLoadingScreen(modifier: Modifier = Modifier) {
+fun CircularLoadingScreen(
+    modifier: Modifier = Modifier,
+    lottieRawRes: Int = R.raw.food_loading,
+    size: Dp = 360.dp
+) {
     Box(
         modifier
             .fillMaxSize()
@@ -29,14 +35,19 @@ fun CircularLoadingScreen(modifier: Modifier = Modifier) {
         contentAlignment = Alignment.Center
     ) {
         LottieAnimation(
-            rawRes = R.raw.food_loading,
+            rawRes = lottieRawRes,
+            modifier = Modifier.size(size)
         )
 
     }
 }
 
 @Composable
-fun LoadingTransparentScreen(modifier: Modifier = Modifier) {
+fun LoadingTransparentScreen(
+    modifier: Modifier = Modifier,
+    lottieRawRes: Int = R.raw.food_loading,
+    size: Dp = 360.dp
+) {
     Dialog(
         properties = DialogProperties(
             dismissOnBackPress = false,
@@ -48,7 +59,8 @@ fun LoadingTransparentScreen(modifier: Modifier = Modifier) {
             contentAlignment = Alignment.Center
         ) {
             LottieAnimation(
-                rawRes = R.raw.food_loading,
+                rawRes = lottieRawRes,
+                modifier = Modifier.size(size)
             )
         }
 
@@ -78,7 +90,7 @@ fun LottieAnimation(
     val restart = iterations == 1
     val composition by rememberLottieComposition(LottieCompositionSpec.RawRes(rawRes))
     LottieAnimation(
-        modifier = Modifier.fillMaxSize(),
+        modifier = modifier,
         composition = composition,
         iterations = iterations,
         restartOnPlay = restart,

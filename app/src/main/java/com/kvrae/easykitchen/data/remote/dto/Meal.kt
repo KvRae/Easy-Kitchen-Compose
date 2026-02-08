@@ -201,3 +201,16 @@ fun MealResponse.asMealDetail(): MealDetail =
         ).filter { it.isNotEmpty() },
     )
 
+@Serializable
+data class MealErrorResponse(
+    val message: String? = null,
+    val error: String? = null
+)
+
+@Serializable
+data class MealApiResponse(
+    val message: String? = null,
+    val count: Int? = null,
+    val data: List<MealResponse>? = null,
+    val error: String? = null
+)

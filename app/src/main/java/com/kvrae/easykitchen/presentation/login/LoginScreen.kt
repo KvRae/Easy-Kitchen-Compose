@@ -24,6 +24,8 @@ import androidx.compose.material.icons.rounded.Email
 import androidx.compose.material.icons.rounded.Lock
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.SnackbarHost
+import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -65,6 +67,7 @@ fun LoginScreen(
     val loginState = loginViewModel.loginState.collectAsState().value
     val mealsViewModel = koinViewModel<MealsViewModel>()
     val context = LocalContext.current
+    val snackbarHostState = remember { SnackbarHostState() }
 
     LaunchedEffect(Unit) {
         loginViewModel.resetLoginState()
@@ -74,6 +77,14 @@ fun LoginScreen(
         LoginUILayout(
             navController = navController,
             loginViewModel = loginViewModel
+        )
+
+        // Snackbar host for error messages
+        SnackbarHost(
+            hostState = snackbarHostState,
+            modifier = Modifier
+                .align(Alignment.BottomCenter)
+                .padding(16.dp)
         )
 
         when (loginState) {
@@ -95,7 +106,10 @@ fun LoginScreen(
 
             is LoginState.Error -> {
                 LaunchedEffect(loginState.message) {
-                    Toast.makeText(context, loginState.message, Toast.LENGTH_SHORT).show()
+                    snackbarHostState.showSnackbar(
+                        message = loginState.message,
+                        withDismissAction = true
+                    )
                     loginViewModel.resetLoginState()
                 }
             }
