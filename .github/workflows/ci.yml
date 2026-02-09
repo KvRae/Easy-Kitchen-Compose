@@ -1,9 +1,6 @@
 name: Android CI/CD Pipeline
 
 on:
-  push:
-    branches:
-      - main         # Production releases on merge to main
   pull_request:
     branches:
       - develop      # Development branch
