@@ -14,6 +14,16 @@ EasyKitchenCompose is a Jetpack Compose recipe app that makes discovering, savin
 delightful. It pairs a modern UI with clean architecture, remote data via Ktor, local persistence
 via Room, and DI via Koin.
 
+<div style="display: flex; flex-wrap: nowrap; gap: 12px; overflow-x: auto;">
+  <img src="https://github.com/user-attachments/assets/98460667-3913-4f96-a47c-99a820f9409e" style="width: 16%;" />
+  <img src="https://github.com/user-attachments/assets/88a931ec-05e6-4bb6-b8ed-3799b79f2264" style="width: 16%;" />
+  <img src="https://github.com/user-attachments/assets/891b3e46-c2e3-4210-9ce9-3b7c05ab507b" style="width: 16%;" />
+  <img src="https://github.com/user-attachments/assets/49209eb0-8f2d-41dd-8182-3bbd4ef5f5f0" style="width: 16%;" />
+  <img src="https://github.com/user-attachments/assets/e6506860-31af-490d-b7aa-f072c74d1672" style="width: 16%;" />
+  <img src="https://github.com/user-attachments/assets/5e3eb8fd-c5c5-4bd4-9e0f-e2940176065a" style="width: 16%;" />
+</div>
+
+
 ## What you can do
 
 - Browse and search meals by name, category, or area.
