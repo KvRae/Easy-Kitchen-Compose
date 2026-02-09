@@ -23,7 +23,7 @@ via Room, and DI via Koin.
   <img src="https://github.com/user-attachments/assets/5e3eb8fd-c5c5-4bd4-9e0f-e2940176065a" style="width: 16%;" />
 </div>
 
-## 🚀 Distribution
+## Distribution
 
 Available on **Huawei AppGallery**.
 
