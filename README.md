@@ -23,6 +23,22 @@ via Room, and DI via Koin.
   <img src="https://github.com/user-attachments/assets/5e3eb8fd-c5c5-4bd4-9e0f-e2940176065a" style="width: 16%;" />
 </div>
 
+## 🚀 Distribution
+
+Available on **Huawei AppGallery**.
+
+<p align="center">
+  <a href="https://appgallery.huawei.com/#/app/C116762135" target="_blank">
+    <img 
+      src="https://github.com/user-attachments/assets/50b61961-08eb-4911-92da-86b11a179fc0"
+      alt="Download on Huawei AppGallery"
+      width="30%"
+    />
+  </a>
+</p>
+
+
+
 
 ## What you can do
 
